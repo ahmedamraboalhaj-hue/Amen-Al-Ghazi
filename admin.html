@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة إدارة المنصة | مستر أمين الغازي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@200;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --admin-sidebar-width: 280px;
+            --admin-card-bg: rgba(255, 255, 255, 0.03);
+            --admin-accent-gradient: linear-gradient(135deg, var(--secondary-color) 0%, #ff9800 100%);
+            --admin-primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, #1a237e 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: #05080b;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--admin-sidebar-width);
+            background: #0a0e14;
+            border-left: 1px solid var(--glass-border);
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-family: 'Amiri', serif;
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-bottom: 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            box-shadow: inset 4px 0 0 var(--secondary-color);
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            color: #ff5252;
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 82, 82, 0.1);
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            margin-right: var(--admin-sidebar-width);
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1400px;
+            margin-left: auto;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(to left, #fff, var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-text p {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Stat Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--admin-card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 193, 7, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+            font-weight: 400;
+        }
+
+        .stat-info p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Form Styling */
+        .admin-card {
+            background: var(--admin-card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .admin-card h2 {
+            margin-bottom: 30px;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-card h2 i {
+            color: var(--secondary-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Quiz Specific */
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-action {
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .btn-add {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--secondary-color);
+            border: 1px dashed var(--secondary-color);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-add:hover {
+            background: rgba(255, 193, 7, 0.2);
+        }
+
+        .btn-save-large {
+            background: var(--admin-accent-gradient);
+            color: #000;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1rem;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.2);
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th {
+            text-align: right;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td:first-child {
+            border-right: 1px solid var(--glass-border);
+            border-radius: 0 15px 15px 0;
+        }
+
+        td:last-child {
+            border-left: 1px solid var(--glass-border);
+            border-radius: 15px 0 0 15px;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tag-grade {
+            background: rgba(13, 71, 161, 0.2);
+            color: #90caf9;
+        }
+
+        .tag-group {
+            background: rgba(0, 200, 83, 0.2);
+            color: #69f0ae;
+        }
+
+        /* Visit Log Items */
+        .visit-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .visit-item:hover {
+            transform: translateX(-5px);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .visit-time {
+            padding: 5px 12px;
+            background: var(--admin-accent-gradient);
+            color: #000;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .visit-content h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .visit-content p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animations for sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0 !important;
+                padding: 20px !important;
+                padding-top: 80px !important;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-header {
+                display: flex !important;
+            }
+
+            .sidebar-overlay {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1500;
+                opacity: 0;
+                visibility: hidden;
+                transition: 0.3s;
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            background: #0a0e14;
+            padding: 15px 20px;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">لوحة التحكم</div>
+        <nav class="nav-menu">
+            <div class="nav-item active" onclick="showSection('overview')">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </div>
+            <div class="nav-item" onclick="showSection('lecture')">
+                <i class="fas fa-video"></i>
+                <span>المحاضرات</span>
+            </div>
+            <div class="nav-item" onclick="showSection('quiz')">
+                <i class="fas fa-tasks"></i>
+                <span>الاختبارات</span>
+            </div>
+            <div class="nav-item" onclick="showSection('bank')">
+                <i class="fas fa-database"></i>
+                <span>بنك الأسئلة</span>
+            </div>
+            <div class="nav-item" onclick="showSection('grades')">
+                <i class="fas fa-graduation-cap"></i>
+                <span>الدرجات</span>
+            </div>
+            <div class="nav-item" onclick="showSection('broadcast')">
+                <i class="fas fa-bullhorn"></i>
+                <span>التنبيهات</span>
+            </div>
+            <div class="nav-item" onclick="showSection('students')">
+                <i class="fas fa-users"></i>
+                <span>الطلاب</span>
+            </div>
+            <div class="nav-item" onclick="showSection('visits')">
+                <i class="fas fa-history"></i>
+                <span>الزيارات</span>
+            </div>
+        </nav>
+        <a href="index.html" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> خروج من النظام
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <div class="logo-text" style="font-size: 1.2rem;">لوحة الإدارة</div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <header class="top-header">
+            <div class="welcome-text">
+                <h1>أهلاً بك، مستر أمين الغازي</h1>
+                <p>إليك نظرة سريعة على أداء منصتك اليوم.</p>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <!-- Real-time Status Indicator -->
+                <div
+                    style="display: flex; align-items: center; gap: 8px; background: rgba(0,200,83,0.1); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(0,200,83,0.2);">
+                    <div
+                        style="width: 10px; height: 10px; background: #00c853; border-radius: 50%; box-shadow: 0 0 10px #00c853; animation: pulse 2s infinite;">
+                    </div>
+                    <span style="color: #00c853; font-size: 0.85rem; font-weight: 700;">المنصة متصلة</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stat Cards -->
+        <div id="overview-section" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255,193,7,0.1); color: var(--secondary-color);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>إجمالي الطلاب</h3>
+                        <p id="stat-total-students">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(0,184,212,0.1); color: #00b8d4;">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>زيارات اليوم</h3>
+                        <p id="stat-today-visits">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255,82,82,0.1); color: #ff5252;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>المحاضرات</h3>
+                        <p id="stat-total-lectures">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Feed -->
+            <div class="admin-card">
+                <h2><i class="fas fa-chart-line"></i> أحدث النشاطات على المنصة</h2>
+                <div id="activity-feed" style="margin-top: 20px;">
+                    <!-- Real-time activity logs will appear here -->
+                    <div style="text-align: center; color: rgba(255,255,255,0.3); padding: 20px;">جاري تحميل النشاطات...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lecture Section -->
+        <div id="lecture-section" class="section">
+            <div class="admin-card">
+                <h2><i class="fas fa-plus-circle"></i> إضافة محاضرة جديدة</h2>
+                <div class="form-group">
+                    <label>عنوان المحاضرة</label>
+                    <input type="text" id="lecture-title" placeholder="مثال: شرح الوحدة الأولى - نحو">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رابط اليوتيوب</label>
+                        <input type="text" id="lecture-url" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <div class="form-group">
+                        <label>وصف مختصر</label>
+                        <input type="text" id="lecture-short-desc" placeholder="وصف يظهر للطالب">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المرحلة المستهدفة</label>
+                        <select id="lecture-stage" onchange="adminUpdateYears('lecture')">
+                            <option value="">اختر المرحلة</option>
+                            <option value="primary">الابتدائية</option>
+                            <option value="preparatory">الإعدادية</option>
+                            <option value="secondary">الثانوية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>السنة الدراسية</label>
+                        <select id="lecture-year">
+                            <option value="">اختر السنة</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>وصف المحاضرة الكامل</label>
+                    <textarea id="lecture-desc" rows="4" placeholder="اكتب تفاصيل المحاضرة هنا..."></textarea>
+                </div>
+                <button class="btn-action btn-save-large" onclick="saveLecture()">
+                    <i class="fas fa-upload"></i> نشر المحاضرة الآن
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <!-- Bank Section -->
+        <div id="bank-section" class="section">
+            <div class="admin-card">
+                <h2><i class="fas fa-plus-circle"></i> إضافة سؤال لبنك الأسئلة</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الفرع (نحو، بلاغة، إلخ)</label>
+                        <select id="bank-category">
+                            <option value="نحو">نحو</option>
+                            <option value="بلاغة">بلاغة</option>
+                            <option value="أدب">أدب</option>
+                            <option value="نصوص">نصوص</option>
+                            <option value="قراءة">قراءة</option>
+                            <option value="تعبير">تعبير</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المرحلة</label>
+                        <select id="bank-stage" onchange="adminUpdateYears('bank')">
+                            <option value="">اختر المرحلة</option>
+                            <option value="primary">ابتدائي</option>
+                            <option value="preparatory">إعدادي</option>
+                            <option value="secondary">ثانوي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>السنة</label>
+                        <select id="bank-year">
+                            <option value="">اختر السنة</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>نص السؤال</label>
+                    <textarea id="bank-question-text" rows="3" placeholder="اكتب السؤال هنا..."></textarea>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="bank-opt-1" placeholder="الاختيار الأول">
+                    <input type="text" id="bank-opt-2" placeholder="الاختيار الثاني">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="bank-opt-3" placeholder="الاختيار الثالث">
+                    <input type="text" id="bank-opt-4" placeholder="الاختيار الرابع">
+                </div>
+                <div class="form-group">
+                    <label>الإجابة الصحيحة</label>
+                    <select id="bank-correct">
+                        <option value="1">الاختيار الأول</option>
+                        <option value="2">الاختيار الثاني</option>
+                        <option value="3">الاختيار الثالث</option>
+                        <option value="4">الاختيار الرابع</option>
+                    </select>
+                </div>
+                <button class="btn-action btn-save-large" onclick="saveToBank()">
+                    <i class="fas fa-save"></i> حفظ في بنك الأسئلة
+                </button>
+            </div>
+
+            <div class="admin-card" style="margin-top: 30px;">
+                <h2><i class="fas fa-list-ul"></i> مراجعة بنك الأسئلة</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>السؤال</th>
+                                <th>الفرع</th>
+                                <th>السنة</th>
+                                <th>الإجابة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bank-table-body">
+                            <!-- Questions will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="quiz-section" class="section">
+            <div class="admin-card">
+                <h2><i class="fas fa-file-signature"></i> إنشاء اختبار احترافي</h2>
+                <div class="form-group">
+                    <label>عنوان الاختبار</label>
+                    <input type="text" id="quiz-title" placeholder="مثال: اختبار شامل على الوحدة الأولى">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المرحلة المستهدفة</label>
+                        <select id="quiz-stage" onchange="adminUpdateYears('quiz')">
+                            <option value="">اختر المرحلة</option>
+                            <option value="primary">الابتدائية</option>
+                            <option value="preparatory">الإعدادية</option>
+                            <option value="secondary">الثانوية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>السنة الدراسية</label>
+                        <select id="quiz-year">
+                            <option value="">اختر السنة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div
+                    style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--secondary-color); margin-bottom: 25px;">
+                    <h4 style="margin-bottom: 15px;"><i class="fas fa-magic"></i> إنشاء سريع من بنك الأسئلة</h4>
+                    <div style="display: flex; gap: 15px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>عدد الأسئلة العشوائية</label>
+                            <input type="number" id="bank-count" value="5" min="1">
+                        </div>
+                        <button class="btn-action" style="background: var(--secondary-color); color: #000;"
+                            onclick="generateFromBank()">
+                            سحب الأسئلة الآن
+                        </button>
+                    </div>
+                </div>
+
+                <div id="questions-container">
+                    <!-- Questions will be added here -->
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button class="btn-action" style="background: var(--primary-color);" onclick="addQuestion()">
+                        <i class="fas fa-plus"></i> إضافة سؤال يدوي
+                    </button>
+                    <button class="btn-action btn-save-large" style="flex: 2;" onclick="saveQuiz()">
+                        <i class="fas fa-check-circle"></i> حفظ ونشر الاختبار
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Grades Section -->
+        <div id="grades-section" class="section">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2><i class="fas fa-graduation-cap"></i> نتائج اختبارات الطلاب</h2>
+                    <button class="btn-action"
+                        onclick="db.collection('quiz_results').get().then(s => alert(`إجمالي الاختبارات المكتملة: ${s.size}`))">إحصائيات
+                        كاملة</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>اسم الاختبار</th>
+                                <th>الدرجة</th>
+                                <th>النسبة</th>
+                                <th>السنة الدراسية</th>
+                                <th>التوقيت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body">
+                            <tr>
+                                <td colspan="6"
+                                    style="text-align: center; color: rgba(255,255,255,0.3); padding: 40px;">جاري تحميل
+                                    النتائج...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Broadcast Section -->
+        <div id="broadcast-section" class="section">
+            <div class="admin-card">
+                <h2><i class="fas fa-paper-plane"></i> إرسال تنبيه ذكي</h2>
+                <p style="color: rgba(255,255,255,0.5); margin-bottom: 25px;">سيصل هذا التنبيه لجميع الطلاب المسجلين
+                    بالمنصة فوراً.</p>
+                <div class="form-group">
+                    <label>نص التنبيه (سيظهر في لوحة الطالب)</label>
+                    <textarea id="broadcast-text" rows="4"
+                        placeholder="اكتب رسالتك التحفيزية أو الإدارية هنا..."></textarea>
+                </div>
+                <button class="btn-action btn-save-large" onclick="sendBroadcast()"
+                    style="background: var(--admin-primary-gradient); color: #fff;">
+                    <i class="fas fa-bullhorn"></i> إرسال التنبيه الآن
+                </button>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students-section" class="section">
+            <div class="admin-card">
+                <div style="margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; min-width: 200px;">
+                        <label>تصفية حسب السنة:</label>
+                        <select id="filter-year" onchange="filterStudents()">
+                            <option value="all">كل السنوات</option>
+                            <optgroup label="المرحلة الابتدائية">
+                                <option value="الصف الأول الابتدائي">أولى ابتدائي</option>
+                                <option value="الصف الثاني الابتدائي">تانية ابتدائي</option>
+                                <option value="الصف الثالث الابتدائي">تالتة ابتدائي</option>
+                                <option value="الصف الرابع الابتدائي">رابعة ابتدائي</option>
+                                <option value="الصف الخامس الابتدائي">خامسة ابتدائي</option>
+                                <option value="الصف السادس الابتدائي">ستة ابتدائي</option>
+                            </optgroup>
+                            <optgroup label="المرحلة الإعدادية">
+                                <option value="الصف الأول الإعدادي">أولى إعدادي</option>
+                                <option value="الصف الثاني الإعدادي">تانية إعدادي</option>
+                                <option value="الصف الثالث الإعدادي">تالتة إعدادي</option>
+                            </optgroup>
+                            <optgroup label="المرحلة الثانوية">
+                                <option value="الصف الأول الثانوي">أولى ثانوي</option>
+                                <option value="الصف الثاني الثانوي">تانية ثانوي</option>
+                                <option value="الصف الثالث الثانوي">تالتة ثانوي</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الهاتف</th>
+                                <th>ولي الأمر</th>
+                                <th>المرحلة</th>
+                                <th>السنة</th>
+                                <th>المجموعة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <!-- Student rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visits Section -->
+        <div id="visits-section" class="section">
+            <div class="admin-card">
+                <h2><i class="fas fa-bolt"></i> مراقبة الزيارات الحية</h2>
+                <div id="visits-container">
+                    <!-- Visit logs will be added here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-player-modal" class="splash-screen" style="display: none; z-index: 2000;">
+        <div class="card"
+            style="max-width: 800px; width: 95%; background: #0a0e14; padding: 40px; border-radius: 20px; border: 1px solid var(--secondary-color); position: relative; max-height: 90vh; overflow-y: auto;">
+            <button onclick="closeQuiz()"
+                style="position: absolute; top: 20px; left: 20px; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;"><i
+                    class="fas fa-times"></i></button>
+            <h2 id="modal-quiz-title" style="color: var(--secondary-color); margin-bottom: 30px; text-align: center;">
+                ...</h2>
+
+            <div id="quiz-questions-area">
+                <!-- Current Question will appear here -->
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px;">
+                <div id="quiz-progress-text" style="color: rgba(255,255,255,0.5);">سؤال 1 من ...</div>
+                <button id="next-q-btn" class="btn btn-secondary" onclick="handleNextQuestion()">السؤال التالي</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGKHCYjB-ryi6To5lDwlYya6hFOS4i40E",
+            authDomain: "ahlquraan-29c5b.firebaseapp.com",
+            projectId: "ahlquraan-29c5b",
+            storageBucket: "ahlquraan-29c5b.firebasestorage.app",
+            messagingSenderId: "677127394598",
+            appId: "1:677127394598:web:a237d013ad2174f1e95de7",
+            measurementId: "G-033RNWBVTL"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function showSection(type) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(type + '-section').classList.add('active');
+
+            // Find the clicked nav item and mark it active
+            const items = document.querySelectorAll('.nav-item');
+            items.forEach(item => {
+                if (item.getAttribute('onclick').includes(type)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        let questionCount = 0;
+        function addQuestion() {
+            questionCount++;
+            const container = document.getElementById('questions-container');
+            const qDiv = document.createElement('div');
+            qDiv.className = 'quiz-question';
+            qDiv.id = 'q-' + questionCount;
+            qDiv.innerHTML = `
+                <div class="form-group">
+                    <label style="font-weight: 700; color: var(--secondary-color);">السؤال رقم ${questionCount}</label>
+                    <input type="text" class="q-text" placeholder="اكتب السؤال هنا..." style="background: rgba(255,255,255,0.08);">
+                </div>
+                <div class="options-grid">
+                    <input type="text" class="opt-1" placeholder="الاختيار الأول">
+                    <input type="text" class="opt-2" placeholder="الاختيار الثاني">
+                    <input type="text" class="opt-3" placeholder="الاختيار الثالث">
+                    <input type="text" class="opt-4" placeholder="الاختيار الرابع">
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>حدد الإجابة الصحيحة</label>
+                    <select class="q-correct">
+                        <option value="1">الاختيار الأول</option>
+                        <option value="2">الاختيار الثاني</option>
+                        <option value="3">الاختيار الثالث</option>
+                        <option value="4">الاختيار الرابع</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(qDiv);
+        }
+
+        // Update Years dynamically for Admin Forms
+        function adminUpdateYears(prefix) {
+            const stage = document.getElementById(prefix + '-stage').value;
+            const yearSelect = document.getElementById(prefix + '-year');
+            yearSelect.innerHTML = '<option value="">اختر السنة</option>';
+
+            const stages = {
+                primary: ['الصف الأول الابتدائي', 'الصف الثاني الابتدائي', 'الصف الثالث الابتدائي', 'الصف الرابع الابتدائي', 'الصف الخامس الابتدائي', 'الصف السادس الابتدائي'],
+                preparatory: ['الصف الأول الإعدادي', 'الصف الثاني الإعدادي', 'الصف الثالث الإعدادي'],
+                secondary: ['الصف الأول الثانوي', 'الصف الثاني الثانوي', 'الصف الثالث الثانوي']
+            };
+
+            if (stage && stages[stage]) {
+                stages[stage].forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+            }
+        }
+
+        async function saveToBank() {
+            const category = document.getElementById('bank-category').value;
+            const stage = document.getElementById('bank-stage').value;
+            const year = document.getElementById('bank-year').value;
+            const text = document.getElementById('bank-question-text').value;
+            const options = [
+                document.getElementById('bank-opt-1').value,
+                document.getElementById('bank-opt-2').value,
+                document.getElementById('bank-opt-3').value,
+                document.getElementById('bank-opt-4').value
+            ];
+            const correct = document.getElementById('bank-correct').value;
+
+            if (!year || !text || !options[0] || !options[1]) return alert('يرجى ملء كافة بيانات السؤال');
+
+            const questionData = {
+                category, stage, year, text, options, correct,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('question_bank').add(questionData);
+                alert('تم الحفظ في بنك الأسئلة!');
+                // Clear fields
+                document.getElementById('bank-question-text').value = '';
+                document.getElementById('bank-opt-1').value = '';
+                document.getElementById('bank-opt-2').value = '';
+                document.getElementById('bank-opt-3').value = '';
+                document.getElementById('bank-opt-4').value = '';
+            } catch (e) { alert('خطأ في الحفظ'); }
+        }
+
+        db.collection('question_bank').orderBy('timestamp', 'desc').onSnapshot(snap => {
+            const tbody = document.getElementById('bank-table-body');
+            if (tbody) {
+                tbody.innerHTML = '';
+                snap.forEach(doc => {
+                    const q = doc.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${q.text}</td>
+                            <td><span class="tag tag-group">${q.category}</span></td>
+                            <td><span class="tag tag-grade">${q.year}</span></td>
+                            <td>الاختيار ${q.correct}</td>
+                            <td>
+                                <button onclick="db.collection('question_bank').doc('${doc.id}').delete()" style="color:#ff5252; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        async function generateFromBank() {
+            const year = document.getElementById('quiz-year').value;
+            const count = parseInt(document.getElementById('bank-count').value);
+
+            if (!year) return alert('يرجى اختيار السنة الدراسية أولاً للاقتباس من البنك');
+
+            try {
+                const snap = await db.collection('question_bank').where('year', '==', year).get();
+                if (snap.empty) return alert('لا توجد أسئلة مخزنة لهذه السنة في بنك الأسئلة');
+
+                let questions = [];
+                snap.forEach(doc => questions.push(doc.data()));
+
+                // Shuffle
+                questions = questions.sort(() => 0.5 - Math.random());
+                const selected = questions.slice(0, count);
+
+                document.getElementById('questions-container').innerHTML = '';
+                questionCount = 0;
+
+                selected.forEach(q => {
+                    addQuestion();
+                    const lastQ = document.getElementById('questions-container').lastElementChild;
+                    lastQ.querySelector('.q-text').value = q.text;
+                    lastQ.querySelector('.opt-1').value = q.options[0];
+                    lastQ.querySelector('.opt-2').value = q.options[1];
+                    lastQ.querySelector('.opt-3').value = q.options[2];
+                    lastQ.querySelector('.opt-4').value = q.options[3];
+                    lastQ.querySelector('.q-correct').value = q.correct;
+                });
+
+                alert(`تم سحب ${selected.length} سؤال بنجاح!`);
+            } catch (e) { console.error(e); alert('خطأ أثناء سحب الأسئلة'); }
+        }
+
+        async function saveLecture() {
+            const title = document.getElementById('lecture-title').value;
+            const url = document.getElementById('lecture-url').value;
+            const desc = document.getElementById('lecture-desc').value;
+            const stage = document.getElementById('lecture-stage').value;
+            const year = document.getElementById('lecture-year').value;
+
+            if (!title || !url || !stage || !year) return alert('يرجى إدخال كافة البيانات المطلوبة');
+
+            const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+
+            const lectureData = {
+                title,
+                videoId,
+                desc,
+                stage,
+                year,
+                date: new Date().toLocaleDateString('ar-EG'),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                // Now we save lectures to a collection named 'lectures'
+                await db.collection('lectures').add(lectureData);
+                alert('تم نشر المحاضرة بنجاح!');
+            } catch (error) {
+                console.error(error);
+                alert('خطأ في الاتصال بقاعدة البيانات');
+            }
+        }
+
+        async function saveQuiz() {
+            const title = document.getElementById('quiz-title').value;
+            const stage = document.getElementById('quiz-stage').value;
+            const year = document.getElementById('quiz-year').value;
+            const questions = [];
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                questions.push({
+                    text: q.querySelector('.q-text').value,
+                    options: [
+                        q.querySelector('.opt-1').value,
+                        q.querySelector('.opt-2').value,
+                        q.querySelector('.opt-3').value,
+                        q.querySelector('.opt-4').value
+                    ],
+                    correct: q.querySelector('.q-correct').value
+                });
+            });
+
+            if (!title || !stage || !year || questions.length === 0) return alert('من فضلك أضف البيانات والأسئلة كاملة');
+
+            const quizData = {
+                title,
+                stage,
+                year,
+                questions,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('quizzes').add(quizData);
+                alert('تم نشر الاختبار بنجاح!');
+            } catch (error) {
+                console.error(error);
+                alert('حدث خطأ أثناء الحفظ');
+            }
+        }
+
+        // Real-time Data Listeners
+        db.collection('students').onSnapshot((snap) => {
+            document.getElementById('stat-total-students').innerText = snap.size;
+            const table = document.getElementById('students-table-body');
+            if (table) {
+                table.innerHTML = '';
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    let stageText = '';
+                    if (s.stage === 'primary') stageText = 'ابتدائي';
+                    else if (s.stage === 'preparatory') stageText = 'إعدادي';
+                    else if (s.stage === 'secondary') stageText = 'ثانوي';
+
+                    table.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 700;">${s.name}</td>
+                            <td>${s.phone}</td>
+                            <td>${s.parentPhone}</td>
+                            <td><span class="tag tag-grade">${stageText}</span></td>
+                            <td><span class="tag tag-grade">${s.year || s.grade || ''}</span></td>
+                            <td><span class="tag tag-group">مجموعة ${s.group}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        // Fetch Total Lectures
+        db.collection('lectures').onSnapshot((snap) => {
+            document.getElementById('stat-total-lectures').innerText = snap.size;
+        });
+
+        // Fetch Visits & Today's Stats
+        db.collection('student_visits').orderBy('timestamp', 'desc').limit(20).onSnapshot((snap) => {
+            const today = new Date().toLocaleDateString('ar-EG');
+            let todayCount = 0;
+            const container = document.getElementById('visits-container');
+            if (container) {
+                container.innerHTML = '';
+                snap.forEach(doc => {
+                    const v = doc.data();
+                    const vDate = v.timestamp ? v.timestamp.toDate().toLocaleDateString('ar-EG') : '';
+                    if (vDate === today) todayCount++;
+
+                    container.innerHTML += `
+                        <div class="visit-item">
+                            <span class="visit-time">${v.timeString.split(',')[1] || v.timeString}</span>
+                            <div class="visit-content">
+                                <h4>${v.studentName}</h4>
+                                <p>دخل المنصة الآن • ${v.year || v.grade || ''} • المجموعة: ${v.group}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('stat-today-visits').innerText = todayCount;
+            }
+        });
+
+        async function sendBroadcast() {
+            const text = document.getElementById('broadcast-text').value;
+            if (!text) return alert('برجاء كتابة نص التنبيه');
+            try {
+                await db.collection('platform_data').doc('announcement').set({
+                    text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('تم الإرسال لجميع الطلاب!');
+                document.getElementById('broadcast-text').value = '';
+            } catch (err) { alert('خطأ في الإرسال'); }
+        }
+
+        function filterStudents() {
+            const val = document.getElementById('filter-year').value;
+            const rows = document.querySelectorAll('#students-table-body tr');
+            rows.forEach(row => {
+                const yearCell = row.cells[4].innerText;
+                if (val === 'all' || yearCell === val) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Activity Feed Listener
+        db.collection('activity').orderBy('timestamp', 'desc').limit(10).onSnapshot((snap) => {
+            const feed = document.getElementById('activity-feed');
+            if (feed) {
+                feed.innerHTML = '';
+                if (snap.empty) {
+                    feed.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.2); padding: 20px;">لا يوجد نشاطات حالياً.</div>';
+                    return;
+                }
+                snap.forEach(doc => {
+                    const act = doc.data();
+                    let icon = 'fa-info-circle';
+                    let color = 'var(--primary-color)';
+
+                    if (act.type === 'registration') { icon = 'fa-user-plus'; color = 'var(--accent-color)'; }
+                    if (act.type === 'quiz_complete') { icon = 'fa-check-double'; color = 'var(--secondary-color)'; }
+
+                    feed.innerHTML += `
+                        <div class="visit-item" style="border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; padding-bottom: 15px;">
+                            <div class="stat-icon" style="width: 40px; height: 40px; font-size: 1rem; background: rgba(255,255,255,0.05); color: ${color}; margin-left: 15px;">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div class="visit-content">
+                                <h4 style="font-size: 1rem;">${act.studentName}</h4>
+                                <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">${act.message}</p>
+                                <span style="font-size: 0.75rem; color: rgba(255,255,255,0.3);">${act.dateString}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        });
+
+        // Activity Feed Listener
+        // ... (existing activity feed listener) ...
+
+        // Quiz Results Listener
+        db.collection('quiz_results').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+            const table = document.getElementById('grades-table-body');
+            if (table) {
+                table.innerHTML = '';
+                if (snap.empty) {
+                    table.innerHTML = '<tr><td colspan="6" style="text-align: center; color: rgba(255,255,255,0.2); padding: 40px;">لا يوجد نتائج بعد.</td></tr>';
+                    return;
+                }
+                snap.forEach(doc => {
+                    const res = doc.data();
+                    const date = res.timestamp ? res.timestamp.toDate().toLocaleString('ar-EG') : 'قيد المعالجة';
+                    table.innerHTML += `
+                        <tr>
+                            <td style="font-weight:700;">${res.studentName}</td>
+                            <td>${res.quizTitle}</td>
+                            <td><span class="tag tag-group">${res.score} / ${res.total}</span></td>
+                            <td><span class="tag tag-grade" style="background: rgba(76,175,80,0.1); color: #4caf50;">${res.percent}%</span></td>
+                            <td>${res.year}</td>
+                            <td style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${date}</td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        // Close menu on nav item click (mobile)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) toggleMenu();
+            });
+        });
+
+        // Initialize first question
+        addQuestion();
+    </script>
+</body>
+
+</html>
+```
