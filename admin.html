@@ -495,6 +495,123 @@
         .sidebar-overlay {
             display: none;
         }
+
+        /* Voucher System Styles */
+        .vouchers-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .vouchers-table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .vouchers-table-container th {
+            position: sticky;
+            top: 0;
+            background: #0a0e14;
+            padding: 15px;
+            z-index: 5;
+            border-bottom: 2px solid var(--glass-border);
+        }
+
+        .vouchers-table-container td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .voucher-note-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            color: #fff;
+            padding: 6px 12px;
+            width: 100%;
+            min-width: 150px;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .voucher-note-input:focus {
+            border-color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .voucher-code {
+            font-family: 'monospace';
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--secondary-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-used {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+        }
+
+        .status-active {
+            background: rgba(0, 200, 83, 0.1);
+            color: #00c853;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box input {
+            padding-right: 45px !important;
+        }
+
+        /* Export/Generate Buttons */
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-generate {
+            background: var(--admin-accent-gradient);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-generate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+        }
     </style>
 </head>
 
@@ -534,9 +651,13 @@
                 <i class="fas fa-users"></i>
                 <span>الطلاب</span>
             </div>
+            <div class="nav-item" onclick="showSection('vouchers')">
+                <i class="fas fa-key"></i>
+                <span>أكواد التفعيل</span>
+            </div>
             <div class="nav-item" onclick="showSection('visits')">
                 <i class="fas fa-history"></i>
-                <span>الزيارات</span>
+                <span>الزيارات الحية</span>
             </div>
         </nav>
         <a href="index.html" class="logout-btn">
@@ -584,7 +705,25 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(0,184,212,0.1); color: #00b8d4;">
+                    <div class="stat-icon" style="background: rgba(0, 200, 83, 0.1); color: #00c853;">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>أكواد مستخدمة</h3>
+                        <p id="stat-used-vouchers">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(13, 71, 161, 0.1); color: #42a5f5;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>الأرباح المتوقعة</h3>
+                        <p id="stat-revenue">0 ج.م</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255,82,82,0.1); color: #ff5252;">
                         <i class="fas fa-eye"></i>
                     </div>
                     <div class="stat-info">
@@ -593,11 +732,11 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(255,82,82,0.1); color: #ff5252;">
+                    <div class="stat-icon" style="background: rgba(103, 58, 183, 0.1); color: #9575cd;">
                         <i class="fas fa-video"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>المحاضرات</h3>
+                        <h3>إجمالي المحاضرات</h3>
                         <p id="stat-total-lectures">0</p>
                     </div>
                 </div>
@@ -757,8 +896,15 @@
                     </div>
                     <div class="form-group">
                         <label>السنة الدراسية</label>
-                        <select id="quiz-year">
+                        <select id="quiz-year" onchange="updateQuizGroups()">
                             <option value="">اختر السنة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المجموعة / السنتر</label>
+                        <select id="quiz-group" required>
+                            <option value="all">كل المجموعات (عام)</option>
+                            <option value="online">أونلاين (C)</option>
                         </select>
                     </div>
                 </div>
@@ -853,14 +999,6 @@
                         <label>تصفية حسب السنة:</label>
                         <select id="filter-year" onchange="filterStudents()">
                             <option value="all">كل السنوات</option>
-                            <optgroup label="المرحلة الابتدائية">
-                                <option value="الصف الأول الابتدائي">أولى ابتدائي</option>
-                                <option value="الصف الثاني الابتدائي">تانية ابتدائي</option>
-                                <option value="الصف الثالث الابتدائي">تالتة ابتدائي</option>
-                                <option value="الصف الرابع الابتدائي">رابعة ابتدائي</option>
-                                <option value="الصف الخامس الابتدائي">خامسة ابتدائي</option>
-                                <option value="الصف السادس الابتدائي">ستة ابتدائي</option>
-                            </optgroup>
                             <optgroup label="المرحلة الإعدادية">
                                 <option value="الصف الأول الإعدادي">أولى إعدادي</option>
                                 <option value="الصف الثاني الإعدادي">تانية إعدادي</option>
@@ -903,6 +1041,68 @@
                 </div>
             </div>
         </div>
+
+        <!-- Vouchers Section -->
+        <div id="vouchers-section" class="section">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2><i class="fas fa-key"></i> إدارة أكواد التفعيل (Vouchers)</h2>
+                    <div class="admin-actions">
+                        <button class="btn-generate" onclick="generateVouchers()">
+                            <i class="fas fa-magic"></i> توليد 1000 كود جديد
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="search-box" style="flex: 2;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="voucher-search" placeholder="ابحث عن كود معين..."
+                            oninput="filterVouchers()">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <select id="voucher-filter-grade" onchange="filterVouchers()">
+                            <option value="all">كل المراحل</option>
+                            <optgroup label="المرحلة الإعدادية">
+                                <option value="الصف الأول الإعدادي">أولى إعدادي</option>
+                                <option value="الصف الثاني الإعدادي">تانية إعدادي</option>
+                                <option value="الصف الثالث الإعدادي">تالتة إعدادي</option>
+                            </optgroup>
+                            <optgroup label="المرحلة الثانوية">
+                                <option value="الصف الأول الثانوي">أولى ثانوي</option>
+                                <option value="الصف الثاني الثانوي">تانية ثانوي</option>
+                                <option value="الصف الثالث الثانوي">تالتة ثانوي</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <select id="voucher-filter-status" onchange="filterVouchers()">
+                            <option value="all">كل الحالات</option>
+                            <option value="active">متاحة</option>
+                            <option value="used">مستخدمة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="vouchers-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الكود</th>
+                                <th>المرحلة</th>
+                                <th>الحالة</th>
+                                <th>ملاحظات (اسم الطالب مثلاً)</th>
+                                <th>تاريخ التوليد</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vouchers-table-body">
+                            <!-- Voucher rows will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Quiz Modal -->
@@ -933,13 +1133,13 @@
     <script>
         // --- Firebase Configuration ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDGKHCYjB-ryi6To5lDwlYya6hFOS4i40E",
-            authDomain: "ahlquraan-29c5b.firebaseapp.com",
-            projectId: "ahlquraan-29c5b",
-            storageBucket: "ahlquraan-29c5b.firebasestorage.app",
-            messagingSenderId: "677127394598",
-            appId: "1:677127394598:web:a237d013ad2174f1e95de7",
-            measurementId: "G-033RNWBVTL"
+            apiKey: "AIzaSyAUZUyDm026pvbScVn6f_Hy5MFcf9SvLuE",
+            authDomain: "siond-a6c34.firebaseapp.com",
+            projectId: "siond-a6c34",
+            storageBucket: "siond-a6c34.firebasestorage.app",
+            messagingSenderId: "875547108455",
+            appId: "1:875547108455:web:60bb9ba17b3f97759be0c2",
+            measurementId: "G-SYBKW4D61H"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -997,10 +1197,10 @@
             yearSelect.innerHTML = '<option value="">اختر السنة</option>';
 
             const stages = {
-                primary: ['الصف الأول الابتدائي', 'الصف الثاني الابتدائي', 'الصف الثالث الابتدائي', 'الصف الرابع الابتدائي', 'الصف الخامس الابتدائي', 'الصف السادس الابتدائي'],
                 preparatory: ['الصف الأول الإعدادي', 'الصف الثاني الإعدادي', 'الصف الثالث الإعدادي'],
                 secondary: ['الصف الأول الثانوي', 'الصف الثاني الثانوي', 'الصف الثالث الثانوي']
             };
+
 
             if (stage && stages[stage]) {
                 stages[stage].forEach(year => {
@@ -1106,8 +1306,9 @@
             const desc = document.getElementById('lecture-desc').value;
             const stage = document.getElementById('lecture-stage').value;
             const year = document.getElementById('lecture-year').value;
+            const group = document.getElementById('lecture-group').value;
 
-            if (!title || !url || !stage || !year) return alert('يرجى إدخال كافة البيانات المطلوبة');
+            if (!title || !url || !stage || !year || !group) return alert('يرجى إدخال كافة البيانات المطلوبة');
 
             const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
 
@@ -1117,12 +1318,12 @@
                 desc,
                 stage,
                 year,
+                group,
                 date: new Date().toLocaleDateString('ar-EG'),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             try {
-                // Now we save lectures to a collection named 'lectures'
                 await db.collection('lectures').add(lectureData);
                 alert('تم نشر المحاضرة بنجاح!');
             } catch (error) {
@@ -1135,6 +1336,7 @@
             const title = document.getElementById('quiz-title').value;
             const stage = document.getElementById('quiz-stage').value;
             const year = document.getElementById('quiz-year').value;
+            const group = document.getElementById('quiz-group').value;
             const questions = [];
             document.querySelectorAll('.quiz-question').forEach(q => {
                 questions.push({
@@ -1149,12 +1351,13 @@
                 });
             });
 
-            if (!title || !stage || !year || questions.length === 0) return alert('من فضلك أضف البيانات والأسئلة كاملة');
+            if (!title || !stage || !year || !group || questions.length === 0) return alert('من فضلك أضف البيانات والأسئلة كاملة');
 
             const quizData = {
                 title,
                 stage,
                 year,
+                group,
                 questions,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -1165,6 +1368,53 @@
             } catch (error) {
                 console.error(error);
                 alert('حدث خطأ أثناء الحفظ');
+            }
+        }
+
+        // Shared Group Logic
+        const groupMapping = {
+            'الصف الثالث الإعدادي': [
+                { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+                { id: 'van_sun_wed', name: 'حد وأربع (وان)' },
+                { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' }
+            ],
+            'الصف الأول الثانوي': [
+                { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+                { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' },
+                { id: 'ibnsina_mon_thu', name: 'اثنين وخميس (ابن سينا)' }
+            ],
+            'الصف الثاني الثانوي': [
+                { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+                { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' }
+            ],
+            'الصف الثالث الثانوي': [
+                { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+                { id: 'total_sun_wed', name: 'حد وأربع (توتال)' },
+                { id: 'ibnsina_mon_thu', name: 'اثنين وخميس (ابن سينا)' }
+            ]
+        };
+
+        function updateLectureGroups() {
+            const year = document.getElementById('lecture-year').value;
+            const groupSelect = document.getElementById('lecture-group');
+            populateGroupSelect(year, groupSelect);
+        }
+
+        function updateQuizGroups() {
+            const year = document.getElementById('quiz-year').value;
+            const groupSelect = document.getElementById('quiz-group');
+            populateGroupSelect(year, groupSelect);
+        }
+
+        function populateGroupSelect(year, selectElement) {
+            selectElement.innerHTML = '<option value="all">كل المجموعات (عام)</option><option value="online">أونلاين (C)</option>';
+            if (groupMapping[year]) {
+                groupMapping[year].forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = g.name;
+                    selectElement.appendChild(opt);
+                });
             }
         }
 
@@ -1328,6 +1578,136 @@
 
         // Initialize first question
         addQuestion();
+
+        // --- Voucher Management Logic ---
+        let allVouchers = [];
+
+        async function generateVouchers() {
+            if (!confirm('هل أنت متأكد من توليد 1000 كود جديد؟ سيتم توزيعها على جميع الصفوف الدراسية.')) return;
+
+            const years = [
+                'الصف الأول الإعدادي', 'الصف الثاني الإعدادي', 'الصف الثالث الإعدادي',
+                'الصف الأول الثانوي', 'الصف الثاني الثانوي', 'الصف الثالث الثانوي'
+            ];
+
+            const countPerYear = Math.floor(1000 / years.length);
+            let totalAdded = 0;
+
+            // We'll do this in two chunks of 500 to stay within limits
+            const chunks = [0, 500];
+
+            for (let chunkStart of chunks) {
+                const batch = db.batch();
+                let operationsInBatch = 0;
+
+                // Calculate which years and how many codes and years to process in this chunk
+                // Simplified: just loop through all years and use a counter
+                let currentYearIndex = 0;
+                let codesForCurrentYear = 0;
+
+                for (let i = 0; i < 500; i++) {
+                    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const ref = db.collection('vouchers').doc();
+
+                    const yearIdx = Math.floor(totalAdded / countPerYear);
+                    const year = years[yearIdx < years.length ? yearIdx : years.length - 1];
+
+                    batch.set(ref, {
+                        code: code,
+                        year: year,
+                        used: false,
+                        note: '',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    totalAdded++;
+                }
+
+                try {
+                    await batch.commit();
+                } catch (e) {
+                    console.error(e);
+                    return alert('خطأ أثناء حفظ الدفعة: ' + e.message);
+                }
+            }
+
+            alert('تم توليد 1000 كود بنجاح وتوزيعها على الصفوف!');
+        }
+
+        // Voucher Listener
+        db.collection('vouchers').orderBy('timestamp', 'desc').onSnapshot(snap => {
+            allVouchers = [];
+            let usedCount = 0;
+            snap.forEach(doc => {
+                const v = doc.data();
+                allVouchers.push({ id: doc.id, ...v });
+                if (v.used) usedCount++;
+            });
+
+            document.getElementById('stat-used-vouchers').innerText = usedCount;
+            document.getElementById('stat-revenue').innerText = (usedCount * 50).toLocaleString() + ' ج.م';
+
+            filterVouchers(); // Refresh view
+        });
+
+        function filterVouchers() {
+            const search = document.getElementById('voucher-search').value.toLowerCase();
+            const grade = document.getElementById('voucher-filter-grade').value;
+            const status = document.getElementById('voucher-filter-status').value;
+
+            const filtered = allVouchers.filter(v => {
+                const matchesSearch = v.code.toLowerCase().includes(search) || (v.note && v.note.toLowerCase().includes(search));
+                const matchesGrade = grade === 'all' || v.year === grade;
+                const matchesStatus = status === 'all' || (status === 'used' ? v.used : !v.used);
+                return matchesSearch && matchesGrade && matchesStatus;
+            });
+
+            renderVoucherRows(filtered.slice(0, 100)); // Show only first 100 for performance
+        }
+
+        function renderVoucherRows(vouchers) {
+            const tbody = document.getElementById('vouchers-table-body');
+            tbody.innerHTML = '';
+
+            if (vouchers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color:rgba(255,255,255,0.2);">لا توجد أكواد تطابق البحث</td></tr>';
+                return;
+            }
+
+            vouchers.forEach(v => {
+                const date = v.timestamp ? v.timestamp.toDate().toLocaleDateString('ar-EG') : '...';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="voucher-code">${v.code}</span></td>
+                        <td><span class="tag tag-grade" style="font-size:0.75rem;">${v.year}</span></td>
+                        <td><span class="status-badge ${v.used ? 'status-used' : 'status-active'}">${v.used ? 'مستخدم' : 'متاح'}</span></td>
+                        <td>
+                            <input type="text" class="voucher-note-input" value="${v.note || ''}" 
+                                   placeholder="أضف ملاحظة (مثلاً: طالب كذا)" 
+                                   onchange="updateVoucherNote('${v.id}', this.value)">
+                        </td>
+                        <td style="font-size: 0.8rem; color: rgba(255,255,255,0.4);">${date}</td>
+                        <td>
+                            <button onclick="deleteVoucher('${v.id}')" style="color:#ff5252; background:none; border:none; cursor:pointer;" title="حذف">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateVoucherNote(id, note) {
+            try {
+                await db.collection('vouchers').doc(id).update({ note: note });
+            } catch (err) { console.error(err); }
+        }
+
+        async function deleteVoucher(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الكود؟')) return;
+            try {
+                await db.collection('vouchers').doc(id).delete();
+            } catch (err) { console.error(err); }
+        }
     </script>
 </body>
 

@@ -52,13 +52,13 @@ function openAdmin() {
 // --- Firebase Configuration (REQUIRED) ---
 // Note: This must match the config in admin.html
 const firebaseConfig = {
-    apiKey: "AIzaSyDGKHCYjB-ryi6To5lDwlYya6hFOS4i40E",
-    authDomain: "ahlquraan-29c5b.firebaseapp.com",
-    projectId: "ahlquraan-29c5b",
-    storageBucket: "ahlquraan-29c5b.firebasestorage.app",
-    messagingSenderId: "677127394598",
-    appId: "1:677127394598:web:a237d013ad2174f1e95de7",
-    measurementId: "G-033RNWBVTL"
+    apiKey: "AIzaSyAUZUyDm026pvbScVn6f_Hy5MFcf9SvLuE",
+    authDomain: "siond-a6c34.firebaseapp.com",
+    projectId: "siond-a6c34",
+    storageBucket: "siond-a6c34.firebasestorage.app",
+    messagingSenderId: "875547108455",
+    appId: "1:875547108455:web:60bb9ba17b3f97759be0c2",
+    measurementId: "G-SYBKW4D61H"
 };
 
 // Initialize Firebase (Check if already initialized to avoid errors)
@@ -74,7 +74,6 @@ function updateYears() {
     yearSelect.innerHTML = '<option value="">اختر السنة</option>';
 
     const stages = {
-        primary: ['الصف الأول الابتدائي', 'الصف الثاني الابتدائي', 'الصف الثالث الابتدائي', 'الصف الرابع الابتدائي', 'الصف الخامس الابتدائي', 'الصف السادس الابتدائي'],
         preparatory: ['الصف الأول الإعدادي', 'الصف الثاني الإعدادي', 'الصف الثالث الإعدادي'],
         secondary: ['الصف الأول الثانوي', 'الصف الثاني الثانوي', 'الصف الثالث الثانوي']
     };
@@ -85,6 +84,59 @@ function updateYears() {
             option.value = year;
             option.textContent = year;
             yearSelect.appendChild(option);
+        });
+    }
+    updateGroups(); // Reset groups
+}
+
+// Fixed Schedule Mapping for Groups/Centers
+const groupMapping = {
+    'الصف الثالث الإعدادي': [
+        { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+        { id: 'van_sun_wed', name: 'حد وأربع (وان)' },
+        { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' }
+    ],
+    'الصف الأول الثانوي': [
+        { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+        { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' },
+        { id: 'ibnsina_mon_thu', name: 'اثنين وخميس (ابن سينا)' }
+    ],
+    'الصف الثاني الثانوي': [
+        { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+        { id: 'total_mon_thu', name: 'اثنين وخميس (توتال)' }
+    ],
+    'الصف الثالث الثانوي': [
+        { id: 'alamein_sat_tue', name: 'سبت وثلاث (الأمين)' },
+        { id: 'total_sun_wed', name: 'حد وأربع (توتال)' },
+        { id: 'ibnsina_mon_thu', name: 'اثنين وخميس (ابن سينا)' }
+    ]
+};
+
+function updateGroups() {
+    const year = document.getElementById('student-year').value;
+    const groupSelect = document.getElementById('student-group');
+    groupSelect.innerHTML = '<option value="">اختر المجموعة</option>';
+
+    // Add Online as default for everyone
+    const onlineOpt = document.createElement('option');
+    onlineOpt.value = 'online';
+    onlineOpt.textContent = 'أونلاين (مجموعة C)';
+    groupSelect.appendChild(onlineOpt);
+
+    if (groupMapping[year]) {
+        groupMapping[year].forEach(g => {
+            const option = document.createElement('option');
+            option.value = g.id;
+            option.textContent = g.name;
+            groupSelect.appendChild(option);
+        });
+    } else if (year) {
+        // Default options for primary/other years if not specified
+        ['A', 'B'].forEach(grp => {
+            const option = document.createElement('option');
+            option.value = grp;
+            option.textContent = `مجموعة ${grp}`;
+            groupSelect.appendChild(option);
         });
     }
 }
@@ -134,6 +186,9 @@ function initDashboard() {
         // Fetch Honor Roll
         fetchHonorRoll(studentData.year);
 
+        // Fetch Student Results
+        fetchStudentResults(studentData);
+
         // Listen for Announcements
         db.collection('platform_data').doc('announcement').onSnapshot(doc => {
             if (doc.exists) {
@@ -143,50 +198,79 @@ function initDashboard() {
 
         // Log daily visit if not logged today
         logVisit(studentData);
+    } else {
+        if (authModal) authModal.style.display = 'flex';
+        if (dashboardSidebar) dashboardSidebar.style.display = 'none';
+        if (dashboardMain) dashboardMain.style.display = 'none';
     }
 }
 
 function fetchStudentContent(student) {
     // 1. Fetch Lectures
-    db.collection('lectures').where('year', '==', student.year).orderBy('timestamp', 'desc').onSnapshot(snap => {
-        const grid = document.getElementById('lectures-grid');
-        const latestEntry = document.getElementById('latest-content-entry');
-        const badge = document.getElementById('lecture-count-badge');
+    db.collection('lectures')
+        .where('year', '==', student.year)
+        .orderBy('timestamp', 'desc').onSnapshot(snap => {
+            const grid = document.getElementById('lectures-grid');
+            const latestEntry = document.getElementById('latest-content-entry');
+            const badge = document.getElementById('lecture-count-badge');
+            const isYearUnlocked = localStorage.getItem('unlocked_' + student.year);
 
-        badge.innerText = `${snap.size} محاضرة مخصصة لك`;
-        grid.innerHTML = '';
+            // Filter by group manually code-side to handle "all" groups
+            const filteredLectures = snap.docs.map(d => d.data()).filter(l => {
+                return l.group === 'all' || l.group === student.group;
+            });
 
-        if (snap.empty) {
-            grid.innerHTML = '<p style="color: rgba(255,255,255,0.3);">لا توجد محاضرات متاحة لعامك الدراسي حالياً.</p>';
-            latestEntry.innerHTML = '';
-            return;
-        }
+            badge.innerText = `${filteredLectures.length} محاضرة مخصصة لك`;
+            grid.innerHTML = '';
 
-        let first = true;
-        snap.forEach(doc => {
-            const lec = doc.data();
-            const card = `
-                <div class="course-card" style="margin-bottom: 0;">
-                    <div class="course-image" style="height: 180px;">
-                        <img src="https://img.youtube.com/vi/${lec.videoId}/mqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
-                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size: 3rem; color: #fff; opacity:0.8;">
-                             <i class="fas fa-play-circle"></i>
+            if (filteredLectures.length === 0) {
+                grid.innerHTML = '<p style="color: rgba(255,255,255,0.3);">لا توجد محاضرات متاحة لمجموعتك حالياً.</p>';
+                latestEntry.innerHTML = '';
+                return;
+            }
+
+            let first = true;
+            filteredLectures.forEach(lec => {
+                let card = '';
+
+                if (isYearUnlocked) {
+                    card = `
+                    <div class="course-card" style="margin-bottom: 0;">
+                        <div class="course-image" style="height: 180px;">
+                            <img src="https://img.youtube.com/vi/${lec.videoId}/mqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
+                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size: 3rem; color: #fff; opacity:0.8;">
+                                 <i class="fas fa-play-circle"></i>
+                            </div>
+                        </div>
+                        <div class="course-body">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 10px;">${lec.title}</h3>
+                            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px;">${lec.desc || 'لا يوجد وصف للمحاضرة'}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.8rem; color: var(--secondary-color);">${lec.date}</span>
+                                <a href="https://youtube.com/watch?v=${lec.videoId}" target="_blank" class="btn btn-secondary" style="padding: 8px 15px; font-size:0.8rem;">مشاهدة</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="course-body">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 10px;">${lec.title}</h3>
-                        <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px;">${lec.desc || 'لا يوجد وصف للمحاضرة'}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.8rem; color: var(--secondary-color);">${lec.date}</span>
-                            <a href="https://youtube.com/watch?v=${lec.videoId}" target="_blank" class="btn btn-secondary" style="padding: 8px 15px; font-size:0.8rem;">مشاهدة</a>
+                `;
+                } else {
+                    card = `
+                    <div class="course-card locked-card" style="margin-bottom: 0;">
+                        <div class="locked-overlay">
+                            <i class="fas fa-lock"></i>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 10px;">${lec.title}</h3>
+                            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px;">هذا المحتوى محمي بكود تفعيل</p>
+                            <div class="voucher-input-group">
+                                <input type="text" class="dashboard-voucher-input" placeholder="ادخل الكود هنا">
+                                <button class="btn-verify" onclick="checkVoucher(this, '${student.year}')">تفعيل</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            grid.innerHTML += card;
+                `;
+                }
+                grid.innerHTML += card;
 
-            if (first) {
-                latestEntry.innerHTML = `
+                if (first && isYearUnlocked) {
+                    latestEntry.innerHTML = `
                     <div class="next-lesson-card" style="background: linear-gradient(135deg, #0d47a1 0%, #002171 100%);">
                         <div class="course-badge" style="background: var(--secondary-color); color: #000;">أحدث محاضرة</div>
                         <p style="opacity: 0.8; margin-bottom: 15px;">${lec.year}</p>
@@ -195,35 +279,90 @@ function fetchStudentContent(student) {
                         <i class="fas fa-book-reader" style="position: absolute; bottom: -20px; left: 20px; font-size: 12rem; opacity: 0.05;"></i>
                     </div>
                 `;
-                first = false;
-            }
+                    first = false;
+                } else if (first && !isYearUnlocked) {
+                    latestEntry.innerHTML = `
+                    <div class="next-lesson-card" style="background: linear-gradient(135deg, #333 0%, #000 100%); position: relative; overflow: hidden;">
+                        <div class="course-badge" style="background: #555; color: #fff;">محتوى مغلق</div>
+                        <h2 style="font-size: 1.8rem; margin-bottom: 15px;">يرجى تفعيل السنة الدراسية</h2>
+                        <p style="opacity: 0.7; margin-bottom: 25px;">قم بإدخال كود التفعيل في أي كارت بالأسفل لفتح كافة المحاضرات.</p>
+                        <i class="fas fa-lock" style="position: absolute; bottom: -20px; left: 20px; font-size: 12rem; opacity: 0.1;"></i>
+                    </div>
+                `;
+                    first = false;
+                }
+            });
         });
-    });
 
     // 2. Fetch Quizzes
-    db.collection('quizzes').where('year', '==', student.year).onSnapshot(snap => {
-        const grid = document.getElementById('quizzes-grid');
-        const badge = document.getElementById('quiz-count-badge');
+    db.collection('quizzes')
+        .where('year', '==', student.year)
+        .orderBy('timestamp', 'desc').onSnapshot(snap => {
+            const grid = document.getElementById('quizzes-grid');
+            const badge = document.getElementById('quiz-count-badge');
 
-        badge.innerText = `${snap.size} اختبار مخصص لك`;
-        grid.innerHTML = '';
+            // Filter by group manually code-side to handle "all" groups
+            const filteredQuizzes = snap.docs.map(d => d.data()).filter(q => {
+                return q.group === 'all' || q.group === student.group;
+            });
 
-        if (snap.empty) {
-            grid.innerHTML = '<p style="color: rgba(255,255,255,0.3);">لا توجد اختبارات متاحة لعامك الدراسي حالياً.</p>';
-            return;
-        }
+            badge.innerText = `${filteredQuizzes.length} اختبار مخصص لك`;
+            grid.innerHTML = '';
 
-        snap.forEach(doc => {
-            const quiz = doc.data();
-            grid.innerHTML += `
-                <div class="progress-section" style="border-right: 4px solid var(--secondary-color);">
-                    <h3 style="margin-bottom: 10px;">${quiz.title}</h3>
-                    <p style="opacity: 0.6; font-size: 0.9rem; margin-bottom: 20px;">عدد الأسئلة: ${quiz.questions.length}</p>
-                    <button class="btn btn-secondary" style="width: 100%;" onclick='startQuiz(${JSON.stringify(quiz).replace(/'/g, "&apos;")})'>بدء الاختبار الآن</button>
+            if (filteredQuizzes.length === 0) {
+                grid.innerHTML = '<p style="color: rgba(255,255,255,0.3);">لا توجد اختبارات متاحة لمجموعتك حالياً.</p>';
+                return;
+            }
+
+            filteredQuizzes.forEach(quiz => {
+                const quizDataJson = JSON.stringify(quiz).replace(/'/g, "&apos;");
+                const card = `
+                <div class="progress-section" style="border-right: 4px solid var(--secondary-color); background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; margin-bottom: 0;">
+                    <h3 style="margin-bottom: 10px; font-size:1.1rem;">${quiz.title}</h3>
+                    <p style="opacity: 0.6; font-size: 0.85rem; margin-bottom: 20px;">عدد الأسئلة: ${quiz.questions.length}</p>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick='startQuiz(${quizDataJson})'>بدء الاختبار</button>
                 </div>
             `;
+                grid.innerHTML += card;
+            });
         });
-    });
+}
+
+function fetchStudentResults(student) {
+    db.collection('quiz_results')
+        .where('phone', '==', student.phone)
+        .onSnapshot(snap => {
+            const table = document.getElementById('student-results-table');
+            if (!table) return;
+
+            table.innerHTML = '';
+            if (snap.empty) {
+                table.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.2);">لم تقم بأداء أي اختبارات بعد.</td></tr>';
+                return;
+            }
+
+            let results = [];
+            snap.forEach(doc => results.push(doc.data()));
+
+            // Sort in JS instead of Firestore to avoid composite index requirement
+            results.sort((a, b) => {
+                const tsA = a.timestamp ? a.timestamp.toDate() : 0;
+                const tsB = b.timestamp ? b.timestamp.toDate() : 0;
+                return tsB - tsA;
+            });
+
+            results.forEach(res => {
+                const date = res.timestamp ? new Date(res.timestamp.toDate()).toLocaleDateString('ar-EG') : 'قيد المعالجة';
+                table.innerHTML += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 15px;">${res.quizTitle}</td>
+                        <td style="padding: 15px; color: var(--secondary-color); font-weight:700;">${res.score} / ${res.total}</td>
+                        <td style="padding: 15px;">${res.percent}%</td>
+                        <td style="padding: 15px; opacity: 0.6; font-size: 0.8rem;">${date}</td>
+                    </tr>
+                `;
+            });
+        });
 }
 
 function logVisit(student) {
@@ -444,3 +583,63 @@ if (mobileMenu && navLinks) {
 
 // Run Init
 document.addEventListener('DOMContentLoaded', initDashboard);
+
+// --- Activation Code (Voucher) Logic ---
+async function checkVoucher(btn, studentYear) {
+    const input = btn.previousElementSibling;
+    const code = input.value.trim().toUpperCase();
+
+    if (!code) return alert('برجاء إدخال الكود');
+
+    btn.disabled = true;
+    btn.innerText = 'جاري التحقق...';
+
+    try {
+        const snap = await db.collection('vouchers').where('code', '==', code).get();
+
+        if (snap.empty) {
+            alert('كود غير صحيح.. تأكد من كتابة الكود بشكل سليم');
+            btn.disabled = false;
+            btn.innerText = 'تفعيل';
+            return;
+        }
+
+        const doc = snap.docs[0];
+        const vData = doc.data();
+
+        if (vData.used) {
+            alert('عذراً، هذا الكود تم استخدامه من قبل');
+            btn.disabled = false;
+            btn.innerText = 'تفعيل';
+            return;
+        }
+
+        if (vData.year !== studentYear) {
+            alert(`هذا الكود مخصص لـ (${vData.year}) وأنت مسجل في (${studentYear})`);
+            btn.disabled = false;
+            btn.innerText = 'تفعيل';
+            return;
+        }
+
+        // Mark as used
+        await db.collection('vouchers').doc(doc.id).update({
+            used: true,
+            usedBy: JSON.parse(localStorage.getItem('student_profile')).name,
+            usedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Set Local Storage
+        localStorage.setItem('unlocked_' + studentYear, 'true');
+
+        alert('تم تفعيل السنة الدراسية بنجاح! استمتع بالمشاهدة');
+
+        // Refresh Content
+        initDashboard();
+
+    } catch (err) {
+        console.error(err);
+        alert('حدث خطأ في الاتصال.. حاول مرة أخرى');
+        btn.disabled = false;
+        btn.innerText = 'تفعيل';
+    }
+}
