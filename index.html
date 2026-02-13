@@ -363,15 +363,103 @@
                 <p><i class="fas fa-map-marker-alt"></i> القاهرة، مصر</p>
             </div>
         </div>
+
         <div class="footer-bottom">
             <p>جميع الحقوق محفوظة &copy; 2026 مستر أمين الغازي | تم التطوير بواسطة Antigravity</p>
-            <a href="javascript:void(0)" onclick="openAdmin()"
-                style="font-size: 0.7rem; color: rgba(255,255,255,0.2); margin-top: 10px; display: block;">لوحة
-                التحكم</a>
+            <button class="footer-admin-link" onclick="openAdmin()">لوحة التحكم</button>
         </div>
     </footer>
 
+    <!-- Admin Login Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content glass">
+            <span class="close-modal"
+                onclick="document.getElementById('admin-modal').classList.remove('active')">&times;</span>
+            <h2>دخول المسؤول</h2>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="admin-password" placeholder="••••••••">
+            </div>
+            <button id="login-confirm" class="btn btn-primary w-100" onclick="checkLogin()">دخول</button>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (Overlay) -->
+    <div id="admin-dashboard" class="admin-overlay hidden">
+        <div class="admin-mobile-header">
+            <button class="admin-menu-toggle" onclick="hideAdminDashboard()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="admin-logo" style="margin-bottom: 0; font-size: 1.2rem;">لوحة التحكم</div>
+            <button class="admin-menu-toggle" onclick="toggleAdminSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="admin-container">
+            <div id="admin-sidebar" class="admin-sidebar">
+                <div class="admin-logo">لوحة التحكم</div>
+                <ul class="admin-nav">
+                    <li class="active" data-section="dashboard"><i class="fas fa-chart-line"></i> الإحصائيات العامة</li>
+                    <li data-section="add-lesson"><i class="fas fa-video"></i> إضافة درس فيديو</li>
+                    <li data-section="add-exam"><i class="fas fa-file-alt"></i> إضافة اختبار</li>
+                    <li data-section="add-file"><i class="fas fa-file-pdf"></i> إضافة مذكرة/ملف</li>
+                    <li data-section="vouchers"><i class="fas fa-key"></i> أكواد التفعيل</li>
+                    <li data-section="students-list"><i class="fas fa-user-graduate"></i> قائمة الطلاب</li>
+                </ul>
+                <button class="btn btn-secondary logout-btn" style="margin-top: auto; color: #ff5252;"
+                    onclick="location.reload()">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </button>
+            </div>
+            <div class="admin-main">
+                <div id="admin-content-area">
+                    <!-- Dynamic Admin Content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intro Video Modal with Shield -->
+    <div id="intro-modal" class="modal">
+        <div class="modal-content glass" style="max-width: 800px; padding: 0; overflow: hidden;">
+            <span class="close-modal" onclick="closeIntroVideo()"
+                style="position: absolute; top: 10px; left: 10px; z-index: 200; color: white;">&times;</span>
+            <div class="video-preview-wrapper" id="intro-video-wrapper">
+                <div id="intro-player"></div>
+                <div class="video-overlay-shield total-shield" onclick="togglePlayPause('intro')"
+                    ondblclick="toggleFullscreen('intro-video-wrapper')">
+                    <div class="play-overlay">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="shield-top"></div>
+                    <div class="shield-bottom-right"></div>
+                    <div class="custom-controls">
+                        <button class="custom-seek-btn" onclick="event.stopPropagation(); seek('intro', -10)">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <div class="progress-container" onclick="event.stopPropagation(); handleSeek(event, 'intro')">
+                            <div class="progress-bar" id="progress-intro"></div>
+                        </div>
+                        <button class="custom-seek-btn" onclick="event.stopPropagation(); seek('intro', 10)">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button class="custom-fs-btn"
+                            onclick="event.stopPropagation(); toggleFullscreen('intro-video-wrapper')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase & Scripts -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
+</body>
+
 </body>
 
 </html>
