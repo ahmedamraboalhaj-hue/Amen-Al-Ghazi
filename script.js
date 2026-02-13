@@ -29,7 +29,16 @@ const GRADES_CONFIG = {
 };
 
 // State
-let appData = { lessons: [], exams: [], files: [], vouchers: [], students: [], announcements: [] };
+let appData = {
+    lessons: [],
+    exams: [],
+    files: [],
+    vouchers: [],
+    students: [],
+    announcements: [],
+    views: [],
+    stats: { visits: 0 }
+};
 let ytPlayers = {};
 let isYouTubeAPIReady = false;
 
@@ -220,6 +229,11 @@ function renderAdminSection(section) {
                     <p>إحصائيات مباشرة من قاعدة البيانات</p>
                 </div>
                 <div class="stats-grid">
+                    <div class="stat-item glass" style="border-bottom: 3px solid var(--secondary-color);">
+                        <i class="fas fa-users" style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
+                        <h3>${appData.stats.visits}</h3>
+                        <p>إجمالي زيارات المنصة</p>
+                    </div>
                     <div class="stat-item glass">
                         <i class="fas fa-user-graduate" style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
                         <h3>${appData.students.length}</h3>
@@ -234,11 +248,6 @@ function renderAdminSection(section) {
                         <i class="fas fa-tasks" style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
                         <h3>${appData.exams.length}</h3>
                         <p>اختبار إلكتروني</p>
-                    </div>
-                    <div class="stat-item glass">
-                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
-                        <h3>${appData.files.length}</h3>
-                        <p>مذكرة تعليمية</p>
                     </div>
                 </div>
 
@@ -268,6 +277,36 @@ function renderAdminSection(section) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+            `;
+            break;
+
+        case 'stats':
+            content.innerHTML = `
+                <h2>إحصائيات مشاهدة الدروس</h2>
+                <div class="vouchers-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الدرس</th>
+                                <th>الصف</th>
+                                <th>عدد المشاهدات</th>
+                                <th>عرض التفاصيل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.lessons.map(l => {
+                const views = appData.views.filter(v => v.lessonId === l.id);
+                return `
+                                <tr>
+                                    <td>${l.title}</td>
+                                    <td>${GRADES_CONFIG[l.grade]?.title || l.grade}</td>
+                                    <td><span class="status-badge status-active" style="background: rgba(79, 195, 247, 0.2); color: #4fc3f7;">${views.length} مشاهدة</span></td>
+                                    <td><button class="btn-verify" style="padding: 5px 15px;" onclick="showViewers('${l.id}')">المشاهدين</button></td>
+                                </tr>`;
+            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
             `;
             break;
@@ -462,42 +501,32 @@ function printSingleVoucher(code, gradeKey) {
     `);
 }
 
-function printVouchersByGrade(gradeKey) {
-    const gradeName = GRADES_CONFIG[gradeKey]?.title || "عام";
-    const vouchers = appData.vouchers.filter(v => v.grade === gradeKey && !v.used).slice(0, 30);
-    if (vouchers.length === 0) {
-        alert("لا توجد أكواد غير مستخدمة لهذا الصف حالياً.");
-        return;
-    }
-    const printWindow = window.open('', '_blank');
-    let cardsHtml = vouchers.map(v => `
-        <div class="card">
-            <div class="teacher">مستر أمين الغازي</div>
-            <div class="grade">${gradeName}</div>
-            <div class="code">${v.code}</div>
-            <div class="footer-text">منصة مستر أمين التعليمية</div>
+function showViewers(lessonId) {
+    const lesson = appData.lessons.find(l => l.id === lessonId);
+    if (!lesson) return;
+    const viewers = appData.views.filter(v => v.lessonId === lessonId);
+
+    const viewersHtml = viewers.length > 0 ? viewers.map(v => `
+        <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+            <span>${v.studentName}</span>
+            <span dir="ltr" style="color: var(--secondary-color);">${v.studentPhone}</span>
+            <span style="font-size: 0.7rem; color: gray;">${new Date(v.timestamp).toLocaleString('ar-EG')}</span>
         </div>
-    `).join('');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>طباعة أكواد ${gradeName}</title>
-                <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-                    .card { border: 1px solid #ccc; width: 220px; height: 140px; padding: 15px; text-align: center; border-radius: 10px; box-sizing: border-box; page-break-inside: avoid; }
-                    .teacher { font-size: 0.9rem; font-weight: bold; }
-                    .grade { font-size: 0.75rem; color: #444; margin-bottom: 5px; }
-                    .code { font-size: 1.4rem; font-family: monospace; font-weight: bold; margin: 10px 0; border: 1px solid #eee; background: #f9f9f9; padding: 5px; }
-                    .footer-text { font-size: 0.6rem; color: #999; }
-                    @media print { body { padding: 0; } }
-                </style>
-            </head>
-            <body>
-                ${cardsHtml}
-                <script>setTimeout(() => { window.print(); window.close(); }, 700);<\/script>
-            </body>
-        </html>
-    `);
+    `).join('') : '<p style="text-align: center; color: gray; padding: 20px;">لا يوجد مشاهدات مسجلة بعد</p>';
+
+    const modal = document.getElementById('admin-modal');
+    if (!modal) return;
+    const content = modal.querySelector('.modal-content');
+
+    // Save previous content to restore if needed, or just clear and update
+    content.innerHTML = `
+        <span class="close-modal" onclick="document.getElementById('admin-modal').classList.remove('active'); location.reload();">&times;</span>
+        <h2 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.2rem;">مشاهدين: ${lesson.title}</h2>
+        <div style="max-height: 400px; overflow-y: auto; text-align: right;">
+            ${viewersHtml}
+        </div>
+    `;
+    modal.classList.add('active');
 }
 
 
@@ -599,34 +628,224 @@ function seek(id, seconds) {
     if (player) player.seekTo(player.getCurrentTime() + seconds, true);
 }
 
+// --- Printing Logic ---
+function printSingleVoucher(code, gradeKey) {
+    const gradeName = GRADES_CONFIG[gradeKey]?.title || "عام";
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>طباعة كود تفعيل</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; text-align: center; padding: 50px; }
+                    .card { border: 2px dashed #000; padding: 20px; display: inline-block; min-width: 300px; border-radius: 15px; }
+                    .teacher { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+                    .code { font-size: 2.5rem; font-family: monospace; font-weight: bold; color: #000; margin: 15px 0; letter-spacing: 5px; }
+                    .grade { font-size: 1rem; color: #666; margin-bottom: 20px; }
+                    .footer { font-size: 0.8rem; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="teacher">مستر أمين الغازي - لغة عربية</div>
+                    <div class="grade">${gradeName}</div>
+                    <div style="font-size: 0.9rem;">كود التفعيل الخاص بك:</div>
+                    <div class="code">${code}</div>
+                    <div class="footer">تستخدم مرة واحدة فقط - منصة مستر أمين التعليمية</div>
+                </div>
+                <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
+            </body>
+        </html>
+    `);
+}
+
+function printVouchersByGrade(gradeKey) {
+    const gradeName = GRADES_CONFIG[gradeKey]?.title || "عام";
+    const vouchers = appData.vouchers.filter(v => v.grade === gradeKey && !v.used).slice(0, 30);
+    if (vouchers.length === 0) {
+        alert("لا توجد أكواد غير مستخدمة لهذا الصف حالياً.");
+        return;
+    }
+    const printWindow = window.open('', '_blank');
+    let cardsHtml = vouchers.map(v => `
+        <div class="card">
+            <div class="teacher">مستر أمين الغازي</div>
+            <div class="grade">${gradeName}</div>
+            <div class="code">${v.code}</div>
+            <div class="footer-text">منصة مستر أمين التعليمية</div>
+        </div>
+    `).join('');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>طباعة أكواد ${gradeName}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+                    .card { border: 1px solid #ccc; width: 220px; height: 140px; padding: 15px; text-align: center; border-radius: 10px; box-sizing: border-box; page-break-inside: avoid; }
+                    .teacher { font-size: 0.9rem; font-weight: bold; }
+                    .grade { font-size: 0.75rem; color: #444; margin-bottom: 5px; }
+                    .code { font-size: 1.4rem; font-family: monospace; font-weight: bold; margin: 10px 0; border: 1px solid #eee; background: #f9f9f9; padding: 5px; }
+                    .footer-text { font-size: 0.6rem; color: #999; }
+                    @media print { body { padding: 0; } }
+                </style>
+            </head>
+            <body>
+                ${cardsHtml}
+                <script>setTimeout(() => { window.print(); window.close(); }, 700);<\/script>
+            </body>
+        </html>
+    `);
+}
+
 function toggleFullscreen(wrapperId) {
     const el = document.getElementById(wrapperId);
     if (!document.fullscreenElement) {
         el.requestFullscreen().catch(err => console.error(err));
     } else {
-        document.exitFullscreen();
+        if (document.exitFullscreen) document.exitFullscreen();
     }
 }
 
 // --- Student Dashboard Logic ---
+// --- Student Dashboard Logic ---
 function initDashboard() {
-    const student = JSON.parse(localStorage.getItem('student_session'));
-    if (!student) {
-        document.getElementById('auth-modal').style.display = 'flex';
-        return;
-    }
-    document.getElementById('auth-modal').style.display = 'none';
     const mainArea = document.getElementById('dashboard-main');
     if (mainArea) mainArea.style.display = 'block';
 
-    ['display-name', 'profile-name'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = student.name;
-    });
-    const pInit = document.getElementById('profile-initial');
-    if (pInit) pInit.textContent = student.name.charAt(0);
+    const student = JSON.parse(localStorage.getItem('student_session'));
+    const guestLinks = document.getElementById('guest-links');
 
-    renderStudentContent();
+    if (student) {
+        if (guestLinks) guestLinks.style.display = 'none';
+        ['display-name', 'profile-name'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = student.name;
+        });
+        const pInit = document.getElementById('profile-initial');
+        if (pInit) pInit.textContent = student.name.charAt(0);
+        renderStudentContent();
+    } else {
+        if (guestLinks) guestLinks.style.display = 'block';
+        ['display-name', 'profile-name'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = 'زائر';
+        });
+        const pInit = document.getElementById('profile-initial');
+        if (pInit) pInit.textContent = '?';
+    }
+
+    renderOverview();
+}
+
+function renderOverview() {
+    const student = JSON.parse(localStorage.getItem('student_session'));
+
+    // 1. Render Latest Content Entry (Welcome Card)
+    const latestEntry = document.getElementById('latest-content-entry');
+    if (latestEntry) {
+        // Find latest lesson (either for student grade or general)
+        const relevantLessons = student
+            ? appData.lessons.filter(l => l.grade === student.grade)
+            : appData.lessons;
+
+        const latestLesson = relevantLessons.length > 0
+            ? [...relevantLessons].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0]
+            : null;
+
+        if (latestLesson) {
+            latestEntry.innerHTML = `
+                <div class="welcome-highlight">
+                    <div style="position: relative; z-index: 2;">
+                        <span class="badge pulse-badge" style="background: rgba(255,255,255,0.2); margin-bottom: 15px; display: inline-block;">جديد الآن 🔥</span>
+                        <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 10px;">${latestLesson.title}</h2>
+                        <p style="opacity: 0.9; margin-bottom: 25px; max-width: 500px;">استكمل رحلتك التعليمية مع أحدث الدروس المضافة لصفك الدراسي. لا تدع الفرصة تفوتك!</p>
+                        <button class="btn-premium" onclick="showTab('lectures')">
+                            شاهد المحاضرة الآن <i class="fas fa-play-circle"></i>
+                        </button>
+                    </div>
+                    <i class="fas fa-graduation-cap" style="position: absolute; left: 40px; bottom: -20px; font-size: 12rem; opacity: 0.1; transform: rotate(-15deg);"></i>
+                </div>
+            `;
+        } else {
+            latestEntry.innerHTML = `
+                <div class="welcome-highlight" style="background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);">
+                    <h2 style="font-family: 'Amiri', serif;">مرحباً بك في منصة الأمين</h2>
+                    <p>المحتوى التعليمي سيظهر هنا فور إضافته من قبل المستر.</p>
+                </div>
+            `;
+        }
+    }
+
+    // 2. Render Announcements
+    const announceText = document.getElementById('announcement-text');
+    if (announceText && appData.announcements && appData.announcements.length > 0) {
+        const sorted = [...appData.announcements].sort((a, b) => b.createdAt - a.createdAt);
+        announceText.innerHTML = `
+            <div style="font-weight: 700; color: var(--secondary-color); margin-bottom: 5px;">أحدث تنبيه:</div>
+            <div style="font-size: 1.1rem; line-height: 1.6;">${sorted[0].text || sorted[0].content}</div>
+        `;
+    }
+
+    // 3. Render Leaderboard (Honor Roll)
+    const honorRoll = document.getElementById('honor-roll-list');
+    if (honorRoll) {
+        const topStudents = appData.students.slice(0, 5);
+        honorRoll.innerHTML = topStudents.length > 0 ? topStudents.map((s, i) => `
+            <div class="premium-card honor-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 12px; border-right: 4px solid ${i === 0 ? '#ffd700' : 'transparent'};">
+                <div class="stat-circle" style="width: 40px; height: 40px; margin-bottom: 0; font-size: 1.1rem; background: ${i === 0 ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)'};">
+                    ${i + 1}
+                </div>
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: 700; font-size: 1rem; color: #fff;">${s.name}</div>
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${GRADES_CONFIG[s.grade]?.title || ''}</div>
+                </div>
+                ${i === 0 ? '<i class="fas fa-crown" style="color: #ffd700; font-size: 1.2rem;"></i>' : ''}
+            </div>
+        `).join('') : '<p style="text-align: center; color: rgba(255,255,255,0.2); padding: 20px;">قائمة المتفوقين سيتم تحديثها قريباً</p>';
+    }
+}
+
+function showTab(tabId) {
+    const student = JSON.parse(localStorage.getItem('student_session'));
+    const protectedTabs = ['lectures', 'quizzes', 'results'];
+
+    if (protectedTabs.includes(tabId) && !student) {
+        openRegistration();
+        return;
+    }
+
+    // Hide all tabs
+    document.querySelectorAll('.dashboard-tab').forEach(tab => {
+        tab.style.display = 'none';
+    });
+
+    // Show target tab
+    const targetTab = document.getElementById(tabId + '-tab');
+    if (targetTab) targetTab.style.display = 'block';
+
+    // Update active state in sidebar
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabId)) {
+            item.classList.add('active');
+        }
+    });
+
+    // Close sidebar on mobile if it's open
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && sidebar.classList.contains('mobile-open')) {
+        toggleMenu();
+    }
+}
+
+function openRegistration() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeRegistration() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 function renderStudentContent() {
@@ -635,31 +854,37 @@ function renderStudentContent() {
     const unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
     const gradeLessons = appData.lessons.filter(l => l.grade === student.grade);
     const grid = document.getElementById('lectures-grid');
+
     if (grid) {
         grid.innerHTML = gradeLessons.length ? gradeLessons.map(l => {
             const isUnlocked = unlocked.includes(l.id);
             return `
-            <div class="course-card">
-                <div class="video-preview-wrapper" id="video-${l.id}">
+            <div class="premium-card course-card" style="padding: 15px; overflow: hidden;">
+                <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 15px;">
                     <div id="player-${l.id}"></div>
                     ${isUnlocked ? `
-                        <div class="video-overlay-shield total-shield" onclick="playLesson('${l.id}', '${l.youtubeId}')">
-                            <div class="play-overlay"><i class="fas fa-play"></i></div>
-                            <div class="shield-bottom-right"></div>
+                        <div class="video-overlay-shield total-shield" onclick="playLesson('${l.id}', '${l.youtubeId}')" style="cursor: pointer; background: rgba(0,0,0,0.4);">
+                            <div class="play-overlay"><i class="fas fa-play" style="font-size: 2.5rem; color: var(--secondary-color);"></i></div>
                         </div>
                     ` : `
-                        <div class="locked-overlay" onclick="unlockLesson('${l.id}')">
-                            <i class="fas fa-lock"></i>
-                            <p>الدرس مقفل.. اضغط لإدخال الكود</p>
+                        <div class="locked-overlay" onclick="unlockLesson('${l.id}')" style="cursor: pointer; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fas fa-lock" style="font-size: 2rem; color: var(--secondary-color);"></i>
+                            <span style="font-size: 0.8rem; font-weight: 700;">اضغط لتفعيل الدرس</span>
                         </div>
                     `}
                 </div>
-                <div class="course-body">
-                    <h3>${l.title}</h3>
-                    <p>${l.branch}</p>
+                <div style="padding: 5px 10px;">
+                    <span class="badge" style="background: rgba(255,193,7,0.1); color: var(--secondary-color); font-size: 0.7rem; margin-bottom: 8px; display: inline-block;">${l.branch || 'عام'}</span>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #fff;">${l.title}</h3>
                 </div>
-            </div>`;
-        }).join('') : '<div class="empty-msg">لا يوجد فيديوهات مضافة بعد</div>';
+            </div>
+            `;
+        }).join('') : `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px; opacity: 0.5;">
+                <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <p>لم يتم إضافة محاضرات لهذا الصف بعد.</p>
+            </div>
+        `;
     }
     const badge = document.getElementById('lecture-count-badge');
     if (badge) badge.textContent = gradeLessons.length;
@@ -695,9 +920,13 @@ async function unlockLesson(lessonId) {
 }
 
 function playLesson(containerId, youtubeId) {
+    const lesson = appData.lessons.find(l => l.id === containerId);
+    logView(containerId, lesson ? lesson.title : 'درس فيديو');
+
     const wrapper = document.getElementById(`video-${containerId}`);
     const shield = wrapper.querySelector('.total-shield');
     if (shield) shield.style.display = 'none';
+
     new YT.Player(`player-${containerId}`, {
         height: '100%', width: '100%', videoId: youtubeId,
         playerVars: { 'autoplay': 1, 'modestbranding': 1, 'rel': 0 },
@@ -708,16 +937,31 @@ function playLesson(containerId, youtubeId) {
 // Auth Form (Dashboard)
 const regForm = document.getElementById('registration-form');
 if (regForm) {
-    regForm.onsubmit = (e) => {
+    regForm.onsubmit = async (e) => {
         e.preventDefault();
         const studentData = {
             name: document.getElementById('student-name').value,
             phone: document.getElementById('student-phone').value,
+            parentPhone: document.getElementById('parent-phone').value,
+            stage: document.getElementById('student-stage').value,
             grade: document.getElementById('student-year').value,
+            group: document.getElementById('student-group').value,
             createdAt: Date.now()
         };
-        localStorage.setItem('student_session', JSON.stringify(studentData));
-        location.reload();
+
+        try {
+            // Save to Firestore for admin tracking
+            await db.collection('students').add(studentData);
+
+            // Save locally for persistent session
+            localStorage.setItem('student_session', JSON.stringify(studentData));
+
+            alert(`مرحباً بك يا ${studentData.name} في منصة مستر أمين الغازي`);
+            location.reload();
+        } catch (error) {
+            console.error("Registration error:", error);
+            alert("حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى.");
+        }
     };
 }
 
@@ -740,8 +984,41 @@ function updateYears() {
 }
 
 function updateGroups() {
-    // Basic implementation, can be expanded to fetch groups from appData
+    const year = document.getElementById('student-year').value;
     const groupSelect = document.getElementById('student-group');
-    groupSelect.innerHTML = `<option value="">اختر المجموعة</option>
-        <option value="A">مجموعة A (مركز)</option><option value="B">مجموعة B (أونلاين)</option>`;
+    groupSelect.innerHTML = '<option value="">اختر المجموعة/المركز</option>';
+
+    // Groups Mapping based on User Request
+    const groupsMapping = {
+        '3prep': [
+            'سبت وثلاث (الأمين)',
+            'حد وأربع (وان)',
+            'اثنين وخميس (توتال)'
+        ],
+        '1sec': [
+            'سبت وثلاث (الأمين)',
+            'اثنين وخميس (توتال)',
+            'اثنين وخميس (ابن سينا)'
+        ],
+        '2sec': [
+            'سبت وثلاث (الأمين)',
+            'اثنين وخميس (توتال)'
+        ],
+        '3sec': [
+            'سبت وثلاث (الأمين)',
+            'حد وأربع (توتال)',
+            'اثنين وخميس (ابن سينا)'
+        ],
+        // Default for others if needed
+        '1prep': ['مجموعة A (صباحي)', 'مجموعة B (مسائي)', 'أونلاين'],
+        '2prep': ['مجموعة A (صباحي)', 'مجموعة B (مسائي)', 'أونلاين']
+    };
+
+    if (groupsMapping[year]) {
+        groupsMapping[year].forEach(group => {
+            groupSelect.innerHTML += `<option value="${group}">${group}</option>`;
+        });
+    } else {
+        groupSelect.innerHTML += '<option value="online">أونلاين</option>';
+    }
 }

@@ -13,16 +13,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        body {
-            background-color: #05080b;
-            display: flex;
-            min-height: 100vh;
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --premium-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --secondary-color: #d97706;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --sidebar-bg: #ffffff;
+            --body-bg: #f8fafc;
         }
 
-        /* Sidebar */
+        body {
+            background-color: var(--body-bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text-main);
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Sidebar Styles */
         .sidebar {
             width: 280px;
-            background: #0a0e14;
+            background: var(--sidebar-bg);
             border-left: 1px solid var(--glass-border);
             padding: 40px 20px;
             display: flex;
@@ -31,44 +49,55 @@
             height: 100vh;
             right: 0;
             top: 0;
+            z-index: 1000;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
         }
 
         .sidebar-logo {
             font-family: 'Amiri', serif;
-            font-size: 1.5rem;
-            color: var(--secondary-color);
+            font-size: 1.8rem;
+            background: var(--gold-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 50px;
             text-align: center;
-        }
-
-        .sidebar-menu {
-            flex-grow: 1;
+            font-weight: 700;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            transition: var(--transition);
-            color: rgba(255, 255, 255, 0.6);
+            padding: 14px 20px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .menu-item:hover,
         .menu-item.active {
-            background: rgba(13, 71, 161, 0.2);
+            background: rgba(245, 158, 11, 0.1);
             color: var(--secondary-color);
+            transform: translateX(-5px);
         }
 
         .menu-item i {
             font-size: 1.2rem;
+            transition: 0.3s;
+        }
+
+        .menu-item:hover i {
+            transform: scale(1.2);
         }
 
         .logout {
             margin-top: auto;
-            color: #ff5252;
+            color: #ff5252 !important;
         }
 
         /* Main Content */
@@ -76,6 +105,22 @@
             flex-grow: 1;
             margin-right: 280px;
             padding: 40px;
+            width: calc(100% - 280px);
+            animation: fadeInPage 0.8s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInPage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .dashboard-header {
@@ -83,137 +128,175 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .user-welcome h1 {
-            font-size: 2rem;
-            margin-bottom: 5px;
+            font-size: 2.22rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-family: 'Amiri', serif;
         }
 
         .user-welcome p {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
+            font-size: 1rem;
         }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--card-bg);
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--secondary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 800;
-        }
-
-        /* Dashboard Grid */
+        /* Premium Components */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 35px;
+            margin-top: 30px;
         }
 
-        .next-lesson-card {
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 193, 7, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .welcome-highlight {
             background: linear-gradient(135deg, #0d47a1 0%, #002171 100%);
-            padding: 40px;
-            border-radius: 30px;
+            padding: 45px;
+            border-radius: 35px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 25px 50px rgba(13, 71, 161, 0.2);
             margin-bottom: 30px;
+            animation: floatCard 6s infinite ease-in-out;
         }
 
-        .next-lesson-card h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
+        @keyframes floatCard {
 
-        .lesson-info {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
-        .info-pill {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .progress-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 25px;
-            border: 1px solid var(--glass-border);
+            margin-bottom: 0;
         }
 
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar-container {
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
             height: 100%;
-            background: var(--secondary-color);
-            width: 65%;
-            box-shadow: 0 0 15px var(--secondary-color);
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 900;
+            display: none;
+            backdrop-filter: blur(5px);
         }
 
-        .announcements {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 25px;
-            border: 1px solid var(--glass-border);
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(10, 14, 20, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 950;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .announcement-item {
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .badge {
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
-        .announcement-item:last-child {
-            border-bottom: none;
+        .pulse-badge {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--secondary-color);
+            animation: pulse-gold 2s infinite;
         }
 
-        .announcement-tag {
-            font-size: 0.7rem;
-            background: var(--secondary-color);
-            color: #000;
-            padding: 2px 10px;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            display: inline-block;
+        @keyframes pulse-gold {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
         }
 
-        .announcement-title {
-            font-weight: 600;
-            display: block;
+        /* Decoration Circles */
+        .decor-circle {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--secondary-color) 0%, transparent 70%);
+            opacity: 0.1;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatCircle 20s infinite linear;
         }
 
+        @keyframes floatCircle {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(50px, 30px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-30px, 50px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* Mobile Optimization */
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(100%);
-                transition: transform 0.3s ease;
-                z-index: 2000;
+                width: 260px;
             }
 
             .sidebar.mobile-open {
@@ -221,168 +304,177 @@
             }
 
             .main-content {
-                margin-right: 0 !important;
-                padding: 20px !important;
-                padding-top: 80px !important;
+                margin-right: 0;
+                width: 100%;
+                padding: 20px;
+                padding-top: 100px;
             }
 
             .dashboard-grid {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: 1fr;
             }
 
             .mobile-header {
-                display: flex !important;
-                position: fixed;
-                top: 0;
-                right: 0;
-                width: 100%;
-                background: #0a0e14;
-                padding: 15px 20px;
-                justify-content: space-between;
-                align-items: center;
-                z-index: 1000;
-                border-bottom: 1px solid var(--glass-border);
-                backdrop-filter: blur(10px);
-            }
-
-            .sidebar-overlay {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.7);
-                z-index: 1500;
-                opacity: 0;
-                visibility: hidden;
-                transition: 0.3s;
+                display: flex;
             }
 
             .sidebar-overlay.active {
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .course-card {
-                margin-bottom: 20px;
-            }
-
-            .user-welcome h1 {
-                font-size: 1.5rem;
+                display: block;
             }
         }
 
-        .mobile-header {
-            display: none;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .sidebar-overlay {
-            display: none;
-        }
-
-        /* Auth Modal Enhancements */
+        /* Form Styling */
         .auth-card {
-            max-width: 550px;
+            background: rgba(10, 14, 20, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 40px;
+            backdrop-filter: blur(30px);
             width: 95%;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 50px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 193, 7, 0.2);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            max-width: 550px;
+        }
+
+        .btn-premium {
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-primary-premium {
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            border-radius: 18px;
+            padding: 18px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.4s;
+            box-shadow: 0 15px 30px rgba(255, 143, 0, 0.2);
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 15px !important;
+            padding: 14px 20px !important;
+            color: #fff !important;
+            margin-bottom: 20px;
         }
 
         .auth-form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-bottom: 25px;
         }
 
-        @media (max-width: 576px) {
-            .auth-card {
-                padding: 25px 20px;
-                border-radius: 20px;
-            }
-
+        @media (max-width: 500px) {
             .auth-form-row {
                 grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .auth-card h2 {
-                font-size: 1.6rem !important;
             }
         }
     </style>
 </head>
 
 <body>
+    <!-- Background Decor -->
+    <div class="decor-circle" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
+    <div class="decor-circle" style="width: 300px; height: 300px; bottom: 10%; right: 10%; animation-delay: -5s;"></div>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="sidebar-logo" style="margin-bottom: 0; font-size: 1.2rem;">لوحة الطالب</div>
+        <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    </header>
+
     <!-- Registration Modal -->
     <div id="auth-modal" class="splash-screen"
-        style="display: flex; background: radial-gradient(circle at center, #0a0e14 0%, #05080b 100%);">
+        style="display: none; background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);">
         <div class="auth-card">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2
-                    style="color: var(--secondary-color); font-size: 2.2rem; font-family: 'Amiri', serif; margin-bottom: 10px;">
-                    تسجيل بيانات الطالب</h2>
-                <p style="color: rgba(255,255,255,0.5); font-size: 0.95rem;">يرجى إدخال بياناتك بدقة للوصول إلى محتواك
-                    التعليمي.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2
+                        style="color: var(--secondary-color); font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 5px;">
+                        تسجيل بيانات
+                        الطالب</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">يرجى إدخال البيانات بدقة للوصول للمحتوى
+                        التعليمي</p>
+                </div>
+                <button type="button" onclick="closeRegistration()"
+                    style="background: #f1f5f9; border: 1px solid var(--glass-border); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
             <form id="registration-form">
                 <div class="form-group">
-                    <label style="color: rgba(255,255,255,0.8); font-weight: 500;">الاسم الثلاثي بالكامل</label>
+                    <label style="color: #475569; font-weight: 500;">الاسم الثلاثي بالكامل</label>
                     <input type="text" id="student-name" placeholder="مثال: أحمد محمد علي" required
-                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%; transition: all 0.3s;">
+                        style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%; transition: all 0.3s;">
                 </div>
 
                 <div class="auth-form-row">
                     <div class="form-group">
-                        <label style="color: rgba(255,255,255,0.8); font-weight: 500;">رقم هاتفك</label>
+                        <label style="color: #475569; font-weight: 500;">رقم هاتفك</label>
                         <input type="tel" id="student-phone" placeholder="01xxxxxxxxx" required
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%;">
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%;">
                     </div>
                     <div class="form-group">
-                        <label style="color: rgba(255,255,255,0.8); font-weight: 500;">رقم هاتف ولي الأمر</label>
+                        <label style="color: #475569; font-weight: 500;">رقم هاتف ولي الأمر</label>
                         <input type="tel" id="parent-phone" placeholder="01xxxxxxxxx" required
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%;">
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%;">
                     </div>
                 </div>
 
                 <div class="form-row"
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
                     <div class="form-group">
-                        <label style="color: rgba(255,255,255,0.8); font-weight: 500;">المرحلة الدراسية</label>
+                        <label style="color: #475569; font-weight: 500;">المرحلة الدراسية</label>
                         <select id="student-stage" required onchange="updateYears()"
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%; cursor: pointer;">
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%; cursor: pointer;">
                             <option value="">اختر المرحلة</option>
                             <option value="preparatory">المرحلة الإعدادية</option>
                             <option value="secondary">المرحلة الثانوية</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label style="color: rgba(255,255,255,0.8); font-weight: 500;">السنة الدراسية</label>
+                        <label style="color: #475569; font-weight: 500;">السنة الدراسية</label>
                         <select id="student-year" required onchange="updateGroups()"
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%; cursor: pointer;">
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%; cursor: pointer;">
                             <option value="">اختر السنة</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label style="color: rgba(255,255,255,0.8); font-weight: 500;">المجموعة</label>
+                    <label style="color: #475569; font-weight: 500;">المجموعة</label>
                     <select id="student-group" required
-                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; color: #fff; width: 100%; cursor: pointer;">
+                        style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 12px; color: var(--text-main); width: 100%; cursor: pointer;">
                         <option value="">اختر المجموعة</option>
                         <option value="A">مجموعة A (صباحي)</option>
                         <option value="B">مجموعة B (مسائي)</option>
@@ -390,8 +482,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100"
-                    style="margin-top: 30px; padding: 18px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; background: linear-gradient(135deg, var(--secondary-color) 0%, #ffa000 100%); color: #000; box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);">
+                <button type="submit" class="btn-primary-premium" style="margin-top: 30px;">
                     دخول المنصة الآن <i class="fas fa-arrow-left" style="margin-right: 10px; font-size: 0.9rem;"></i>
                 </button>
             </form>
@@ -426,14 +517,14 @@
                 <i class="fas fa-chart-line"></i>
                 <span>نتائج الاختبارات</span>
             </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-wallet"></i>
-                <span>المحفظة</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-cog"></i>
-                <span>الإعدادات</span>
-            </a>
+            <div id="guest-links"
+                style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                <a href="#" class="menu-item" style="background: rgba(255,193,7,0.1); color: var(--secondary-color);"
+                    onclick="openRegistration()">
+                    <i class="fas fa-user-plus"></i>
+                    <span>تسجيل بياناتي</span>
+                </a>
+            </div>
         </nav>
         <a href="javascript:void(0)" onclick="logout()" class="menu-item logout">
             <i class="fas fa-sign-out-alt"></i>
@@ -442,35 +533,32 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content" style="display: none; margin-right: 0;" id="dashboard-main">
+    <main class="main-content" style="display: none;" id="dashboard-main">
         <header class="dashboard-header">
             <div class="user-welcome">
                 <h1>مرحباً، <span id="display-name">...</span></h1>
                 <p>استكمل رحلة تفوقك اليوم في اللغة العربية</p>
             </div>
-            <div class="user-profile">
+            <div class="user-profile"
+                style="background: #fff; border: 1px solid var(--glass-border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-main); padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 15px;">
                 <span id="profile-name" style="font-weight: 700;">...</span>
-                <div class="user-avatar" id="profile-initial">أ</div>
+                <div class="user-avatar" id="profile-initial"
+                    style="width: 40px; height: 40px; background: var(--secondary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800;">
+                    أ</div>
             </div>
         </header>
 
         <!-- Dynamic Tabs -->
         <div id="overview-tab" class="dashboard-tab">
             <div id="latest-content-entry">
-                <!-- Most recent lecture for the student will appear here -->
-                <div
-                    style="text-align: center; padding: 50px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
-                    <i class="fas fa-spinner fa-spin"
-                        style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
-                    <p>جاري تحميل أحدث المحتويات...</p>
-                </div>
+                <!-- Most recent content will appear here -->
             </div>
 
             <div class="dashboard-grid" style="margin-top: 30px; grid-template-columns: 1fr 1fr;">
                 <div style="display: flex; flex-direction: column; gap: 30px;">
-                    <div class="progress-section">
+                    <div class="premium-card progress-section">
                         <div class="progress-header">
-                            <span>نسبة الإنجاز في المنهج</span>
+                            <span style="font-weight: 600;">نسبة الإنجاز في المنهج</span>
                             <span>0%</span>
                         </div>
                         <div class="progress-bar-container">
@@ -478,27 +566,27 @@
                         </div>
                     </div>
 
-                    <div id="announcement-card" class="progress-section"
-                        style="background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.02) 100%); border: 1px solid rgba(255,193,7,0.3);">
+                    <div id="announcement-card" class="premium-card progress-section"
+                        style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, #fff 100%); border: 1px solid rgba(245, 158, 11, 0.2);">
                         <div class="progress-header">
                             <span style="color: var(--secondary-color); font-weight: 700;"><i
-                                    class="fas fa-bullhorn"></i> تنبيه هام من المستر</span>
+                                    class="fas fa-bullhorn rotate-icon"></i> تنبيه هام من المستر</span>
                         </div>
-                        <p id="announcement-text" style="font-size: 1.1rem; line-height: 1.7; margin-top: 10px;">جاري
-                            تحميل التنبيهات...</p>
+                        <p id="announcement-text"
+                            style="font-size: 1.1rem; line-height: 1.7; margin-top: 10px; color: var(--text-main); opacity: 0.9;">
+                            لا توجد تنبيهات
+                            حالياً.</p>
                     </div>
                 </div>
 
                 <!-- Honor Roll / Leaderboard -->
-                <div class="progress-section"
-                    style="background: linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 100%); border-color: rgba(255,215,0,0.2);">
+                <div class="premium-card progress-section" style="border-color: rgba(255,215,0,0.15);">
                     <div class="progress-header">
                         <span style="color: #ffd700; font-weight: 700;"><i class="fas fa-trophy"></i> لوحة الشرف (أوائل
                             دفعتك)</span>
                     </div>
                     <div id="honor-roll-list" style="margin-top: 20px;">
-                        <div style="text-align: center; color: rgba(255,255,255,0.2); padding: 20px;">جاري تحميل
-                            المتفوقين...</div>
+                        <!-- Leaderboard will load here -->
                     </div>
                 </div>
             </div>
@@ -537,7 +625,7 @@
                 <div class="table-container" style="overflow-x: auto;">
                     <table style="width: 100%; text-align: right; border-collapse: collapse;">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <tr style="border-bottom: 2px solid var(--glass-border); color: var(--text-main);">
                                 <th style="padding: 15px;">الاختبار</th>
                                 <th style="padding: 15px;">الدرجة</th>
                                 <th style="padding: 15px;">النسبة</th>
@@ -547,8 +635,8 @@
                         <tbody id="student-results-table">
                             <tr>
                                 <td colspan="4"
-                                    style="text-align: center; padding: 40px; color: rgba(255,255,255,0.2);">جاري تحميل
-                                    النتائج...</td>
+                                    style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;">
+                                    لا تتوفر نتائج حالياً</td>
                             </tr>
                         </tbody>
                     </table>
@@ -560,6 +648,42 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Typing Effect for Welcome Message
+        function typeWelcome() {
+            const el = document.getElementById('display-name');
+            if (!el || el.textContent === '...') return;
+
+            const originalText = el.textContent;
+            el.textContent = '';
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i < originalText.length) {
+                    el.textContent += originalText.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, 100);
+        }
+
+        // Wait for script.js to set the name then run typing effect
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                    if (mutation.target.textContent !== '...' && mutation.target.textContent !== '') {
+                        observer.disconnect();
+                        typeWelcome();
+                    }
+                }
+            });
+        });
+
+        const displayNameNode = document.getElementById('display-name');
+        if (displayNameNode) {
+            observer.observe(displayNameNode, { characterData: true, childList: true, subtree: true });
+        }
+    </script>
 </body>
 
 </html>
