@@ -111,6 +111,14 @@ async function trackVisit() {
     } catch (e) { console.error(e); }
 }
 
+function extractYouTubeId(url) {
+    if (!url) return '';
+    if (url.length === 11) return url;
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : url;
+}
+
 async function logView(lessonId, lessonTitle) {
     const student = JSON.parse(localStorage.getItem('student_session'));
     if (!student) return;
@@ -754,7 +762,7 @@ function renderOverview() {
 
         if (latestLesson) {
             latestEntry.innerHTML = `
-                <div class="welcome-highlight">
+                <div class="welcome-highlight" style="background: linear-gradient(135deg, rgba(13, 71, 161, 0.9) 0%, rgba(0, 33, 113, 0.9) 100%), url('https://img.youtube.com/vi/${latestLesson.youtubeId}/maxresdefault.jpg'); background-size: cover; background-position: center;">
                     <div style="position: relative; z-index: 2;">
                         <span class="badge pulse-badge" style="background: rgba(255,255,255,0.2); margin-bottom: 15px; display: inline-block;">جديد الآن 🔥</span>
                         <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 10px;">${latestLesson.title}</h2>
@@ -763,7 +771,6 @@ function renderOverview() {
                             شاهد المحاضرة الآن <i class="fas fa-play-circle"></i>
                         </button>
                     </div>
-                    <i class="fas fa-graduation-cap" style="position: absolute; left: 40px; bottom: -20px; font-size: 12rem; opacity: 0.1; transform: rotate(-15deg);"></i>
                 </div>
             `;
         } else {
@@ -858,24 +865,29 @@ function renderStudentContent() {
     if (grid) {
         grid.innerHTML = gradeLessons.length ? gradeLessons.map(l => {
             const isUnlocked = unlocked.includes(l.id);
+            const vidId = extractYouTubeId(l.youtubeId);
+            const thumbUrl = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
             return `
             <div class="premium-card course-card" style="padding: 15px; overflow: hidden;">
-                <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 15px;">
-                    <div id="player-${l.id}"></div>
+                <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 15px; background: url('${thumbUrl}') center/cover no-repeat; height: 180px; position: relative; background-color: #eee;">
+                    <div id="player-${l.id}" style="width: 100%; height: 100%;"></div>
                     ${isUnlocked ? `
-                        <div class="video-overlay-shield total-shield" onclick="playLesson('${l.id}', '${l.youtubeId}')" style="cursor: pointer; background: rgba(0,0,0,0.4);">
-                            <div class="play-overlay"><i class="fas fa-play" style="font-size: 2.5rem; color: var(--secondary-color);"></i></div>
+                        <div class="video-overlay-shield total-shield" onclick="playLesson('${l.id}', '${l.youtubeId}')" style="cursor: pointer; background: rgba(0,0,0,0.2); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                            <div class="play-overlay"><i class="fas fa-play-circle" style="font-size: 3.5rem; color: var(--secondary-color); text-shadow: 0 4px 15px rgba(0,0,0,0.5);"></i></div>
                         </div>
                     ` : `
-                        <div class="locked-overlay" onclick="unlockLesson('${l.id}')" style="cursor: pointer; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
-                            <i class="fas fa-lock" style="font-size: 2rem; color: var(--secondary-color);"></i>
-                            <span style="font-size: 0.8rem; font-weight: 700;">اضغط لتفعيل الدرس</span>
+                        <div class="locked-overlay" onclick="unlockLesson('${l.id}')" style="cursor: pointer; background: rgba(0,0,0,0.6); position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; backdrop-filter: blur(4px);">
+                            <i class="fas fa-lock" style="font-size: 2rem; color: #fff;"></i>
+                            <span style="font-size: 0.9rem; font-weight: 700; color: #fff;">اضغط لتفعيل الدرس</span>
                         </div>
                     `}
                 </div>
                 <div style="padding: 5px 10px;">
-                    <span class="badge" style="background: rgba(255,193,7,0.1); color: var(--secondary-color); font-size: 0.7rem; margin-bottom: 8px; display: inline-block;">${l.branch || 'عام'}</span>
-                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #fff;">${l.title}</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="badge" style="background: rgba(217, 119, 6, 0.1); color: var(--secondary-color); font-size: 0.7rem;">${l.branch || 'عام'}</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);"><i class="far fa-clock"></i> ${new Date(l.createdAt).toLocaleDateString('ar-EG')}</span>
+                    </div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: var(--text-main); font-weight: 700;">${l.title}</h3>
                 </div>
             </div>
             `;
@@ -927,10 +939,21 @@ function playLesson(containerId, youtubeId) {
     const shield = wrapper.querySelector('.total-shield');
     if (shield) shield.style.display = 'none';
 
+    // Clear background image to avoid ghosting
+    wrapper.style.background = 'black';
+
+    const vidId = extractYouTubeId(youtubeId);
+
     new YT.Player(`player-${containerId}`, {
-        height: '100%', width: '100%', videoId: youtubeId,
-        playerVars: { 'autoplay': 1, 'modestbranding': 1, 'rel': 0 },
-        events: { 'onReady': (event) => event.target.playVideo() }
+        height: '100%', width: '100%', videoId: vidId,
+        playerVars: { 'autoplay': 1, 'modestbranding': 1, 'rel': 0, 'playsinline': 1 },
+        events: {
+            'onReady': (event) => event.target.playVideo(),
+            'onError': (e) => {
+                console.error("YT Player Error:", e);
+                wrapper.innerHTML = `<div style="padding: 20px; text-align: center; color: #ff5252;">عذراً، تعذر تشغيل الفيديو. تأكد من صحة الرابط.</div>`;
+            }
+        }
     });
 }
 
