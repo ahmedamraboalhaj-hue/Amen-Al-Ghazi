@@ -942,11 +942,33 @@ function playLesson(containerId, youtubeId) {
     // Clear background image to avoid ghosting
     wrapper.style.background = 'black';
 
+    // Inject Protection Shields
+    const shieldContainer = document.createElement('div');
+    shieldContainer.className = 'video-shield-container';
+    shieldContainer.innerHTML = `
+        <div class="top-shield"></div>
+        <div class="logo-shield"></div>
+        <div class="title-shield"></div>
+        <div class="platform-watermark">
+            <i class="fas fa-shield-alt"></i>
+            <span>منصة الأمين التعليمية</span>
+        </div>
+    `;
+    wrapper.appendChild(shieldContainer);
+
     const vidId = extractYouTubeId(youtubeId);
 
     new YT.Player(`player-${containerId}`, {
         height: '100%', width: '100%', videoId: vidId,
-        playerVars: { 'autoplay': 1, 'modestbranding': 1, 'rel': 0, 'playsinline': 1 },
+        playerVars: {
+            'autoplay': 1,
+            'modestbranding': 1,
+            'rel': 0,
+            'playsinline': 1,
+            'controls': 1,
+            'showinfo': 0,
+            'iv_load_policy': 3
+        },
         events: {
             'onReady': (event) => event.target.playVideo(),
             'onError': (e) => {
