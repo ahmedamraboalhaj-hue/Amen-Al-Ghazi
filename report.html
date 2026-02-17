@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير الطالب التعليمي | منصة الأمين</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --secondary-color: #d97706;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .report-card {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .teacher-name {
+            font-family: 'Amiri', serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .student-info {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 700;
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .score-big {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 10px 0;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .exam-details {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(13, 71, 161, 0.1);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .qr-placeholder {
+            text-align: center;
+            margin-top: 40px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="report-card">
+        <div class="header">
+            <div class="teacher-name">المستر أمين الغازي</div>
+            <div style="color: var(--secondary-color); font-weight: 700; letter-spacing: 1px;">منصة الأمين التعليمية -
+                تقرير أداء</div>
+        </div>
+
+        <div id="loader" style="text-align: center; padding: 40px;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+            <p>جاري تحميل التقرير...</p>
+        </div>
+
+        <div id="report-content" style="display: none;">
+            <div class="student-info">
+                <div class="info-row">
+                    <span class="info-label">اسم الطالب:</span>
+                    <span class="info-value" id="student-name">...</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">الصف الدراسي:</span>
+                    <span class="info-value" id="student-year">...</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">المجموعة:</span>
+                    <span class="info-value" id="student-group">...</span>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div id="quiz-title" style="font-size: 1.1rem; opacity: 0.9;">...</div>
+                <div class="score-big" id="student-score">0 / 0</div>
+                <div class="grade-badge" id="student-rating">...</div>
+            </div>
+
+            <div class="exam-details">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">تاريخ الاختبار</div>
+                        <div id="exam-date" style="font-weight: 700;">...</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-percentage"></i></div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">النسبة المئوية</div>
+                        <div id="exam-percent" style="font-weight: 700;">0%</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">الحالة الدراسية</div>
+                        <div id="exam-status" style="font-weight: 700;">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; font-size: 0.8rem; color: var(--text-muted);">
+            هذا التقرير صادر من منصة الأمين التعليمية - جميع الحقوق محفوظة © 2024
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCoUAGpTJANr-voTNxvEIlos2I8w_1kXtA",
+            authDomain: "yghjni.firebaseapp.com",
+            projectId: "yghjni",
+            storageBucket: "yghjni.firebasestorage.app",
+            messagingSenderId: "629167303662",
+            appId: "1:629167303662:web:91069e95be3ac626c13cff",
+            measurementId: "G-NT4EF36RFT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function loadReport() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resultId = urlParams.get('id');
+
+            if (!resultId) {
+                document.body.innerHTML = '<div style="text-align:center; padding:50px;">رابط التقرير غير صحيح</div>';
+                return;
+            }
+
+            try {
+                const doc = await db.collection('quiz_results').doc(resultId).get();
+                if (!doc.exists) {
+                    document.body.innerHTML = '<div style="text-align:center; padding:50px;">التقرير غير موجود أو تم حذفه</div>';
+                    return;
+                }
+
+                const data = doc.data();
+                const gradesMapping = {
+                    '1prep': 'الأول الإعدادي', '2prep': 'الثاني الإعدادي', '3prep': 'الثالث الإعدادي',
+                    '1sec': 'الأول الثانوي', '2sec': 'الثاني الثانوي', '3sec': 'الثالث الثانوي'
+                };
+
+                document.getElementById('student-name').textContent = data.studentName;
+                document.getElementById('student-year').textContent = gradesMapping[data.grade] || data.grade;
+                document.getElementById('student-group').textContent = data.group;
+                document.getElementById('quiz-title').textContent = data.quizTitle;
+                document.getElementById('student-score').textContent = `${data.score} / ${data.total}`;
+                document.getElementById('exam-date').textContent = new Date(data.timestamp).toLocaleDateString('ar-EG');
+                document.getElementById('exam-percent').textContent = data.percent + '%';
+
+                // Rating Logic
+                let rating = 'ضعيف';
+                let status = 'يحتاج لمراجعة المادة';
+                if (data.percent >= 90) { rating = 'ممتاز 🌟'; status = 'أداء مشرف جداً ومتميز'; }
+                else if (data.percent >= 80) { rating = 'جيد جداً ✨'; status = 'أداء رائع، استمر في التقدم'; }
+                else if (data.percent >= 65) { rating = 'جيد 👍'; status = 'أداء جيد، حاول التحسين للأفضل'; }
+                else if (data.percent >= 50) { rating = 'مقبول'; status = 'مستوى متوسط، يرجى بذل مجهود أكبر'; }
+
+                document.getElementById('student-rating').textContent = rating;
+                document.getElementById('exam-status').textContent = status;
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('report-content').style.display = 'block';
+
+            } catch (e) {
+                console.error(e);
+                alert('خطأ أثناء تحميل التقرير');
+            }
+        }
+
+        loadReport();
+    </script>
+</body>
+
+</html>

@@ -175,7 +175,7 @@
 
             <!-- Preparatory Stage -->
             <h3
-                style="color: var(--secondary-color); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary-color); padding-right: 15px;">
+                style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary); padding-right: 15px;">
                 المرحلة الإعدادية</h3>
             <div class="courses-grid" style="margin-bottom: 60px;">
                 <!-- 1 Prep -->
@@ -188,7 +188,7 @@
                         <h3>الصف الأول الإعدادي</h3>
                         <p>تأسيس شامل في قواعد النحو والنصوص الأدبية المقررة.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=1prep" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                         <h3>الصف الثاني الإعدادي</h3>
                         <p>شرح مبسط وأقوى التدريبات على منهج اللغة العربية.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=2prep" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -216,7 +216,7 @@
                         <h3>الصف الثالث الإعدادي</h3>
                         <p>المراجعات النهائية والتدريب على نماذج الامتحانات.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=3prep" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -224,7 +224,7 @@
 
             <!-- Secondary Stage -->
             <h3
-                style="color: var(--secondary-color); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary-color); padding-right: 15px;">
+                style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary); padding-right: 15px;">
                 المرحلة الثانوية</h3>
             <div class="courses-grid">
                 <!-- 1 Sec -->
@@ -238,7 +238,7 @@
                         <h3>الصف الأول الثانوي</h3>
                         <p>البداية القوية في مرحلة التأسيس للمرحلة الثانوية.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=1sec" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -252,7 +252,7 @@
                         <h3>الصف الثاني الثانوي</h3>
                         <p>تعمق في فنون البلاغة وقواعد النحو المتقدمة.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=2sec" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -267,7 +267,7 @@
                         <h3>الصف الثالث الثانوي</h3>
                         <p>المنهج المتكامل للثانوية العامة والوصول للدرجة النهائية.</p>
                         <div class="course-footer">
-                            <a href="dashboard.html" class="btn btn-secondary w-100">استعرض الدروس</a>
+                            <a href="dashboard.html?grade=3sec" class="btn btn-secondary w-100">استعرض الدروس</a>
                         </div>
                     </div>
                 </div>
@@ -366,59 +366,9 @@
 
         <div class="footer-bottom">
             <p>جميع الحقوق محفوظة &copy; 2026 مستر أمين الغازي | تم التطوير بواسطة Antigravity</p>
-            <button class="footer-admin-link" onclick="openAdmin()">لوحة التحكم</button>
+            <a href="admin.html" class="footer-admin-link">لوحة التحكم</a>
         </div>
     </footer>
-
-    <!-- Admin Login Modal -->
-    <div id="admin-modal" class="modal">
-        <div class="modal-content glass">
-            <span class="close-modal"
-                onclick="document.getElementById('admin-modal').classList.remove('active')">&times;</span>
-            <h2>دخول المسؤول</h2>
-            <div class="form-group">
-                <label>كلمة المرور</label>
-                <input type="password" id="admin-password" placeholder="••••••••">
-            </div>
-            <button id="login-confirm" class="btn btn-primary w-100" onclick="checkLogin()">دخول</button>
-        </div>
-    </div>
-
-    <!-- Admin Dashboard (Overlay) -->
-    <div id="admin-dashboard" class="admin-overlay hidden">
-        <div class="admin-mobile-header">
-            <button class="admin-menu-toggle" onclick="hideAdminDashboard()">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="admin-logo" style="margin-bottom: 0; font-size: 1.2rem;">لوحة التحكم</div>
-            <button class="admin-menu-toggle" onclick="toggleAdminSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-        <div class="admin-container">
-            <div id="admin-sidebar" class="admin-sidebar">
-                <div class="admin-logo">لوحة التحكم</div>
-                <ul class="admin-nav">
-                    <li class="active" data-section="dashboard"><i class="fas fa-chart-line"></i> الإحصائيات العامة</li>
-                    <li data-section="add-lesson"><i class="fas fa-video"></i> إضافة درس فيديو</li>
-                    <li data-section="add-exam"><i class="fas fa-file-alt"></i> إضافة اختبار</li>
-                    <li data-section="add-file"><i class="fas fa-file-pdf"></i> إضافة مذكرة/ملف</li>
-                    <li data-section="vouchers"><i class="fas fa-key"></i> أكواد التفعيل</li>
-                    <li data-section="stats"><i class="fas fa-eye"></i> متابعة المشاهدات</li>
-                    <li data-section="students-list"><i class="fas fa-user-graduate"></i> قائمة الطلاب</li>
-                </ul>
-                <button class="btn btn-secondary logout-btn" style="margin-top: auto; color: #ff5252;"
-                    onclick="location.reload()">
-                    <i class="fas fa-sign-out-alt"></i> خروج
-                </button>
-            </div>
-            <div class="admin-main">
-                <div id="admin-content-area">
-                    <!-- Dynamic Admin Content -->
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Intro Video Modal with Shield -->
     <div id="intro-modal" class="modal">
@@ -432,27 +382,11 @@
                     <div class="play-overlay">
                         <i class="fas fa-play"></i>
                     </div>
-                    <div class="shield-top"></div>
-                    <div class="shield-bottom-right"></div>
-                    <div class="custom-controls">
-                        <button class="custom-seek-btn" onclick="event.stopPropagation(); seek('intro', -10)">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <div class="progress-container" onclick="event.stopPropagation(); handleSeek(event, 'intro')">
-                            <div class="progress-bar" id="progress-intro"></div>
-                        </div>
-                        <button class="custom-seek-btn" onclick="event.stopPropagation(); seek('intro', 10)">
-                            <i class="fas fa-redo"></i>
-                        </button>
-                        <button class="custom-fs-btn"
-                            onclick="event.stopPropagation(); toggleFullscreen('intro-video-wrapper')">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Firebase & Scripts -->
     <script src="https://www.youtube.com/iframe_api"></script>
