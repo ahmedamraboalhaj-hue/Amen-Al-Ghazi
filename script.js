@@ -16,7 +16,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // Platform Config
-const TEACHER_NAME = "مستر أمين الغازي";
+const TEACHER_NAME = "مستر أحمد رمضان";
 const ARABIC_BRANCHES = ['الكل', 'النحو', 'البلاغة', 'الأدب', 'القراءة', 'النصوص', 'القصة', 'مراجعة نهائية', 'تأسيس'];
 
 const GRADES_CONFIG = {
@@ -100,7 +100,22 @@ async function loadInitialData() {
             results: 'quiz_results'
         };
 
-        const fetchPromises = Object.entries(collections).map(async ([key, coll]) => {
+        const realtimeCollections = {
+            lessons: 'lessons',
+            quizzes: 'quizzes',
+            announcements: 'announcements'
+        };
+
+        const staticCollections = {
+            files: 'files',
+            vouchers: 'vouchers',
+            students: 'students',
+            views: 'views',
+            results: 'quiz_results'
+        };
+
+        // Static fetch
+        const staticPromises = Object.entries(staticCollections).map(async ([key, coll]) => {
             try {
                 const snap = await db.collection(coll).get();
                 appData[key] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -109,7 +124,22 @@ async function loadInitialData() {
             }
         });
 
-        await Promise.all(fetchPromises);
+        // Realtime fetch
+        Object.entries(realtimeCollections).forEach(([key, coll]) => {
+            db.collection(coll).onSnapshot(snap => {
+                appData[key] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log(`Realtime update for ${key}`);
+
+                // Trigger UI re-render if we are on dashboard
+                if (window.location.pathname.includes('dashboard.html')) {
+                    if (key === 'lessons') renderStudentContent ? renderStudentContent() : null;
+                    if (key === 'quizzes') renderQuizzes ? renderQuizzes() : null;
+                    renderOverview ? renderOverview() : null;
+                }
+            }, e => console.warn(`Realtime error for ${coll}:`, e));
+        });
+
+        await Promise.all(staticPromises);
 
         // Load stats
         try {
@@ -126,8 +156,21 @@ async function loadInitialData() {
 
 async function trackVisit() {
     const ref = db.collection('platform_stats').doc('visits');
+    const visitRecord = db.collection('student_visits').doc();
+    const student = JSON.parse(localStorage.getItem('student_session'));
+    const now = new Date();
+
     try {
         await ref.set({ count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+
+        // Also add detailed record if student is logged in, or anonymous if guest
+        await visitRecord.set({
+            studentName: student ? student.name : 'زائر',
+            studentPhone: student ? student.phone : '---',
+            grade: student ? student.grade : '---',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            dateString: now.toLocaleDateString('ar-EG')
+        });
     } catch (e) { console.error(e); }
 }
 
@@ -372,7 +415,7 @@ function renderAdminSection(section) {
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-primary w-100" style="padding: 15px;" onclick="saveLesson()">حفظ ونشر الفيديو</button>
+                <button class="btn btn-primary w-100" style="padding: 15px;" onclick="publishLecture()">حفظ ونشر الفيديو</button>
             `;
             break;
 
@@ -577,7 +620,7 @@ async function publishLecture() {
 
     if (!title || !url) return alert('برجاء ملء البيانات الأساسية');
 
-    const id = extractYTId(url);
+    const id = extractYouTubeId(url);
     if (!id) return alert('رابط يوتيوب غير صحيح');
 
     try {
@@ -603,7 +646,7 @@ async function saveExam() {
     };
     if (!exam.title || !exam.link) return alert('أدخل جميع البيانات');
     try {
-        await db.collection('exams').add(exam);
+        await db.collection('quizzes').add(exam);
         alert('تم حفظ الاختبار بنجاح');
         location.reload();
     } catch (e) { alert('خطأ في الحفظ'); }
@@ -1396,7 +1439,7 @@ if (regForm) {
             // Save locally for persistent session
             localStorage.setItem('student_session', JSON.stringify(studentData));
 
-            alert(`مرحباً بك يا ${studentData.name} في منصة مستر أمين الغازي`);
+            alert(`مرحباً بك يا ${studentData.name} في منصة مستر أحمد رمضان`);
             location.reload();
         } catch (error) {
             console.error("Registration error:", error);
