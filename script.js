@@ -16,7 +16,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // Platform Config
-const TEACHER_NAME = "مستر أمين الغازي";
+const TEACHER_NAME = "مستر أحمد رمضان";
 const ARABIC_BRANCHES = ['الكل', 'النحو', 'البلاغة', 'الأدب', 'القراءة', 'النصوص', 'القصة', 'مراجعة نهائية', 'تأسيس'];
 
 const GRADES_CONFIG = {
@@ -201,6 +201,14 @@ async function logView(lessonId, lessonTitle) {
     } catch (e) { console.error(e); }
 }
 
+function getGradeName(code) {
+    const map = {
+        '1prep': 'أولى إعدادي', '2prep': 'تانية إعدادي', '3prep': 'تالتة إعدادي',
+        '1sec': 'أولى ثانوي', '2sec': 'تانية ثانوي', '3sec': 'تالتة ثانوي'
+    };
+    return map[code] || code;
+}
+
 // --- Navigation & UI ---
 function initNavbar() {
     const navbar = document.querySelector('.navbar');
@@ -323,7 +331,7 @@ function renderAdminSection(section) {
                     </div>
                     <div class="stat-item glass">
                         <i class="fas fa-tasks" style="font-size: 2rem; color: var(--secondary); margin-bottom: 15px;"></i>
-                        <h3>${appData.exams.length}</h3>
+                        <h3>${appData.quizzes ? appData.quizzes.length : 0}</h3>
                         <p>اختبار إلكتروني</p>
                     </div>
                 </div>
@@ -394,23 +402,42 @@ function renderAdminSection(section) {
                 <div class="admin-form-container">
                     <div class="form-group">
                         <label>عنوان الفيديو</label>
-                        <input type="text" id="l-title" placeholder="مثال: شرح المبتدأ والخبر">
+                        <input type="text" id="lec-title" placeholder="مثال: شرح المبتدأ والخبر">
                     </div>
                     <div class="form-group">
-                        <label>رابط YouTube (ID فقط)</label>
-                        <input type="text" id="l-youtubeId" placeholder="مثال: dQw4w9WgXcQ">
+                        <label>رابط YouTube (رابط كامل أو ID)</label>
+                        <input type="text" id="lec-url" placeholder="أدخل رابط اليوتيوب هنا">
                     </div>
                     <div class="form-group">
                         <label>السنة الدراسية</label>
-                        <select id="l-grade">
+                        <select id="lec-grade">
                             ${Object.entries(GRADES_CONFIG).map(([k, v]) => `<option value="${k}">${v.title}</option>`).join('')}
                         </select>
                     </div>
                     <div class="form-group">
                         <label>فرع اللغة</label>
-                        <select id="l-branch">
+                        <select id="lec-branch">
                             ${ARABIC_BRANCHES.map(b => `<option value="${b}">${b}</option>`).join('')}
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الشهر</label>
+                        <select id="lec-month">
+                            <option value="all">محتوى عام</option>
+                            <option value="9">سبتمبر (9)</option>
+                            <option value="10">أكتوبر (10)</option>
+                            <option value="11">نوفمبر (11)</option>
+                            <option value="12">ديسمبر (12)</option>
+                            <option value="1">يناير (1)</option>
+                            <option value="2">فبراير (2)</option>
+                            <option value="3">مارس (3)</option>
+                            <option value="4">أبريل (4)</option>
+                            <option value="5">مايو (5)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المجموعة (اختياري)</label>
+                        <input type="text" id="lec-group" placeholder="مثال: مجموعة الأحد">
                     </div>
                 </div>
                 <button class="btn btn-primary w-100" style="padding: 15px;" onclick="publishLecture()">حفظ ونشر الفيديو</button>
@@ -831,7 +858,12 @@ async function initDashboard() {
         if (studentArea) studentArea.style.display = 'block';
         if (userInfoBar) userInfoBar.style.display = 'flex';
 
+        const lecturesTab = document.getElementById('lectures-container');
+        if (lecturesTab) lecturesTab.style.display = 'block';
+
         document.getElementById('display-name').innerText = student.name;
+        const welcomeName = document.getElementById('display-name-welcome');
+        if (welcomeName) welcomeName.innerText = student.name;
         document.getElementById('display-grade').innerText = getGradeName(student.grade);
 
         // Update profile info
@@ -1225,7 +1257,7 @@ async function unlockLesson(lessonId) {
 
 
 
-function playLesson(containerId, youtubeId) {
+function watchVideo(containerId, youtubeId) {
     const lesson = appData.lessons.find(l => l.id === containerId);
     logView(containerId, lesson ? lesson.title : 'درس فيديو');
 
