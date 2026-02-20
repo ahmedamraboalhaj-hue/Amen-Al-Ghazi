@@ -1,4 +1,4 @@
-// --- Firebase Configuration ---
+﻿// --- Firebase Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyCoUAGpTJANr-voTNxvEIlos2I8w_1kXtA",
     authDomain: "yghjni.firebaseapp.com",
@@ -16,7 +16,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // Platform Config
-const TEACHER_NAME = "مستر أحمد رمضان";
+const TEACHER_NAME = "مستر أمين الغازي";
 const ARABIC_BRANCHES = ['الكل', 'النحو', 'البلاغة', 'الأدب', 'القراءة', 'النصوص', 'القصة', 'مراجعة نهائية', 'تأسيس'];
 
 const GRADES_CONFIG = {
@@ -42,7 +42,8 @@ let appData = {
 };
 let ytPlayers = {};
 let isYouTubeAPIReady = false;
-let selectedBranch = 'الكل'; // Default branch for filtering
+let selectedBranch = 'الكل';
+let _dataLoaded = false; // Guard to prevent double-loading
 
 function onYouTubeIframeAPIReady() {
     isYouTubeAPIReady = true;
@@ -50,23 +51,17 @@ function onYouTubeIframeAPIReady() {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // Splash screen (existing logic)
     initSplashScreen();
-
-    // Load Data
-    await loadInitialData();
-
-    // UI Init
     initScrollAnimations();
     initNavbar();
     initMobileMenu();
 
-    // Check Student Session (if on dashboard.html)
-    if (window.location.pathname.includes('dashboard.html')) {
-        initDashboard();
+    // dashboard.html manages its own init via initDashboard()
+    // index.html and other pages load data here
+    if (!window.location.pathname.includes('dashboard.html')) {
+        await loadInitialData();
     }
 
-    // Fullscreen exit sync
     document.addEventListener('fullscreenchange', () => {
         const fsBtn = document.querySelector('.custom-fs-btn i');
         if (!document.fullscreenElement && fsBtn) {
@@ -88,24 +83,24 @@ function initSplashScreen() {
 }
 
 async function loadInitialData() {
-    try {
-        const collections = {
-            lessons: 'lessons',
-            quizzes: 'quizzes',
-            files: 'files',
-            vouchers: 'vouchers',
-            students: 'students',
-            announcements: 'announcements',
-            views: 'views',
-            results: 'quiz_results'
-        };
+    // Prevent double-loading
+    if (_dataLoaded) {
+        console.log("Data already loaded, skipping. Lessons:", appData.lessons.length);
+        return;
+    }
+    _dataLoaded = true;
 
-        const realtimeCollections = {
+    try {
+        const studentSnap_grade = JSON.parse(localStorage.getItem('student_session'))?.grade || null;
+
+        // Critical collections needed before render
+        const criticalCollections = {
             lessons: 'lessons',
             quizzes: 'quizzes',
             announcements: 'announcements'
         };
 
+        // Static collections (vouchers, students, etc.)
         const staticCollections = {
             files: 'files',
             vouchers: 'vouchers',
@@ -114,7 +109,19 @@ async function loadInitialData() {
             results: 'quiz_results'
         };
 
-        // Static fetch
+        // Load critical data FIRST with await so renderStudentContent has data
+        const criticalPromises = Object.entries(criticalCollections).map(async ([key, coll]) => {
+            try {
+                const snap = await db.collection(coll).get();
+                appData[key] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log(`✅ Loaded ${key}: ${appData[key].length} items`);
+            } catch (e) {
+                console.warn(`❌ Failed to load ${coll}:`, e);
+                appData[key] = [];
+            }
+        });
+
+        // Load static collections in parallel
         const staticPromises = Object.entries(staticCollections).map(async ([key, coll]) => {
             try {
                 const snap = await db.collection(coll).get();
@@ -124,20 +131,32 @@ async function loadInitialData() {
             }
         });
 
-        // Realtime fetch
-        Object.entries(realtimeCollections).forEach(([key, coll]) => {
+        // Wait for EVERYTHING before returning
+        await Promise.all([...criticalPromises, ...staticPromises]);
+
+        console.log(`🎯 All data loaded. Lessons: ${appData.lessons.length}, Quizzes: ${appData.quizzes.length}`);
+
+        // Debug: show grade comparison
+        if (studentSnap_grade) {
+            const matching = appData.lessons.filter(l => l.grade === studentSnap_grade);
+            console.log(`📚 Lessons for grade '${studentSnap_grade}': ${matching.length}`);
+        }
+
+        // Now set up realtime listeners for FUTURE updates only
+        Object.entries(criticalCollections).forEach(([key, coll]) => {
             db.collection(coll).onSnapshot(snap => {
                 appData[key] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log(`Realtime update for ${key}`);
-
-                // Trigger UI re-render if we are on dashboard
+                // Re-render student content on updates
                 if (window.location.pathname.includes('dashboard.html')) {
-                    if (key === 'lessons') renderStudentContent ? renderStudentContent() : null;
+                    if (key === 'lessons' && typeof renderStudentContent === 'function') {
+                        renderStudentContent();
+                    }
+                    if (key === 'quizzes' && typeof renderQuizzes === 'function') {
+                        renderQuizzes();
+                    }
                 }
             }, e => console.warn(`Realtime error for ${coll}:`, e));
         });
-
-        await Promise.all(staticPromises);
 
         // Load stats
         try {
@@ -145,9 +164,9 @@ async function loadInitialData() {
             appData.stats.visits = stats.exists ? stats.data().count : 0;
         } catch (e) { }
 
-        console.log("Data loaded successfully");
         trackVisit();
     } catch (e) {
+        _dataLoaded = false; // reset on error so retry is possible
         console.error("Critical error in loadInitialData:", e);
     }
 }

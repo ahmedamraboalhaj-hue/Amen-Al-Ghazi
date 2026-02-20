@@ -1,187 +1,330 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الطالب | مستر أحمد رمضان</title>
+    <title>لوحة الطالب | مستر أمين الغازي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@200;400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@200;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Essential Dashboard Micro-styles */
-        .dashboard-header-premium {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .user-profile-premium {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--bg-card);
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
-            backdrop-filter: var(--blur);
-        }
-
-        .profile-info {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-        }
-
-        .profile-name {
-            font-weight: 800;
-            color: var(--text-main);
-            font-size: 1rem;
-        }
-
-        .profile-status {
-            font-size: 0.75rem;
-            color: var(--secondary);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-header-premium {
-                flex-direction: column;
-                align-items: flex-start;
-                margin-top: 60px;
-            }
-
-            .user-profile-premium {
-                width: 100%;
-            }
-        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:#0a0a0f;color:#fff;font-family:'Tajawal',sans-serif;min-height:100vh}
+        .dash-topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 30px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+        .back-home-btn{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.95rem;font-weight:500;transition:color 0.2s}
+        .back-home-btn:hover{color:#fff}
+        .topbar-user{display:flex;align-items:center;gap:12px}
+        .user-name-top{font-size:0.9rem;color:rgba(255,255,255,0.8);font-weight:600}
+        .logout-btn-top{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;transition:all 0.2s}
+        .logout-btn-top:hover{background:rgba(239,68,68,0.2)}
+        .dash-wrapper{max-width:1400px;margin:0 auto;padding:30px}
+        .student-page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:20px;flex-wrap:wrap}
+        .grade-title-block h1{font-size:2.2rem;font-weight:900;color:#fff;line-height:1.2}
+        .student-stamp{background:transparent;border:2.5px solid rgba(139,92,246,0.6);border-radius:50%;width:120px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px;position:relative;transform:rotate(-15deg);flex-shrink:0}
+        .student-stamp::before{content:'';position:absolute;inset:4px;border:1.5px dashed rgba(139,92,246,0.35);border-radius:50%}
+        .stamp-name{font-size:0.78rem;font-weight:800;color:rgba(255,255,255,0.85);line-height:1.3}
+        .stamp-phone{font-size:0.68rem;font-weight:700;color:rgba(139,92,246,0.9);direction:ltr;margin-top:3px}
+        .filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+        .search-box{flex:1;min-width:200px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;color:#fff;font-family:'Tajawal',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s}
+        .search-box::placeholder{color:rgba(255,255,255,0.35)}
+        .search-box:focus{border-color:rgba(139,92,246,0.6)}
+        .branch-filters{display:flex;gap:8px;flex-wrap:wrap}
+        .branch-btn{padding:8px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .branch-btn:hover{border-color:rgba(139,92,246,0.5);color:#fff}
+        .branch-btn.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
+        .dash-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:30px;overflow-x:auto}
+        .dash-tab-btn{padding:12px 22px;background:none;border:none;color:rgba(255,255,255,0.45);font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:all 0.2s;white-space:nowrap}
+        .dash-tab-btn:hover{color:rgba(255,255,255,0.75)}
+        .dash-tab-btn.active{color:#fff;border-bottom-color:#7c3aed}
+        .tab-panel{display:none}
+        .tab-panel.active{display:block}
+        .lessons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+        .lesson-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s}
+        .lesson-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,0.4);box-shadow:0 12px 40px rgba(124,58,237,0.2)}
+        .lesson-thumb{position:relative;height:170px;background:#111;overflow:hidden}
+        .lesson-thumb img{width:100%;height:100%;object-fit:cover;opacity:0.8}
+        .play-btn-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+        .play-circle{width:56px;height:56px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 4px 20px rgba(245,158,11,0.5);transition:transform 0.2s}
+        .lesson-card:hover .play-circle{transform:scale(1.1)}
+        .lock-overlay-card{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(3px)}
+        .lock-overlay-card i{font-size:1.8rem;color:rgba(255,255,255,0.7)}
+        .lock-overlay-card span{font-size:0.85rem;color:rgba(255,255,255,0.8);font-weight:700}
+        .lesson-info{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+        .lesson-teacher-name{font-size:0.88rem;font-weight:700;color:rgba(255,255,255,0.85)}
+        .lesson-date{font-size:0.75rem;color:rgba(255,255,255,0.35)}
+        .month-header{grid-column:1/-1;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:12px 20px;font-size:1.1rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:4px}
+        .branch-label{grid-column:1/-1;font-size:0.85rem;color:rgba(255,255,255,0.4);margin-top:8px;display:flex;align-items:center;gap:6px}
+        .empty-state{text-align:center;padding:80px 40px;color:rgba(255,255,255,0.3)}
+        .empty-state i{font-size:3rem;margin-bottom:15px;display:block}
+        .empty-state p{font-size:1.1rem}
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+        .modal-overlay.active{display:flex}
+        .modal-box{background:#13131a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px;max-width:720px;width:100%;max-height:85vh;overflow-y:auto}
+        .auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;padding:20px}
+        .auth-overlay.open{display:flex}
+        .auth-box{background:#13131a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px;max-width:460px;width:100%}
+        .auth-box h2{font-size:1.8rem;font-weight:900;margin-bottom:8px;text-align:center}
+        .auth-box p.sub{text-align:center;color:rgba(255,255,255,0.5);margin-bottom:30px;font-size:0.9rem}
+        .form-field{margin-bottom:16px}
+        .form-field label{display:block;font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:6px;font-weight:600}
+        .form-field input,.form-field select{width:100%;padding:11px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Tajawal',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s}
+        .form-field input:focus,.form-field select:focus{border-color:rgba(124,58,237,0.7)}
+        .form-field select option{background:#1a1a2e}
+        .btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;border-radius:12px;color:#fff;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.2s}
+        .btn-submit:hover{opacity:0.9}
+        @media(max-width:768px){.dash-wrapper{padding:20px 16px}.student-page-header{flex-direction:column-reverse}.grade-title-block h1{font-size:1.6rem}.student-stamp{width:90px;height:90px}.stamp-name{font-size:0.65rem}.lessons-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}}
     </style>
 </head>
-
 <body>
-    <!-- Navbar / Header -->
-    <header class="dashboard-header">
-        <div class="container container-header">
-            <div class="header-right">
-                <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> الرئيسية</a>
-                <div class="teacher-info">
-                    <span class="teacher-name-dash">مستر أحمد رمضان</span>
-                    <span class="platform-slug">في اللغة العربية</span>
-                </div>
-            </div>
-            <div id="user-info-bar" class="user-info-premium" style="display: none;">
-                <div class="user-profile-lite">
-                    <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
-                    <div class="user-details">
-                        <span id="display-name" class="u-name">...</span>
-                        <span id="display-grade" class="u-grade">...</span>
-                    </div>
-                </div>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="premium-main-content" style="display: none;" id="dashboard-main">
-        <header class="dashboard-header-premium">
-            <div class="user-welcome">
-                <h1 class="text-gradient">مرحباً، <span id="display-name-welcome">...</span></h1>
-                <p>استكمل رحلة تفوقك اليوم في اللغة العربية</p>
-            </div>
-            <div class="user-profile-premium">
-                <div class="profile-info">
-                    <span id="profile-name" class="profile-name">...</span>
-                    <span class="profile-status">طالب متميز</span>
-                </div>
-                <div class="user-avatar" id="profile-initial">أ</div>
-            </div>
-        </header>
-
-        <!-- Lectures List Only -->
-        <div id="lectures-container" class="dashboard-tab">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem;"><i class="fas fa-video"
-                        style="color: var(--secondary);"></i> مكتبة المحاضرات</h2>
-                <div class="info-pill" id="lecture-count-badge">0 محاضرة مخصصة لك</div>
-            </div>
-
-            <div id="lectures-grid"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;">
-                <!-- Lectures will be injected here -->
-            </div>
-        </div>
-    </main>
-    <!-- Quiz Modal -->
-    <div id="quiz-modal" class="modal">
-        <div class="auth-card" style="max-width: 700px; padding: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h2 id="quiz-modal-title"
-                    style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 1.8rem;">اختبار
-                    إلكتروني</h2>
-                <button type="button" onclick="closeQuiz()"
-                    style="background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="quiz-question-container">
-                <!-- Question content will be injected here -->
-            </div>
+    <!-- TOP BAR -->
+    <div class="dash-topbar">
+        <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+        <div class="topbar-user" id="user-info-bar" style="display:none;">
+            <span class="user-name-top" id="display-name">...</span>
+            <button class="logout-btn-top" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
         </div>
     </div>
 
-    <!-- YouTube Player API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- MAIN DASHBOARD -->
+    <div class="dash-wrapper" id="dashboard-main" style="display:none;">
+        <div class="student-page-header">
+            <div class="grade-title-block"><h1 id="display-grade">...</h1></div>
+            <div class="student-stamp">
+                <span class="stamp-name" id="stamp-name-text">...</span>
+                <span class="stamp-phone" id="stamp-phone-text">...</span>
+            </div>
+        </div>
+        <div class="filter-bar">
+            <input type="text" class="search-box" id="lesson-search" placeholder="ابحث عن محاضرة..." oninput="filterBySearch(this.value)">
+            <div class="branch-filters" id="branch-filter-container"></div>
+        </div>
+        <div class="dash-tabs">
+            <button class="dash-tab-btn active" onclick="switchTab('lectures',this)">الدروس المرئية</button>
+            <button class="dash-tab-btn" onclick="switchTab('packages',this)">الباقات التعليمية</button>
+            <button class="dash-tab-btn" onclick="switchTab('quizzes',this)">الاختبارات</button>
+            <button class="dash-tab-btn" onclick="switchTab('files',this)">المذكرات والملفات</button>
+        </div>
+        <div class="tab-panel active" id="tab-lectures">
+            <div class="lessons-grid" id="lectures-grid"></div>
+        </div>
+        <div class="tab-panel" id="tab-packages">
+            <div id="packages-grid" class="lessons-grid">
+                <div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><p>لا توجد باقات متاحة حالياً</p></div>
+            </div>
+        </div>
+        <div class="tab-panel" id="tab-quizzes">
+            <div id="quizzes-grid" class="lessons-grid"></div>
+        </div>
+        <div class="tab-panel" id="tab-files">
+            <div id="files-grid" class="lessons-grid"></div>
+        </div>
+    </div>
 
-    <!-- Firebase SDKs -->
+    <!-- AUTH MODAL -->
+    <div class="auth-overlay open" id="auth-modal">
+        <div class="auth-box">
+            <h2>&#127891; تسجيل الدخول</h2>
+            <p class="sub">أدخل بياناتك للوصول إلى المحاضرات</p>
+            <form id="registration-form">
+                <div class="form-field"><label>الاسم الكامل</label><input type="text" id="student-name" placeholder="مثال: أحمد محمد علي" required></div>
+                <div class="form-field"><label>رقم هاتفك</label><input type="tel" id="student-phone" placeholder="01xxxxxxxxx" required></div>
+                <div class="form-field"><label>رقم هاتف ولي الأمر</label><input type="tel" id="parent-phone" placeholder="01xxxxxxxxx"></div>
+                <div class="form-field">
+                    <label>المرحلة الدراسية</label>
+                    <select id="student-stage" onchange="updateYears()" required>
+                        <option value="">اختر المرحلة</option>
+                        <option value="preparatory">إعدادي</option>
+                        <option value="secondary">ثانوي</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>السنة الدراسية</label>
+                    <select id="student-year" onchange="updateGroups()" required>
+                        <option value="">اختر السنة</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>المجموعة / المركز</label>
+                    <select id="student-group" required>
+                        <option value="">اختر المجموعة</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">دخول المنصة <i class="fas fa-arrow-left"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QUIZ MODAL -->
+    <div class="modal-overlay" id="quiz-modal">
+        <div class="modal-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
+                <h2 style="color:#f59e0b;font-family:'Amiri',serif;font-size:1.6rem;">اختبار إلكتروني</h2>
+                <button onclick="closeQuiz()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="quiz-question-container"></div>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
     <script>
-        // Typing Effect for Welcome Message
-        function typeWelcome() {
-            const el = document.getElementById('display-name');
-            if (!el || el.textContent === '...') return;
-
-            const originalText = el.textContent;
-            el.textContent = '';
-            let i = 0;
-            const timer = setInterval(() => {
-                if (i < originalText.length) {
-                    el.textContent += originalText.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(timer);
-                }
-            }, 100);
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            btn.classList.add('active');
         }
 
-        // Wait for script.js to set the name then run typing effect
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                    if (mutation.target.textContent !== '...' && mutation.target.textContent !== '') {
-                        observer.disconnect();
-                        typeWelcome();
-                    }
-                }
+        let activeBranch = 'الكل';
+        let searchQuery = '';
+
+        function buildBranchFilters(branches) {
+            const c = document.getElementById('branch-filter-container');
+            if (!c) return;
+            c.innerHTML = ['الكل', ...branches].map(b =>
+                `<button class="branch-btn ${b===activeBranch?'active':''}" onclick="selectBranch('${b}',this)">${b}</button>`
+            ).join('');
+        }
+
+        function selectBranch(branch, btn) {
+            activeBranch = branch;
+            document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderStudentContent();
+        }
+
+        function filterBySearch(val) {
+            searchQuery = val.trim().toLowerCase();
+            renderStudentContent();
+        }
+
+        window.renderStudentContent = function () {
+            const student = JSON.parse(localStorage.getItem('student_session'));
+            if (!student) return;
+            const unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
+            const grid = document.getElementById('lectures-grid');
+            if (!grid) return;
+
+            let lessons = appData.lessons.filter(l => l.grade === student.grade);
+            console.log('Lessons for grade [' + student.grade + ']:', lessons.length);
+
+            if (activeBranch !== 'الكل') lessons = lessons.filter(l => l.branch === activeBranch);
+            if (searchQuery) lessons = lessons.filter(l => l.title && l.title.toLowerCase().includes(searchQuery));
+
+            const allBranches = [...new Set(appData.lessons.filter(l=>l.grade===student.grade).map(l=>l.branch).filter(Boolean))];
+            buildBranchFilters(allBranches);
+
+            if (lessons.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-video-slash"></i><p>لا توجد محاضرات متاحة لصفك حالياً</p></div>';
+                return;
+            }
+
+            const m2n = {all:'محتوى عام','9':'سبتمبر','10':'أكتوبر','11':'نوفمبر','12':'ديسمبر','1':'يناير','2':'فبراير','3':'مارس','4':'أبريل','5':'مايو'};
+            const grouped = {};
+            lessons.forEach(l => {
+                const m = l.month||'all', b = l.branch||'عام';
+                if(!grouped[m]) grouped[m]={};
+                if(!grouped[m][b]) grouped[m][b]=[];
+                grouped[m][b].push(l);
             });
-        });
 
-        const displayNameNode = document.getElementById('display-name');
-        if (displayNameNode) {
-            observer.observe(displayNameNode, { characterData: true, childList: true, subtree: true });
+            const sortedM = Object.keys(grouped).sort((a,b)=>{
+                if(a==='all')return -1; if(b==='all')return 1;
+                return parseInt(b)-parseInt(a);
+            });
+
+            let html = '';
+            sortedM.forEach(m => {
+                html += '<div class="month-header">' + (m2n[m]||m) + '</div>';
+                Object.keys(grouped[m]).forEach(b => {
+                    if (activeBranch === 'الكل') html += '<div class="branch-label"><i class="fas fa-folder-open" style="color:#f59e0b;"></i> فرع: '+b+'</div>';
+                    grouped[m][b].forEach(l => {
+                        const isUnlocked = unlocked.includes(l.id);
+                        const vid = l.youtubeId||'';
+                        const thumb = vid ? 'https://img.youtube.com/vi/'+vid+'/mqdefault.jpg' : '';
+                        html += '<div class="lesson-card" id="card-'+l.id+'">' +
+                            '<div class="lesson-thumb">' +
+                            (thumb ? '<img src="'+thumb+'" alt="'+l.title+'" loading="lazy">' : '<div style="height:100%;background:rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;"><i class="fas fa-video" style="font-size:2rem;color:rgba(255,255,255,0.2);"></i></div>') +
+                            (isUnlocked
+                                ? '<div class="play-btn-overlay" onclick="watchVideo(\''+l.id+'\',\''+vid+'\')"><div class="play-circle"><i class="fas fa-play"></i></div></div>'
+                                : '<div class="lock-overlay-card" onclick="unlockLesson(\''+l.id+'\')"><i class="fas fa-lock"></i><span>فتح المحاضرة</span></div>') +
+                            '</div>' +
+                            '<div class="lesson-info"><span class="lesson-teacher-name">'+l.title+'</span><span class="lesson-date">'+(l.date||'')+'</span></div>' +
+                            '</div>';
+                    });
+                });
+            });
+            grid.innerHTML = html;
+        };
+
+        window.renderQuizzes = function () {
+            const student = JSON.parse(localStorage.getItem('student_session'));
+            if (!student) return;
+            const grid = document.getElementById('quizzes-grid');
+            if (!grid) return;
+            const gq = (appData.quizzes||[]).filter(q=>q.grade===student.grade);
+            const res = (appData.results||[]).filter(r=>r.studentPhone===student.phone);
+            if (!gq.length) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-clipboard-list"></i><p>لا توجد اختبارات حالياً</p></div>';
+                return;
+            }
+            grid.innerHTML = gq.map(q => {
+                const r = res.find(x=>x.quizId===q.id);
+                return '<div class="lesson-card" style="padding:20px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:15px;">' +
+                    '<div style="width:46px;height:46px;background:rgba(245,158,11,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#f59e0b;"><i class="fas fa-file-alt"></i></div>' +
+                    (r ? '<span style="background:rgba(16,185,129,0.1);color:#10b981;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:700;">'+r.percent+'% ✓</span>'
+                       : '<span style="background:rgba(245,158,11,0.1);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:0.78rem;">نشط</span>') +
+                    '</div>' +
+                    '<h3 style="font-size:1rem;color:#fff;margin-bottom:8px;">'+q.title+'</h3>' +
+                    '<p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:16px;">'+(q.questions?q.questions.length:0)+' سؤال</p>' +
+                    (r ? '<button style="width:100%;padding:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:10px;cursor:default;font-family:Tajawal,sans-serif;">تم الحل</button>'
+                       : '<button onclick="openQuiz(\''+q.id+'\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:#fff;border-radius:10px;cursor:pointer;font-family:Tajawal,sans-serif;font-weight:700;">ابدأ الاختبار</button>') +
+                    '</div>';
+            }).join('');
+        };
+
+        function setupStudentUI(student) {
+            ['display-name','stamp-name-text'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=student.name;});
+            const ge=document.getElementById('display-grade'); if(ge) ge.textContent=getGradeName(student.grade);
+            const pe=document.getElementById('stamp-phone-text'); if(pe) pe.textContent=student.phone;
+            const ib=document.getElementById('user-info-bar'); if(ib) ib.style.display='flex';
+            const dm=document.getElementById('dashboard-main'); if(dm) dm.style.display='block';
+            const am=document.getElementById('auth-modal'); if(am) am.classList.remove('open');
         }
+
+        window.initDashboard = async function() {
+            const student = JSON.parse(localStorage.getItem('student_session'));
+            if (!student) {
+                const m = document.getElementById('auth-modal');
+                if (m) m.classList.add('open');
+                return;
+            }
+            setupStudentUI(student);
+            const grid = document.getElementById('lectures-grid');
+            if (grid) grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i><p>جاري تحميل المحاضرات...</p></div>';
+            await loadInitialData();
+            renderStudentContent();
+            renderQuizzes();
+        };
+
+        window.closeQuiz = function() {
+            const m = document.getElementById('quiz-modal');
+            if (m) m.classList.remove('active');
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('student_session');
+            localStorage.removeItem('unlocked_lessons');
+            window.location.href = 'index.html';
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { initDashboard(); });
     </script>
 </body>
-
 </html>
