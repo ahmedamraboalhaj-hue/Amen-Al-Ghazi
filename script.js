@@ -279,7 +279,7 @@ function openAdmin() {
 
 function checkLogin() {
     const pass = document.getElementById('admin-password').value;
-    if (pass === '010qwe') {
+    if (pass === 'Z10qwe') {
         document.getElementById('admin-modal').classList.remove('active');
         showAdminDashboard();
     } else {
@@ -1221,54 +1221,87 @@ async function unlockLesson(lessonId) {
     const lesson = appData.lessons.find(l => l.id === lessonId);
     if (!lesson) return;
 
-    // Create custom modal for voucher entry
+    // Create modal for voucher entry
     const modal = document.createElement('div');
-    modal.className = 'auth-modal-overlay';
     modal.id = 'voucher-modal';
-    modal.style.zIndex = '9999';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
     modal.innerHTML = `
-        <div class="auth-card" style="max-width: 400px; text-align: center; background: #fff; color: #1e293b;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: var(--primary); font-family: 'Amiri', serif; font-size: 1.5rem;">تفعيل المحاضرة</h3>
-                <button onclick="document.getElementById('voucher-modal').remove()" style="background: #f1f5f9; border: none; color: #1e293b; cursor: pointer; font-size: 1.2rem; width: 30px; height: 30px; border-radius: 50%;">&times;</button>
+        <div style="background:#13131a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:36px;max-width:420px;width:100%;text-align:center;">
+            <h3 style="color:#f59e0b;font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:10px;">تفعيل المحاضرة</h3>
+            <p style="font-size:0.9rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">أدخل كود التفعيل لفتح:</p>
+            <p style="font-weight:700;color:#fff;margin-bottom:20px;font-size:1rem;">${lesson.title}</p>
+            <p style="font-size:0.82rem;color:rgba(255,255,255,0.4);margin-bottom:16px;">ملاحظة: كود الشهر يفتح جميع محاضرات نفس الشهر دفعة واحدة</p>
+            <input type="text" id="voucher-code-input" placeholder="أدخل الكود هنا" style="width:100%;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-family:monospace;font-size:1.3rem;font-weight:700;letter-spacing:4px;text-align:center;outline:none;margin-bottom:16px;">
+            <div style="display:flex;gap:10px;">
+                <button onclick="document.getElementById('voucher-modal').remove()" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border-radius:12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:1rem;">إلغاء</button>
+                <button id="confirm-unlock-btn" style="flex:2;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:#fff;border-radius:12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;">تفعيل الآن</button>
             </div>
-            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 20px;">أدخل كود التفعيل لمشاهدة: <br><strong style="color: #1e293b;">${lesson.title}</strong></p>
-            <input type="text" id="voucher-code-input" class="auth-input" placeholder="أدخل الكود هنا" style="text-align: center; font-family: monospace; letter-spacing: 2px; background: #f8fafc !important; color: #1e293b !important; border: 1px solid #e2e8f0 !important; font-size: 1.2rem; font-weight: 700; padding: 15px;">
-            <button class="btn btn-primary w-100" id="confirm-unlock-btn" style="margin-top: 20px; padding: 15px; border-radius: 12px;">تفعيل الآن</button>
+            <div id="unlock-status" style="margin-top:14px;font-size:0.9rem;min-height:20px;"></div>
         </div>
     `;
     document.body.appendChild(modal);
 
+    // Auto-uppercase input
+    document.getElementById('voucher-code-input').addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+
     document.getElementById('confirm-unlock-btn').onclick = async () => {
-        const code = document.getElementById('voucher-code-input').value.trim();
-        if (!code) return alert("يرجى إدخال الكود");
+        const code = document.getElementById('voucher-code-input').value.trim().toUpperCase();
+        const statusEl = document.getElementById('unlock-status');
+        if (!code) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'يرجى إدخال الكود'; return; }
 
         const student = JSON.parse(localStorage.getItem('student_session'));
-        const voucher = appData.vouchers.find(v => v.code === code.toUpperCase());
+        const voucher = appData.vouchers.find(v => v.code === code);
 
-        if (!voucher) return alert("كود غير صحيح!");
-        if (voucher.used) return alert("هذا الكود مستخدم من قبل!");
-        if (voucher.grade !== student.grade) return alert("خطأ! هذا الكود مخصص لصف دراسي آخر.");
+        if (!voucher) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'كود غير صحيح!'; return; }
+        if (voucher.used) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'هذا الكود مستخدم من قبل!'; return; }
+        if (voucher.grade !== student.grade) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'هذا الكود مخصص لصف دراسي آخر!'; return; }
 
-        // Month Restriction check
-        if (voucher.month && voucher.month !== 'all' && lesson.month && lesson.month !== 'all' && voucher.month !== lesson.month) {
-            return alert(`عذراً، هذا الكود مخصص لمحاضرات شهر (${voucher.month}) فقط، بينما هذه المحاضرة تتبع شهر (${lesson.month}).`);
+        // Determine which lessons to unlock
+        let lessonsToUnlock = [];
+        const vMonth = voucher.month;
+
+        if (!vMonth || vMonth === 'all') {
+            // Voucher for all months → unlock only this lesson
+            lessonsToUnlock = [lessonId];
+        } else {
+            // Month voucher → unlock ALL lessons of that month for this grade
+            lessonsToUnlock = appData.lessons
+                .filter(l => l.grade === student.grade && (l.month === vMonth || vMonth === 'all'))
+                .map(l => l.id);
         }
 
+        statusEl.style.color = '#f59e0b'; statusEl.textContent = 'جاري التفعيل...';
+
         try {
+            // Mark voucher as used
             await db.collection('vouchers').doc(voucher.id).update({
                 used: true,
                 usedBy: student.phone,
-                lessonId: lessonId,
+                studentName: student.name,
+                unlockedLessons: lessonsToUnlock,
                 usedAt: Date.now()
             });
+
+            // Save unlocked lessons locally
             let unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
-            unlocked.push(lessonId);
+            lessonsToUnlock.forEach(id => { if (!unlocked.includes(id)) unlocked.push(id); });
             localStorage.setItem('unlocked_lessons', JSON.stringify(unlocked));
-            alert("تم تفعيل المحاضرة بنجاح!");
-            location.reload();
+
+            const monthName = { 'all': 'عام', '9': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر', '1': 'يناير', '2': 'فبراير', '3': 'مارس', '4': 'أبريل', '5': 'مايو' };
+            const msg = lessonsToUnlock.length > 1
+                ? `تم تفعيل (${lessonsToUnlock.length}) محاضرة لشهر ${monthName[vMonth] || vMonth} بنجاح! ✅`
+                : 'تم تفعيل المحاضرة بنجاح! ✅';
+
+            statusEl.style.color = '#10b981'; statusEl.textContent = msg;
+
+            setTimeout(() => {
+                modal.remove();
+                if (typeof renderStudentContent === 'function') renderStudentContent();
+            }, 1500);
         } catch (e) {
-            alert("حدث خطأ أثناء التفعيل");
+            statusEl.style.color = '#ef4444'; statusEl.textContent = 'حدث خطأ أثناء التفعيل';
         }
     };
 }
@@ -1280,50 +1313,88 @@ function watchVideo(containerId, youtubeId) {
     const lesson = appData.lessons.find(l => l.id === containerId);
     logView(containerId, lesson ? lesson.title : 'درس فيديو');
 
-    const wrapper = document.getElementById(`video-${containerId}`);
-    const shield = wrapper.querySelector('.total-shield');
-    if (shield) shield.style.display = 'none';
+    // Look for wrapper by card id OR video- prefix
+    const wrapper = document.getElementById(`video-${containerId}`) || document.getElementById(`card-${containerId}`)?.querySelector('.lesson-thumb');
+    if (!wrapper) { console.error('Video wrapper not found for', containerId); return; }
 
-    wrapper.style.background = 'black';
+    const vidId = extractYouTubeId(youtubeId);
+    if (!vidId) { alert('خطأ: رابط الفيديو غير صحيح'); return; }
 
-    const shieldContainer = document.createElement('div');
-    shieldContainer.className = 'video-shield-container';
-    shieldContainer.innerHTML = `
-        <div class="top-shield"></div>
-        <div class="logo-shield"></div>
-        <div class="title-shield"></div>
-        <div class="platform-watermark">
-            <i class="fas fa-shield-alt"></i>
-            <span>منصة الأمين التعليمية</span>
+    // Clear wrapper content and prepare for player
+    wrapper.innerHTML = '';
+    wrapper.style.cssText = 'position:relative;background:#000;border-radius:0;overflow:hidden;height:280px;';
+
+    // Create the player div that YT API will replace
+    const playerDiv = document.createElement('div');
+    playerDiv.id = `player-${containerId}`;
+    playerDiv.style.cssText = 'width:100%;height:100%;';
+    wrapper.appendChild(playerDiv);
+
+    // Protection shield container - blocks right-click & YouTube logo area
+    const shield = document.createElement('div');
+    shield.style.cssText = 'position:absolute;inset:0;z-index:10;pointer-events:none;';
+    shield.innerHTML = `
+        <!-- Block top YouTube bar -->
+        <div style="position:absolute;top:0;left:0;right:0;height:50px;pointer-events:auto;background:transparent;"></div>
+        <!-- Block bottom YouTube controls except allow interaction via pointer-events on player -->
+        <div style="position:absolute;top:0;right:0;width:130px;height:40px;pointer-events:auto;background:transparent;"></div>
+        <!-- Watermark -->
+        <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.55);color:#f59e0b;font-size:0.75rem;font-weight:700;padding:5px 10px;border-radius:8px;font-family:'Tajawal',sans-serif;pointer-events:none;">
+            <i class="fas fa-shield-alt" style="margin-left:5px;"></i>منصة الأمين
         </div>
-        <button class="custom-fs-btn" onclick="toggleFullScreen('video-${containerId}')" style="position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); border: 1px solid var(--secondary); color: #fff; width: 45px; height: 45px; border-radius: 12px; cursor: pointer; z-index: 2000; pointer-events: auto;">
+        <!-- Fullscreen button -->
+        <button onclick="toggleFullScreen('video-${containerId}')" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.7);border:1px solid #f59e0b;color:#fff;width:42px;height:42px;border-radius:10px;cursor:pointer;z-index:50;pointer-events:auto;font-size:1rem;" title="ملء الشاشة">
             <i class="fas fa-expand"></i>
         </button>
     `;
-    wrapper.appendChild(shieldContainer);
+    wrapper.appendChild(shield);
 
-    const vidId = extractYouTubeId(youtubeId);
+    // Disable right-click on wrapper
+    wrapper.addEventListener('contextmenu', e => e.preventDefault());
 
-    new YT.Player(`player-${containerId}`, {
-        height: '100%', width: '100%', videoId: vidId,
-        playerVars: {
-            'autoplay': 1,
-            'modestbranding': 1,
-            'rel': 0,
-            'playsinline': 1,
-            'controls': 1,
-            'showinfo': 0,
-            'fs': 0,
-            'iv_load_policy': 3
-        },
-        events: {
-            'onReady': (event) => event.target.playVideo(),
-            'onError': (e) => {
-                console.error("YT Player Error:", e);
-                wrapper.innerHTML = `<div style="padding: 20px; text-align: center; color: #ff5252;">عذراً، تعذر تشغيل الفيديو. تأكد من صحة الرابط.</div>`;
+    // Initialize YouTube player
+    if (!isYouTubeAPIReady || typeof YT === 'undefined' || !YT.Player) {
+        // API not ready yet, wait for it
+        const interval = setInterval(() => {
+            if (typeof YT !== 'undefined' && YT.Player) {
+                clearInterval(interval);
+                createYTPlayer(containerId, vidId, playerDiv, wrapper);
             }
-        }
-    });
+        }, 300);
+    } else {
+        createYTPlayer(containerId, vidId, playerDiv, wrapper);
+    }
+}
+
+function createYTPlayer(containerId, vidId, playerDiv, wrapper) {
+    try {
+        ytPlayers[containerId] = new YT.Player(playerDiv, {
+            height: '100%',
+            width: '100%',
+            videoId: vidId,
+            playerVars: {
+                autoplay: 1,
+                modestbranding: 1,
+                rel: 0,
+                playsinline: 1,
+                controls: 1,
+                showinfo: 0,
+                fs: 0,           // disable YouTube's own fullscreen button (we have ours)
+                iv_load_policy: 3,
+                origin: window.location.origin
+            },
+            events: {
+                onReady: (e) => { e.target.playVideo(); },
+                onError: (e) => {
+                    console.error('YT Error:', e.data);
+                    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ef4444;gap:10px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><p>تعذر تشغيل الفيديو (${e.data})</p><p style="font-size:0.8rem;color:rgba(255,255,255,0.4);">تأكد من أن الفيديو غير مقيّد</p></div>`;
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Player creation error:', err);
+        wrapper.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444;">خطأ في تشغيل الفيديو</div>`;
+    }
 }
 
 function toggleFullScreen(elementId) {
