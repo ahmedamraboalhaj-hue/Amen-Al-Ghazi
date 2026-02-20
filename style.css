@@ -511,8 +511,10 @@ img {
 .hero-image-container {
     position: relative;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
+    transform: translateX(-80px);
+    /* Push further left */
 }
 
 .hero-image-bg {
@@ -2565,111 +2567,221 @@ img {
     color: #fff !important;
 }
 
-/* --- Student Dashboard Light Premium Theme --- */
-.premium-main-content {
-    background-color: #f8fafc !important;
-    /* Extremely light grey/white */
-    color: #1e293b !important;
-    /* Dark slate text */
+/* --- Simplified Direct Student Portal --- */
+.dashboard-header {
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
-.text-gradient {
-    background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.premium-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
-    color: #1e293b !important;
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-.premium-card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
-    border-color: var(--primary) !important;
+.back-link {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
-.premium-sidebar {
-    background: #ffffff !important;
-    border-left: 1px solid #e2e8f0 !important;
+.teacher-info {
+    display: flex;
+    flex-direction: column;
 }
 
-.premium-menu-item {
-    color: #64748b !important;
+.teacher-name-dash {
+    font-family: 'Amiri', serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
 }
 
-.premium-menu-item:hover,
-.premium-menu-item.active {
-    background: rgba(13, 131, 230, 0.05) !important;
-    color: var(--primary) !important;
+.platform-slug {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    letter-spacing: 2px;
 }
 
-.user-profile-premium {
-    background: #fff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #1e293b !important;
+.user-info-premium {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-.profile-name {
-    color: #1e293b !important;
+.user-profile-lite {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f1f5f9;
+    padding: 8px 15px;
+    border-radius: 50px;
 }
 
-.sidebar-logo {
-    color: var(--primary) !important;
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.dashboard-tab h2 {
-    color: #1e293b !important;
+.user-details {
+    display: flex;
+    flex-direction: column;
 }
 
-.info-pill {
-    background: rgba(13, 110, 253, 0.1) !important;
-    color: var(--primary) !important;
-    border: 1px solid rgba(13, 110, 253, 0.2) !important;
+.u-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1e293b;
 }
 
-/* Branch Filter Pills Light Mode */
-.filter-btn {
-    background: #fff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #64748b !important;
+.u-grade {
+    font-size: 0.7rem;
+    color: #64748b;
 }
 
-.filter-btn.active {
-    background: var(--primary) !important;
-    color: #fff !important;
-    border-color: var(--primary) !important;
+.main-content-lite {
+    padding: 40px 0;
+    min-height: 80vh;
 }
 
-.progress-section {
-    background: #fff !important;
+.welcome-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, #0d47a1 100%);
+    color: #fff;
+    padding: 40px;
+    border-radius: 24px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(13, 110, 253, 0.2);
 }
 
-.progress-bar-container {
-    background: #f1f5f9 !important;
+.welcome-text h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
 }
 
-.stat-circle {
-    background: #f1f5f9 !important;
-    color: var(--primary) !important;
+.welcome-text p {
+    opacity: 0.8;
+    max-width: 600px;
 }
 
-.honor-item {
-    border-color: #e2e8f0 !important;
+.count-pill {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
 }
 
-.honor-item .profile-name {
-    color: #1e293b !important;
+.lectures-display-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
 }
 
-/* Update ambient background for dashboard */
-body:has(.premium-main-content) {
-    background-color: #f8fafc !important;
+/* Locked Overlay Styling */
+.locked-overlay {
+    background: rgba(15, 23, 42, 0.8) !important;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    border-radius: 12px;
 }
 
-body:has(.premium-main-content) .decor-circle {
-    opacity: 0.1 !important;
+.locked-overlay i {
+    font-size: 2.5rem;
+    color: var(--secondary);
+    text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    animation: bounceLock 2s infinite ease-in-out;
+}
+
+@keyframes bounceLock {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.locked-overlay span {
+    background: var(--secondary);
+    color: #000;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.footer-lite {
+    padding: 40px 0;
+    border-top: 1px solid #e2e8f0;
+    background: #fff;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.auth-inputSelect {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.auth-inputSelect option {
+    background: #1e293b;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .welcome-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+        padding: 30px 20px;
+    }
+
+    .welcome-text h1 {
+        font-size: 1.8rem;
+    }
+
+    .user-info-premium {
+        display: none;
+        /* Hide profile on mobile header to keep it clean */
+    }
 }

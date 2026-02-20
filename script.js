@@ -16,7 +16,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // Platform Config
-const TEACHER_NAME = "مستر أحمد رمضان";
+const TEACHER_NAME = "مستر أمين الغازي";
 const ARABIC_BRANCHES = ['الكل', 'النحو', 'البلاغة', 'الأدب', 'القراءة', 'النصوص', 'القصة', 'مراجعة نهائية', 'تأسيس'];
 
 const GRADES_CONFIG = {
@@ -133,8 +133,6 @@ async function loadInitialData() {
                 // Trigger UI re-render if we are on dashboard
                 if (window.location.pathname.includes('dashboard.html')) {
                     if (key === 'lessons') renderStudentContent ? renderStudentContent() : null;
-                    if (key === 'quizzes') renderQuizzes ? renderQuizzes() : null;
-                    renderOverview ? renderOverview() : null;
                 }
             }, e => console.warn(`Realtime error for ${coll}:`, e));
         });
@@ -799,171 +797,53 @@ function toggleFullscreen(wrapperId) {
     }
 }
 
-// --- Student Dashboard Logic ---
-// --- Student Dashboard Logic ---
-function initDashboard() {
-    const mainArea = document.getElementById('dashboard-main');
-    if (mainArea) mainArea.style.display = 'block';
-
+// --- Simplified Student Portal Logic ---
+async function initDashboard() {
+    console.log("Initializing student portal...");
     const student = JSON.parse(localStorage.getItem('student_session'));
-    const guestLinks = document.getElementById('guest-links');
-    const urlParams = new URLSearchParams(window.location.search);
-    const gradeParam = urlParams.get('grade');
+    const modal = document.getElementById('auth-modal');
+    const studentArea = document.getElementById('dashboard-main');
+    const userInfoBar = document.getElementById('user-info-bar');
 
-    if (student) {
-        if (guestLinks) guestLinks.style.display = 'none';
-        ['display-name', 'profile-name'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = student.name;
-        });
-        const pInit = document.getElementById('profile-initial');
-        if (pInit) pInit.textContent = student.name.charAt(0);
-        renderStudentContent();
-    } else {
-        if (guestLinks) guestLinks.style.display = 'block';
-        ['display-name', 'profile-name'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = 'زائر';
-        });
-        const pInit = document.getElementById('profile-initial');
-        if (pInit) pInit.textContent = '?';
+    if (!student) {
+        if (modal) modal.style.display = 'flex';
+        if (studentArea) studentArea.style.display = 'none';
+        if (userInfoBar) userInfoBar.style.display = 'none';
 
-        // Auto-open registration if grade is specified in URL
+        // Auto-fill grade from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const gradeParam = urlParams.get('grade');
         if (gradeParam) {
-            openRegistration();
-            setTimeout(() => {
-                const stageField = document.getElementById('student-stage');
+            const stage = gradeParam.includes('prep') ? 'preparatory' : 'secondary';
+            const stageField = document.getElementById('student-stage');
+            if (stageField) {
+                stageField.value = stage;
+                updateYears();
                 const yearField = document.getElementById('student-year');
-                const selectionRow = document.getElementById('grade-selection-row');
-
-                if (stageField && yearField) {
-                    if (gradeParam.includes('prep')) {
-                        stageField.value = 'preparatory';
-                    } else if (gradeParam.includes('sec')) {
-                        stageField.value = 'secondary';
-                    }
-                    updateYears();
+                if (yearField) {
                     yearField.value = gradeParam;
                     updateGroups();
-
-                    if (selectionRow) selectionRow.style.display = 'none';
                 }
-            }, 500);
+            }
         }
+    } else {
+        if (modal) modal.style.display = 'none';
+        if (studentArea) studentArea.style.display = 'block';
+        if (userInfoBar) userInfoBar.style.display = 'flex';
+
+        document.getElementById('display-name').innerText = student.name;
+        document.getElementById('display-grade').innerText = getGradeName(student.grade);
+
+        // Update profile info
+        const profileName = document.getElementById('profile-name');
+        if (profileName) profileName.innerText = student.name;
+        const profileInitial = document.getElementById('profile-initial');
+        if (profileInitial) profileInitial.innerText = student.name.charAt(0);
+
+        // Load data and show lectures
+        await loadInitialData();
+        renderStudentContent();
     }
-
-    renderOverview();
-}
-
-function renderOverview() {
-    const student = JSON.parse(localStorage.getItem('student_session'));
-
-    // 1. Render Latest Content Entry (Welcome Card)
-    const latestEntry = document.getElementById('latest-content-entry');
-    if (latestEntry) {
-        // Find latest lesson (either for student grade or general)
-        const relevantLessons = student
-            ? appData.lessons.filter(l => l.grade === student.grade)
-            : appData.lessons;
-
-        const latestLesson = relevantLessons.length > 0
-            ? [...relevantLessons].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0]
-            : null;
-
-        if (latestLesson) {
-            latestEntry.innerHTML = `
-                <div class="welcome-highlight" style="background: linear-gradient(135deg, rgba(13, 71, 161, 0.9) 0%, rgba(0, 33, 113, 0.9) 100%), url('https://img.youtube.com/vi/${latestLesson.youtubeId}/maxresdefault.jpg'); background-size: cover; background-position: center;">
-                    <div style="position: relative; z-index: 2;">
-                        <span class="badge pulse-badge" style="background: rgba(255,255,255,0.2); margin-bottom: 15px; display: inline-block;">جديد الآن 🔥</span>
-                        <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 10px;">${latestLesson.title}</h2>
-                        <p style="opacity: 0.9; margin-bottom: 25px; max-width: 500px;">استكمل رحلتك التعليمية مع أحدث الدروس المضافة لصفك الدراسي. لا تدع الفرصة تفوتك!</p>
-                        <button class="btn-premium" onclick="showTab('lectures')">
-                            شاهد المحاضرة الآن <i class="fas fa-play-circle"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        } else {
-            latestEntry.innerHTML = `
-                <div class="welcome-highlight" style="background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);">
-                    <h2 style="font-family: 'Amiri', serif;">مرحباً بك في منصة الأمين</h2>
-                    <p>المحتوى التعليمي سيظهر هنا فور إضافته من قبل المستر.</p>
-                </div>
-            `;
-        }
-    }
-
-    // 2. Render Announcements
-    const announceText = document.getElementById('announcement-text');
-    if (announceText && appData.announcements && appData.announcements.length > 0) {
-        const sorted = [...appData.announcements].sort((a, b) => b.createdAt - a.createdAt);
-        announceText.innerHTML = `
-            <div style="font-weight: 700; color: var(--secondary); margin-bottom: 5px;">أحدث تنبيه:</div>
-            <div style="font-size: 1.1rem; line-height: 1.6;">${sorted[0].text || sorted[0].content}</div>
-        `;
-    }
-
-    // 3. Render Leaderboard (Honor Roll)
-    const honorRoll = document.getElementById('honor-roll-list');
-    if (honorRoll) {
-        const topStudents = appData.students.slice(0, 5);
-        honorRoll.innerHTML = topStudents.length > 0 ? topStudents.map((s, i) => `
-            <div class="premium-card honor-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 12px; border-right: 4px solid ${i === 0 ? '#ffd700' : 'transparent'};">
-                <div class="stat-circle" style="width: 40px; height: 40px; margin-bottom: 0; font-size: 1.1rem; background: ${i === 0 ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)'};">
-                    ${i + 1}
-                </div>
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: 700; font-size: 1rem; color: #fff;">${s.name}</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${GRADES_CONFIG[s.grade]?.title || ''}</div>
-                </div>
-                ${i === 0 ? '<i class="fas fa-crown" style="color: #ffd700; font-size: 1.2rem;"></i>' : ''}
-            </div>
-        `).join('') : '<p style="text-align: center; color: rgba(255,255,255,0.2); padding: 20px;">قائمة المتفوقين سيتم تحديثها قريباً</p>';
-    }
-}
-
-function showTab(tabId) {
-    const student = JSON.parse(localStorage.getItem('student_session'));
-    const protectedTabs = ['lectures', 'quizzes', 'results'];
-
-    if (protectedTabs.includes(tabId) && !student) {
-        openRegistration();
-        return;
-    }
-
-    // Hide all tabs
-    document.querySelectorAll('.dashboard-tab').forEach(tab => {
-        tab.style.display = 'none';
-    });
-
-    // Show target tab
-    const targetTab = document.getElementById(tabId + '-tab');
-    if (targetTab) targetTab.style.display = 'block';
-
-    // Update active state in sidebar
-    document.querySelectorAll('.premium-menu-item').forEach(item => {
-        item.classList.remove('active');
-        const onclickAttr = item.getAttribute('onclick');
-        if (onclickAttr && onclickAttr.includes(tabId)) {
-            item.classList.add('active');
-        }
-    });
-
-    // Close sidebar on mobile if it's open
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar && sidebar.classList.contains('mobile-open')) {
-        toggleMenu();
-    }
-}
-
-function openRegistration() {
-    const modal = document.getElementById('auth-modal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function closeRegistration() {
-    const modal = document.getElementById('auth-modal');
-    if (modal) modal.style.display = 'none';
 }
 
 function renderStudentContent() {
@@ -976,6 +856,16 @@ function renderStudentContent() {
 
     // Filter by student grade
     let gradeLessons = appData.lessons.filter(l => l.grade === student.grade);
+
+    if (gradeLessons.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px; opacity: 0.5;">
+                <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <p>لا توجد محاضرات متاحة لصفك حالياً.</p>
+            </div>
+        `;
+        return;
+    }
 
     // Month Names Mapping
     const monthNames = {
@@ -1001,23 +891,15 @@ function renderStudentContent() {
         grouped[m][b].push(l);
     });
 
-    // Display Logic
-    let html = '';
-    const months = Object.keys(grouped).sort((a, b) => {
+    // Sort months (newest/numeric descending)
+    const sortedMonths = Object.keys(grouped).sort((a, b) => {
         if (a === 'all') return -1;
         if (b === 'all') return 1;
-        return parseInt(b) - parseInt(a); // Newest months first
+        return parseInt(b) - parseInt(a);
     });
 
-    if (months.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px; opacity: 0.5;">
-            <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 20px;"></i>
-            <p>لا توجد محاضرات متاحة لصفك حالياً.</p>
-        </div>`;
-        return;
-    }
-
-    months.forEach(m => {
+    let html = '';
+    sortedMonths.forEach(m => {
         html += `
             <div class="month-group" style="grid-column: 1/-1; margin-bottom: 40px;">
                 <h2 style="font-family: 'Amiri', serif; font-size: 1.8rem; color: var(--primary); margin-bottom: 20px; border-right: 5px solid var(--primary); padding-right: 15px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">${monthNames[m] || m}</h2>
@@ -1031,56 +913,47 @@ function renderStudentContent() {
                         <i class="fas fa-folder-open" style="color: var(--secondary);"></i> فرع: ${b}
                     </h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-             `;
+            `;
 
             grouped[m][b].forEach(l => {
                 const isUnlocked = unlocked.includes(l.id);
                 const vidId = extractYouTubeId(l.youtubeId);
                 const thumbUrl = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
+
                 html += `
                     <div class="premium-card course-card" style="padding: 12px; border-radius: 20px;">
                         <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 12px; background: url('${thumbUrl}') center/cover no-repeat; height: 160px; position: relative;">
                             ${isUnlocked ? `
-                                <div class="video-overlay-shield total-shield" onclick="playLesson('${l.id}', '${l.youtubeId}')" style="cursor: pointer; background: rgba(0,0,0,0.2); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                                    <div class="play-overlay"><i class="fas fa-play-circle" style="font-size: 3rem; color: #fff; text-shadow: 0 4px 15px rgba(0,0,0,0.5);"></i></div>
+                                <div class="play-overlay" onclick="watchVideo('${l.id}', '${vidId}')">
+                                    <i class="fas fa-play"></i>
                                 </div>
                             ` : `
-                                <div class="locked-overlay" onclick="unlockLesson('${l.id}')" style="cursor: pointer; background: rgba(0,0,0,0.7); position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; backdrop-filter: blur(4px);">
-                                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
-                                        <i class="fas fa-lock" style="font-size: 1.2rem; color: #fff;"></i>
-                                    </div>
-                                    <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">تفعيل المحاضرة</span>
+                                <div class="locked-overlay" onclick="unlockLesson('${l.id}')" style="cursor: pointer; background: rgba(0,0,0,0.7); position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-radius: 15px; backdrop-filter: blur(4px);">
+                                    <i class="fas fa-lock" style="font-size: 2rem; color: #fff;"></i>
+                                    <span style="color: #fff; font-weight: 700; font-size: 0.9rem;">فتح المحاضرة</span>
                                 </div>
                             `}
                         </div>
-                        <div style="padding: 0 5px;">
-                            <h4 style="font-size: 1rem; margin-bottom: 5px; color: #1e293b; font-weight: 700; line-height: 1.5;">${l.title}</h4>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.75rem; color: #64748b;"><i class="far fa-calendar-alt"></i> ${l.date || new Date(l.createdAt).toLocaleDateString('ar-EG')}</span>
-                                ${isUnlocked ? '<span style="font-size: 0.7rem; color: #10b981; font-weight: 700;"><i class="fas fa-check-circle"></i> تم التفعيل</span>' : ''}
+                        <div style="padding: 5px 10px;">
+                            <h4 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px;">${l.title}</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
+                                <span><i class="far fa-calendar-alt"></i> ${l.date || 'تم الرفع مؤخراً'}</span>
+                                ${isUnlocked ? '<span style="color: #4caf50;"><i class="fas fa-check-circle"></i> تم الفتح</span>' : ''}
                             </div>
                         </div>
                     </div>
                 `;
             });
-
             html += `</div></div>`;
         });
-
         html += `</div></div>`;
     });
 
     grid.innerHTML = html;
 
-    // Update statistics badges
-    const badgeSide = document.getElementById('lecture-count-badge-side');
+    // Update statistics badge (if exists in simplified layout)
     const badgeTab = document.getElementById('lecture-count-badge');
-    if (badgeSide) badgeSide.textContent = gradeLessons.length;
     if (badgeTab) badgeTab.textContent = gradeLessons.length + ' محاضرة متاحة لك';
-
-    // Sync other tabs
-    renderQuizzes();
-    renderResults();
 }
 
 function renderQuizzes() {
@@ -1439,7 +1312,7 @@ if (regForm) {
             // Save locally for persistent session
             localStorage.setItem('student_session', JSON.stringify(studentData));
 
-            alert(`مرحباً بك يا ${studentData.name} في منصة مستر أحمد رمضان`);
+            alert(`مرحباً بك يا ${studentData.name} في منصة مستر أمين الغازي`);
             location.reload();
         } catch (error) {
             console.error("Registration error:", error);

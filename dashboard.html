@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الطالب | مستر أحمد رمضان</title>
+    <title>لوحة الطالب | مستر أمين الغازي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -68,125 +68,28 @@
 </head>
 
 <body>
-    <!-- Background Decor -->
-    <div class="decor-circle" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
-    <div class="decor-circle" style="width: 300px; height: 300px; bottom: 10%; right: 10%; animation-delay: -5s;"></div>
-
-    <!-- Mobile Header -->
-    <header class="mobile-header">
-        <div class="sidebar-logo" style="margin-bottom: 0; font-size: 1.2rem;">الأمين</div>
-        <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-    </header>
-
-    <!-- Registration Modal -->
-    <div id="auth-modal" class="auth-modal-overlay" style="display: none;">
-        <div class="auth-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h2
-                        style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 2.2rem; margin-bottom: 5px;">
-                        تسجيل بيانات
-                        الطالب</h2>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">يرجى إدخال البيانات بدقة للوصول للمحتوى
-                        التعليمي</p>
+    <!-- Navbar / Header -->
+    <header class="dashboard-header">
+        <div class="container container-header">
+            <div class="header-right">
+                <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+                <div class="teacher-info">
+                    <span class="teacher-name-dash">مستر أمين الغازي</span>
+                    <span class="platform-slug">في اللغة العربية</span>
                 </div>
-                <button type="button" onclick="closeRegistration()"
-                    style="background: #f1f5f9; border: 1px solid var(--glass-border); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                    <i class="fas fa-times"></i>
-                </button>
             </div>
-
-            <form id="registration-form">
-                <div class="form-group">
-                    <label>الاسم الثلاثي بالكامل</label>
-                    <input type="text" id="student-name" class="auth-input" placeholder="مثال: أحمد محمد علي" required>
-                </div>
-
-                <div class="auth-form-row">
-                    <div class="form-group">
-                        <label>رقم هاتفك</label>
-                        <input type="tel" id="student-phone" class="auth-input" placeholder="01xxxxxxxxx" required>
-                    </div>
-                    <div class="form-group">
-                        <label>رقم هاتف ولي الأمر</label>
-                        <input type="tel" id="parent-phone" class="auth-input" placeholder="01xxxxxxxxx" required>
+            <div id="user-info-bar" class="user-info-premium" style="display: none;">
+                <div class="user-profile-lite">
+                    <div class="user-avatar"><i class="fas fa-user-graduate"></i></div>
+                    <div class="user-details">
+                        <span id="display-name" class="u-name">...</span>
+                        <span id="display-grade" class="u-grade">...</span>
                     </div>
                 </div>
-
-                <div class="auth-form-row" id="grade-selection-row">
-                    <div class="form-group">
-                        <label>المرحلة الدراسية</label>
-                        <select id="student-stage" class="auth-input" required onchange="updateYears()">
-                            <option value="">اختر المرحلة</option>
-                            <option value="preparatory">المرحلة الإعدادية</option>
-                            <option value="secondary">المرحلة الثانوية</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>السنة الدراسية</label>
-                        <select id="student-year" class="auth-input" required onchange="updateGroups()">
-                            <option value="">اختر السنة</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>المجموعة / السنتر</label>
-                    <select id="student-group" class="auth-input" required>
-                        <option value="">اختر المجموعة</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-auth-submit" style="margin-top: 25px;">
-                    دخول المنصة الآن <i class="fas fa-arrow-left"></i>
-                </button>
-            </form>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+            </div>
         </div>
-    </div>
-
-
-    <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
-
-    <!-- Sidebar -->
-    <aside class="premium-sidebar" id="sidebar">
-        <div class="teacher-name">المستر أحمد رمضان</div>
-        <nav class="sidebar-menu">
-            <a href="javascript:void(0)" class="premium-menu-item active" onclick="showTab('overview')">
-                <i class="fas fa-th-large"></i>
-                <span>لوحة التحكم</span>
-            </a>
-            <a href="javascript:void(0)" class="premium-menu-item" onclick="showTab('lectures')">
-                <i class="fas fa-video"></i>
-                <span>المحاضرات <span id="lecture-count-badge-side" class="badge">0</span></span>
-            </a>
-            <a href="javascript:void(0)" class="premium-menu-item" onclick="showTab('quizzes')">
-                <i class="fas fa-tasks"></i>
-                <span>الاختبارات <span id="quiz-count-badge-side" class="badge">0</span></span>
-            </a>
-            <a href="javascript:void(0)" class="premium-menu-item">
-                <i class="fas fa-file-alt"></i>
-                <span>المذكرات</span>
-            </a>
-            <a href="javascript:void(0)" class="premium-menu-item" onclick="showTab('results')">
-                <i class="fas fa-chart-line"></i>
-                <span>نتائج الاختبارات</span>
-            </a>
-            <div id="guest-links"
-                style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 10px;">
-                <a href="javascript:void(0)" class="premium-menu-item"
-                    style="background: rgba(245, 158, 11, 0.05); color: var(--secondary);" onclick="openRegistration()">
-                    <i class="fas fa-user-plus"></i>
-                    <span>تسجيل بياناتي</span>
-                </a>
-            </div>
-        </nav>
-        <a href="javascript:void(0)" onclick="logout()" class="premium-menu-item logout"
-            style="margin-top: auto; color: var(--danger);">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>تسجيل الخروج</span>
-        </a>
-    </aside>
+    </header>
 
     <!-- Main Content -->
     <main class="premium-main-content" style="display: none;" id="dashboard-main">
@@ -204,106 +107,17 @@
             </div>
         </header>
 
-        <!-- Dynamic Tabs -->
-        <div id="overview-tab" class="dashboard-tab">
-            <div id="latest-content-entry">
-                <!-- Most recent content will appear here -->
-            </div>
-
-            <div class="dashboard-grid" style="margin-top: 30px; grid-template-columns: 1fr 1fr;">
-                <div style="display: flex; flex-direction: column; gap: 30px;">
-                    <div class="premium-card progress-section">
-                        <div class="progress-header">
-                            <span style="font-weight: 600;">نسبة الإنجاز في المنهج</span>
-                            <span>0%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-fill" style="width: 0%;"></div>
-                        </div>
-                    </div>
-
-                    <div id="announcement-card" class="premium-card progress-section"
-                        style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, #fff 100%); border: 1px solid rgba(245, 158, 11, 0.2);">
-                        <div class="progress-header">
-                            <span style="color: var(--secondary); font-weight: 700;"><i
-                                    class="fas fa-bullhorn rotate-icon"></i> تنبيه هام من المستر</span>
-                        </div>
-                        <p id="announcement-text"
-                            style="font-size: 1.1rem; line-height: 1.7; margin-top: 10px; color: var(--text-main); opacity: 0.9;">
-                            لا توجد تنبيهات
-                            حالياً.</p>
-                    </div>
-                </div>
-
-                <!-- Honor Roll / Leaderboard -->
-                <div class="premium-card progress-section" style="border-color: rgba(255,215,0,0.15);">
-                    <div class="progress-header">
-                        <span style="color: #ffd700; font-weight: 700;"><i class="fas fa-trophy"></i> لوحة الشرف (أوائل
-                            دفعتك)</span>
-                    </div>
-                    <div id="honor-roll-list" style="margin-top: 20px;">
-                        <!-- Leaderboard will load here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="lectures-tab" class="dashboard-tab" style="display: none;">
+        <!-- Lectures List Only -->
+        <div id="lectures-container" class="dashboard-tab">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem;"><i class="fas fa-video"
                         style="color: var(--secondary);"></i> مكتبة المحاضرات</h2>
                 <div class="info-pill" id="lecture-count-badge">0 محاضرة مخصصة لك</div>
             </div>
 
-            <!-- Branch Filter Pills -->
-            <div id="branch-filter-container" class="filter-wrapper"
-                style="margin-bottom: 30px; display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none;">
-                <!-- Branches will be injected here via JS -->
-            </div>
-
             <div id="lectures-grid"
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;">
                 <!-- Lectures will be injected here -->
-            </div>
-        </div>
-
-        <div id="quizzes-tab" class="dashboard-tab" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem;"><i class="fas fa-file-signature"
-                        style="color: var(--secondary);"></i> الاختبارات الإلكترونية</h2>
-                <div class="info-pill" id="quiz-count-badge-alt">0 اختبار مخصص لك</div>
-            </div>
-            <div id="quizzes-grid"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;">
-                <!-- Quizzes will be injected here -->
-            </div>
-        </div>
-
-        <div id="results-tab" class="dashboard-tab" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Amiri', serif; font-size: 2.2rem;"><i class="fas fa-poll-h"
-                        style="color: var(--secondary);"></i> نتائج اختباراتي</h2>
-            </div>
-            <div class="progress-section">
-                <div class="table-container" style="overflow-x: auto;">
-                    <table style="width: 100%; text-align: right; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--glass-border); color: var(--text-main);">
-                                <th style="padding: 15px;">الاختبار</th>
-                                <th style="padding: 15px;">الدرجة</th>
-                                <th style="padding: 15px;">النسبة</th>
-                                <th style="padding: 15px;">التاريخ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-results-table">
-                            <tr>
-                                <td colspan="4"
-                                    style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;">
-                                    لا تتوفر نتائج حالياً</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </main>
