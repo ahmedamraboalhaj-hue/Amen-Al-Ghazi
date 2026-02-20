@@ -279,7 +279,7 @@ function openAdmin() {
 
 function checkLogin() {
     const pass = document.getElementById('admin-password').value;
-    if (pass === 'Z10qwe') {
+    if (pass === '010qwe') {
         document.getElementById('admin-modal').classList.remove('active');
         showAdminDashboard();
     } else {
