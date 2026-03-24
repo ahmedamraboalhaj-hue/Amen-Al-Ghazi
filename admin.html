@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -912,13 +912,15 @@
             </div>
 
             <div class="panel">
-                <div class="panel-header">
+                <div class="panel-header" style="justify-content: space-between;">
                     <h2 class="panel-title"><i class="fas fa-key"></i> قائمة الأكواد</h2>
+                    <button class="btn btn-secondary" onclick="printSelectedVouchers()"><i class="fas fa-print"></i> طباعة المحدد (10 بالورقة)</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="select-all-vouchers" onclick="toggleAllVouchers(this)"></th>
                                 <th>الكود</th>
                                 <th>الصف</th>
                                 <th>طالب الكود (اختياري)</th>
@@ -1482,6 +1484,7 @@
                     const v = doc.data();
                     container.innerHTML += `
                         <tr>
+                            <td><input type="checkbox" class="voucher-checkbox" value="${v.code}" data-grade="${v.grade}" data-name="${v.studentName || ''}"></td>
                             <td style="font-family:monospace; font-weight:700; color:var(--secondary);">${v.code}</td>
                             <td>${getGradeName(v.grade)}</td>
                             <td>
@@ -1648,6 +1651,49 @@
             `);
         }
 
+        function toggleAllVouchers(source) {
+            const checkboxes = document.querySelectorAll('.voucher-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function printSelectedVouchers() {
+            const selected = Array.from(document.querySelectorAll('.voucher-checkbox:checked'));
+            if (selected.length === 0) return alert('برجاء تحديد كود واحد على الأقل');
+            
+            const win = window.open('', '_blank');
+            let content = `
+            <style>
+                @media print {
+                    @page { margin: 0; size: A4; }
+                    body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .page { page-break-after: always; padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); gap: 15px; height: 100vh; box-sizing: border-box; }
+                }
+                .page { padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); gap: 15px; height: 100vh; box-sizing: border-box; direction:rtl; font-family:sans-serif; }
+            </style>
+            `;
+            
+            for (let i = 0; i < selected.length; i += 10) {
+                const chunk = selected.slice(i, i + 10);
+                content += '<div class="page">';
+                chunk.forEach(cb => {
+                    const code = cb.value;
+                    const grade = cb.getAttribute('data-grade');
+                    const sName = cb.getAttribute('data-name');
+                    content += `
+                        <div style="border:2px dashed #6366f1; padding:10px; text-align:center; border-radius:15px; display:flex; flex-direction:column; justify-content:center; page-break-inside: avoid;">
+                            <h3 style="margin:5px 0; color:#6366f1; font-size:1.1rem;">مستر أمين الغازي</h3>
+                            <p style="font-size:0.9rem; margin:5px 0;">${getGradeName(grade)}</p>
+                            <div style="font-size:1.8rem; font-weight:bold; margin:10px 0; background:#f1f5f9; padding:8px; border-radius:8px; letter-spacing:3px;">${code}</div>
+                            ${sName ? `<p style="font-weight:bold; color:#1e293b; margin:5px 0; font-size:1rem;">الطالب: ${sName}</p>` : '<div style="height:25px; border-bottom:1px solid #ccc; margin-top:10px; font-size:0.9rem;">اسم الطالب: .................</div>'}
+                            <p style="font-size:0.7rem; color:gray; margin-top:5px;">منصة الأمين التعليمية - كود لكل شهر</p>
+                        </div>
+                    `;
+                });
+                content += '</div>';
+            }
+            win.document.write(content + '<script>setTimeout(() => { window.print(); window.close(); }, 700);<\\/script>'.replace('\\/', '/'));
+        }
+
         async function printCustomVouchers() {
             const grade = document.getElementById('print-grade-select').value;
             const count = parseInt(document.getElementById('print-count-input').value);
@@ -1662,23 +1708,37 @@
             if (snap.empty) return alert('لا توجد أكواد متاحة لهذه المرحلة');
 
             const win = window.open('', '_blank');
+            const vouchers = [];
+            snap.forEach(doc => vouchers.push(doc.data()));
+
             let content = `
-            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; direction:rtl; font-family:sans-serif;">
+            <style>
+                @media print {
+                    @page { margin: 0; size: A4; }
+                    body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .page { page-break-after: always; padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); gap: 15px; height: 100vh; box-sizing: border-box; }
+                }
+                .page { padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); gap: 15px; height: 100vh; box-sizing: border-box; direction:rtl; font-family:sans-serif; }
+            </style>
             `;
-            snap.forEach(doc => {
-                const v = doc.data();
-                content += `
-                    <div style="border:2px dashed #6366f1; padding:15px; text-align:center; border-radius:15px; page-break-inside: avoid;">
-                        <h3 style="margin:5px 0; color:#6366f1;">مستر أمين الغازي</h3>
-                        <p style="font-size:0.8rem; margin:5px 0;">${getGradeName(v.grade)}</p>
-                        <div style="font-size:1.6rem; font-weight:bold; margin:10px 0; background:#f1f5f9; padding:10px; border-radius:8px; letter-spacing:3px;">${v.code}</div>
-                        ${v.studentName ? `<p style="font-weight:bold; color:#1e293b; margin:5px 0;">الطالب: ${v.studentName}</p>` : '<div style="height:25px; border-bottom:1px solid #ccc; margin-top:10px;">اسم الطالب: .................</div>'}
-                        <p style="font-size:0.6rem; color:gray; margin-top:5px;">منصة الأمين التعليمية - كود لكل درس</p>
-                    </div>
-                `;
-            });
-            content += '</div>';
-            win.document.write(content + '<script>setTimeout(() => { window.print(); window.close(); }, 700);<\/script>');
+            
+            for (let i = 0; i < vouchers.length; i += 10) {
+                const chunk = vouchers.slice(i, i + 10);
+                content += '<div class="page">';
+                chunk.forEach(v => {
+                    content += `
+                        <div style="border:2px dashed #6366f1; padding:10px; text-align:center; border-radius:15px; display:flex; flex-direction:column; justify-content:center; page-break-inside: avoid;">
+                            <h3 style="margin:5px 0; color:#6366f1; font-size:1.1rem;">مستر أمين الغازي</h3>
+                            <p style="font-size:0.9rem; margin:5px 0;">${getGradeName(v.grade)}</p>
+                            <div style="font-size:1.8rem; font-weight:bold; margin:10px 0; background:#f1f5f9; padding:8px; border-radius:8px; letter-spacing:3px;">${v.code}</div>
+                            ${v.studentName ? `<p style="font-weight:bold; color:#1e293b; margin:5px 0; font-size:1rem;">الطالب: ${v.studentName}</p>` : '<div style="height:25px; border-bottom:1px solid #ccc; margin-top:10px; font-size:0.9rem;">اسم الطالب: .................</div>'}
+                            <p style="font-size:0.7rem; color:gray; margin-top:5px;">منصة الأمين التعليمية - كود لكل شهر</p>
+                        </div>
+                    `;
+                });
+                content += '</div>';
+            }
+            win.document.write(content + '<script>setTimeout(() => { window.print(); window.close(); }, 700);<\\/script>'.replace('\\/', '/'));
         }
 
         // --- Quiz Creation ---

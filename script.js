@@ -1,4 +1,4 @@
-﻿// --- Firebase Configuration ---
+// --- Firebase Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyCoUAGpTJANr-voTNxvEIlos2I8w_1kXtA",
     authDomain: "yghjni.firebaseapp.com",
@@ -967,7 +967,8 @@ function renderStudentContent() {
             `;
 
             grouped[m][b].forEach(l => {
-                const isUnlocked = unlocked.includes(l.id);
+                const lMonth = l.month || 'all';
+                const isUnlocked = unlocked.includes(l.id) || (lMonth !== 'all' && unlocked.includes(`month_${lMonth}`)) || unlocked.includes('month_all');
                 const vidId = extractYouTubeId(l.youtubeId);
                 const thumbUrl = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
 
@@ -1287,9 +1288,16 @@ async function unlockLesson(lessonId) {
             // Save unlocked lessons locally
             let unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
             lessonsToUnlock.forEach(id => { if (!unlocked.includes(id)) unlocked.push(id); });
+            
+            if (vMonth && vMonth !== 'all') {
+                if (!unlocked.includes(`month_${vMonth}`)) unlocked.push(`month_${vMonth}`);
+            } else if (!vMonth || vMonth === 'all') {
+                if (!unlocked.includes('month_all')) unlocked.push('month_all');
+            }
+            
             localStorage.setItem('unlocked_lessons', JSON.stringify(unlocked));
 
-            const monthName = { 'all': 'عام', '9': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر', '1': 'يناير', '2': 'فبراير', '3': 'مارس', '4': 'أبريل', '5': 'مايو' };
+            const monthName = { 'all': 'محتوى مفتوح', '9': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر', '1': 'يناير', '2': 'فبراير', '3': 'مارس', '4': 'أبريل', '5': 'مايو' };
             const msg = lessonsToUnlock.length > 1
                 ? `تم تفعيل (${lessonsToUnlock.length}) محاضرة لشهر ${monthName[vMonth] || vMonth} بنجاح! ✅`
                 : 'تم تفعيل المحاضرة بنجاح! ✅';
