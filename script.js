@@ -680,20 +680,63 @@ async function publishLecture() {
 }
 
 
-async function saveExam() {
-    const exam = {
-        title: document.getElementById('e-title').value,
-        grade: document.getElementById('e-grade').value,
-        duration: document.getElementById('e-duration').value,
-        link: document.getElementById('e-link').value,
-        createdAt: Date.now()
-    };
-    if (!exam.title || !exam.link) return alert('أدخل جميع البيانات');
+async function saveQuiz() {
+    const title = document.getElementById('quiz-title').value;
+    const grade = document.getElementById('quiz-grade').value;
+    const container = document.getElementById('questions-container');
+    const qBlocks = container.querySelectorAll('.question-block');
+
+    if (!title) return alert('برجاء إدخال عنوان الاختبار');
+    if (qBlocks.length === 0) return alert('برجاء إضافة سؤال واحد على الأقل');
+
+    const questions = [];
+    qBlocks.forEach(block => {
+        const qText = block.querySelector('.q-text').value;
+        const options = Array.from(block.querySelectorAll('.opt-text')).map(input => input.value);
+        const correct = parseInt(block.querySelector('.opt-correct').value);
+        if (qText) {
+            questions.push({ question: qText, options, correct });
+        }
+    });
+
     try {
-        await db.collection('quizzes').add(exam);
-        alert('تم حفظ الاختبار بنجاح');
+        await db.collection('quizzes').add({
+            title, grade, questions,
+            createdAt: Date.now()
+        });
+        alert('تم حفظ الاختبار بنجاح ✅');
         location.reload();
     } catch (e) { alert('خطأ في الحفظ'); }
+}
+
+function addQuestionRaw() {
+    const container = document.getElementById('questions-container');
+    const index = container.children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'panel question-block';
+    div.style.padding = '20px';
+    div.style.marginBottom = '15px';
+    div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+            <h4 style="color:var(--primary)">السؤال ${index}</h4>
+            <button class="btn-danger" style="padding:5px 10px;font-size:0.8rem;border-radius:5px;" onclick="this.parentElement.parentElement.remove()">حذف</button>
+        </div>
+        <div class="form-group">
+            <label>نص السؤال</label>
+            <input type="text" class="form-control q-text" placeholder="اكتب السؤال هنا...">
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+            <div class="form-group"><label>الاختيار 1</label><input type="text" class="form-control opt-text"></div>
+            <div class="form-group"><label>الاختيار 2</label><input type="text" class="form-control opt-text"></div>
+            <div class="form-group"><label>الاختيار 3</label><input type="text" class="form-control opt-text"></div>
+            <div class="form-group"><label>الاختيار 4</label><input type="text" class="form-control opt-text"></div>
+        </div>
+        <div class="form-group">
+            <label>رقم الإجابة الصحيحة (1-4)</label>
+            <input type="number" class="form-control opt-correct" min="1" max="4" value="1">
+        </div>
+    `;
+    container.appendChild(div);
 }
 
 async function saveFile() {
@@ -1259,7 +1302,7 @@ async function unlockLesson(lessonId) {
         const statusEl = document.getElementById('unlock-status');
         if (!code) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'يرجى إدخال الكود'; return; }
 
-        statusEl.style.color = '#10b981'; 
+        statusEl.style.color = '#10b981';
         statusEl.textContent = 'تم تفعيل الكود بنجاح! ✅ جاري فتح الفيديو...';
 
         // Save unlocked lessons locally
@@ -1302,10 +1345,8 @@ function watchVideo(containerId, youtubeId) {
     const shield = document.createElement('div');
     shield.style.cssText = 'position:absolute;inset:0;z-index:10;pointer-events:none;';
     shield.innerHTML = `
-        <!-- Block top YouTube bar -->
-        <div style="position:absolute;top:0;left:0;right:0;height:50px;pointer-events:auto;background:transparent;"></div>
-        <!-- Block bottom YouTube controls except allow interaction via pointer-events on player -->
-        <div style="position:absolute;top:0;right:0;width:130px;height:40px;pointer-events:auto;background:transparent;"></div>
+        <!-- Shield Overlay -->
+        <div style="position:absolute;inset:0;pointer-events:none;"></div>
         <!-- Watermark -->
         <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.55);color:#f59e0b;font-size:0.75rem;font-weight:700;padding:5px 10px;border-radius:8px;font-family:'Tajawal',sans-serif;pointer-events:none;">
             <i class="fas fa-shield-alt" style="margin-left:5px;"></i>منصة الأمين
@@ -1346,16 +1387,21 @@ function createYTPlayer(containerId, vidId, playerDiv, wrapper) {
                 rel: 0,
                 playsinline: 1,
                 controls: 1,
-                showinfo: 0,
                 fs: 0,           // disable YouTube's own fullscreen button (we have ours)
                 iv_load_policy: 3,
-                origin: window.location.origin
+                origin: window.location.protocol === 'file:' ? undefined : window.location.origin
             },
             events: {
                 onReady: (e) => { e.target.playVideo(); },
                 onError: (e) => {
                     console.error('YT Error:', e.data);
-                    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ef4444;gap:10px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><p>تعذر تشغيل الفيديو (${e.data})</p><p style="font-size:0.8rem;color:rgba(255,255,255,0.4);">تأكد من أن الفيديو غير مقيّد</p></div>`;
+                    let msg = `تعذر تشغيل الفيديو (${e.data})`;
+                    let subMsg = "تأكد من أن الفيديو غير مقيّد";
+                    if (e.data === 101 || e.data === 150 || e.data === 153) {
+                        msg = "خطأ في سياسة التشغيل (150/153)";
+                        subMsg = "يجب تفعيل خيار 'السماح بالتضمين' (Allow embedding) في إعدادات الفيديو على YouTube Studio";
+                    }
+                    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ef4444;gap:10px;text-align:center;padding:20px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><p>${msg}</p><p style="font-size:0.8rem;color:rgba(255,255,255,0.4);">${subMsg}</p></div>`;
                 }
             }
         });

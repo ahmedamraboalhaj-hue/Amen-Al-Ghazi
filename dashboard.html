@@ -766,10 +766,26 @@
         }
 
         window.initDashboard = async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gradeParam = urlParams.get('grade');
+
             const student = JSON.parse(localStorage.getItem('student_session'));
             if (!student) {
                 const m = document.getElementById('auth-modal');
-                if (m) m.classList.add('open');
+                if (m) {
+                    m.classList.add('open');
+                    // Pre-fill grade if in URL
+                    if (gradeParam) {
+                        const stageField = document.getElementById('student-stage');
+                        const yearField = document.getElementById('student-year');
+                        if (stageField && yearField) {
+                            stageField.value = gradeParam.includes('prep') ? 'preparatory' : 'secondary';
+                            updateYears();
+                            yearField.value = gradeParam;
+                            updateGroups();
+                        }
+                    }
+                }
                 return;
             }
             setupStudentUI(student);
