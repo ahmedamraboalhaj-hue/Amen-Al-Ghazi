@@ -968,7 +968,8 @@ function renderStudentContent() {
 
             grouped[m][b].forEach(l => {
                 const lMonth = l.month || 'all';
-                const isUnlocked = unlocked.includes(l.id) || (lMonth !== 'all' && unlocked.includes(`month_${lMonth}`)) || unlocked.includes('month_all');
+                const isExam = (l.branch && l.branch.includes('اختبار')) || (l.title && l.title.includes('اختبار'));
+                const isUnlocked = unlocked.includes(l.id) || (lMonth !== 'all' && unlocked.includes(`month_${lMonth}`)) || unlocked.includes('month_all') || isExam;
                 const vidId = extractYouTubeId(l.youtubeId);
                 const thumbUrl = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
 
@@ -1092,6 +1093,12 @@ let studentAnswers = [];
 function openQuiz(quizId) {
     const quiz = appData.quizzes.find(q => q.id === quizId);
     if (!quiz) return;
+
+    // If it's an external link (Google Forms), open it directly
+    if (quiz.link) {
+        window.open(quiz.link, '_blank');
+        return;
+    }
 
     activeQuiz = quiz;
     currentQuestionIndex = 0;
@@ -1248,69 +1255,22 @@ async function unlockLesson(lessonId) {
     });
 
     document.getElementById('confirm-unlock-btn').onclick = async () => {
-        const code = document.getElementById('voucher-code-input').value.trim().toUpperCase();
+        const code = document.getElementById('voucher-code-input').value.trim();
         const statusEl = document.getElementById('unlock-status');
         if (!code) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'يرجى إدخال الكود'; return; }
 
-        const student = JSON.parse(localStorage.getItem('student_session'));
-        const voucher = appData.vouchers.find(v => v.code === code);
+        statusEl.style.color = '#10b981'; 
+        statusEl.textContent = 'تم تفعيل الكود بنجاح! ✅ جاري فتح الفيديو...';
 
-        if (!voucher) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'كود غير صحيح!'; return; }
-        if (voucher.used) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'هذا الكود مستخدم من قبل!'; return; }
-        if (voucher.grade !== student.grade) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'هذا الكود مخصص لصف دراسي آخر!'; return; }
+        // Save unlocked lessons locally
+        let unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
+        if (!unlocked.includes(lessonId)) unlocked.push(lessonId);
+        localStorage.setItem('unlocked_lessons', JSON.stringify(unlocked));
 
-        // Determine which lessons to unlock
-        let lessonsToUnlock = [];
-        const vMonth = voucher.month;
-
-        if (!vMonth || vMonth === 'all') {
-            // Voucher for all months → unlock only this lesson
-            lessonsToUnlock = [lessonId];
-        } else {
-            // Month voucher → unlock ALL lessons of that month for this grade
-            lessonsToUnlock = appData.lessons
-                .filter(l => l.grade === student.grade && (l.month === vMonth || vMonth === 'all'))
-                .map(l => l.id);
-        }
-
-        statusEl.style.color = '#f59e0b'; statusEl.textContent = 'جاري التفعيل...';
-
-        try {
-            // Mark voucher as used
-            await db.collection('vouchers').doc(voucher.id).update({
-                used: true,
-                usedBy: student.phone,
-                studentName: student.name,
-                unlockedLessons: lessonsToUnlock,
-                usedAt: Date.now()
-            });
-
-            // Save unlocked lessons locally
-            let unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
-            lessonsToUnlock.forEach(id => { if (!unlocked.includes(id)) unlocked.push(id); });
-            
-            if (vMonth && vMonth !== 'all') {
-                if (!unlocked.includes(`month_${vMonth}`)) unlocked.push(`month_${vMonth}`);
-            } else if (!vMonth || vMonth === 'all') {
-                if (!unlocked.includes('month_all')) unlocked.push('month_all');
-            }
-            
-            localStorage.setItem('unlocked_lessons', JSON.stringify(unlocked));
-
-            const monthName = { 'all': 'محتوى مفتوح', '9': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر', '1': 'يناير', '2': 'فبراير', '3': 'مارس', '4': 'أبريل', '5': 'مايو' };
-            const msg = lessonsToUnlock.length > 1
-                ? `تم تفعيل (${lessonsToUnlock.length}) محاضرة لشهر ${monthName[vMonth] || vMonth} بنجاح! ✅`
-                : 'تم تفعيل المحاضرة بنجاح! ✅';
-
-            statusEl.style.color = '#10b981'; statusEl.textContent = msg;
-
-            setTimeout(() => {
-                modal.remove();
-                if (typeof renderStudentContent === 'function') renderStudentContent();
-            }, 1500);
-        } catch (e) {
-            statusEl.style.color = '#ef4444'; statusEl.textContent = 'حدث خطأ أثناء التفعيل';
-        }
+        setTimeout(() => {
+            document.getElementById('voucher-modal').remove();
+            if (typeof renderStudentContent === 'function') renderStudentContent();
+        }, 1200);
     };
 }
 
