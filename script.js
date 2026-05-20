@@ -193,21 +193,26 @@ async function trackVisit() {
 
 function extractVideoId(url) {
     if (!url) return '';
+    url = url.trim();
     if (url.startsWith('dyntube:')) return url;
     
-    if (url.includes('dyntube.com/v/')) {
-        const match = url.match(/\/v\/([a-zA-Z0-9]+)/);
+    if (url.includes('dyntube')) {
+        const match = url.match(/\/(?:v|videos)\/([a-zA-Z0-9_-]+)/);
         if (match) return 'dyntube:' + match[1];
+        const iframeMatch = url.match(/src="[^"]*dyntube\.com\/(?:v|videos)\/([a-zA-Z0-9_-]+)/);
+        if (iframeMatch) return 'dyntube:' + iframeMatch[1];
     }
     
-    if (!url.includes('/') && url.length > 11 && !url.includes(' ')) {
-        return 'dyntube:' + url;
-    }
+    const ytRegExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const ytMatch = url.match(ytRegExp);
+    if (ytMatch && ytMatch[7].length === 11) return ytMatch[7];
 
-    if (url.length === 11) return url;
-    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[7].length == 11) ? match[7] : url;
+    if (!url.includes('/') && !url.includes(' ')) {
+        if (url.length === 11) return url; // Default 11 chars to YouTube
+        return 'dyntube:' + url; // Any other length raw ID is Dyntube
+    }
+    
+    return url;
 }
 
 async function logView(lessonId, lessonTitle) {
