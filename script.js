@@ -191,8 +191,19 @@ async function trackVisit() {
     } catch (e) { console.error(e); }
 }
 
-function extractYouTubeId(url) {
+function extractVideoId(url) {
     if (!url) return '';
+    if (url.startsWith('dyntube:')) return url;
+    
+    if (url.includes('dyntube.com/v/')) {
+        const match = url.match(/\/v\/([a-zA-Z0-9]+)/);
+        if (match) return 'dyntube:' + match[1];
+    }
+    
+    if (!url.includes('/') && url.length > 11 && !url.includes(' ')) {
+        return 'dyntube:' + url;
+    }
+
     if (url.length === 11) return url;
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
     const match = url.match(regExp);
@@ -664,8 +675,8 @@ async function publishLecture() {
 
     if (!title || !url) return alert('برجاء ملء البيانات الأساسية');
 
-    const id = extractYouTubeId(url);
-    if (!id) return alert('رابط يوتيوب غير صحيح');
+    const id = extractVideoId(url);
+    if (!id) return alert('رابط الفيديو غير صحيح');
 
     try {
         await db.collection('lessons').add({
@@ -1013,12 +1024,14 @@ function renderStudentContent() {
                 const lMonth = l.month || 'all';
                 const isExam = (l.branch && l.branch.includes('اختبار')) || (l.title && l.title.includes('اختبار'));
                 const isUnlocked = unlocked.includes(l.id) || (lMonth !== 'all' && unlocked.includes(`month_${lMonth}`)) || unlocked.includes('month_all') || isExam;
-                const vidId = extractYouTubeId(l.youtubeId);
-                const thumbUrl = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
+                const vidId = extractVideoId(l.youtubeId);
+                const thumbBg = vidId.startsWith('dyntube:') ? 
+                    'linear-gradient(45deg, #1a1a2e, #16213e)' : 
+                    `url('https://img.youtube.com/vi/${vidId}/mqdefault.jpg') center/cover no-repeat`;
 
                 html += `
                     <div class="premium-card course-card" style="padding: 12px; border-radius: 20px;">
-                        <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 12px; background: url('${thumbUrl}') center/cover no-repeat; height: 160px; position: relative;">
+                        <div class="video-preview-wrapper" id="video-${l.id}" style="border-radius: 15px; margin-bottom: 12px; background: ${thumbBg}; height: 160px; position: relative;">
                             ${isUnlocked ? `
                                 <div class="play-overlay" onclick="watchVideo('${l.id}', '${vidId}')">
                                     <i class="fas fa-play"></i>
@@ -1336,12 +1349,19 @@ function watchVideo(containerId, youtubeId) {
     if (!wrapper) { console.error('Video wrapper not found for', containerId); return; }
     wrapper.id = `active-video-${containerId}`; // Ensure it has a reliable ID for fullscreen
 
-    const vidId = extractYouTubeId(youtubeId);
+    const vidId = extractVideoId(youtubeId);
     if (!vidId) { alert('خطأ: رابط الفيديو غير صحيح'); return; }
 
     // Clear wrapper content and prepare for player
     wrapper.innerHTML = '';
     wrapper.style.cssText = 'position:relative;background:#000;border-radius:12px;overflow:hidden;height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;';
+
+    // Dyntube logic
+    if (vidId.startsWith('dyntube:')) {
+        const dId = vidId.split(':')[1];
+        wrapper.innerHTML = \`<iframe src="https://embed.dyntube.com/v/\${dId}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%;height:100%;position:absolute;inset:0;border-radius:12px;"></iframe>\`;
+        return; // Skip YouTube init
+    }
 
     // Create the player div that YT API will replace
     // Put it in a container with pointer-events:none to block YT interactions
