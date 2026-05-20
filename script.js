@@ -612,11 +612,11 @@ function printSingleVoucher(code, gradeKey) {
             </head>
             <body>
                 <div class="card">
-                    <div class="teacher">مستر عادل عكاشه - لغة عربية</div>
+                    <div class="teacher">مستر أمين الغازي - لغة عربية</div>
                     <div class="grade">${gradeName}</div>
                     <div style="font-size: 0.9rem;">كود التفعيل الخاص بك:</div>
                     <div class="code">${code}</div>
-                    <div class="footer">تستخدم مرة واحدة فقط - منصة مستر عادل عكاشه التعليمية</div>
+                    <div class="footer">تستخدم مرة واحدة فقط - منصة مستر أمين الغازي التعليمية</div>
                 </div>
                 <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
             </body>
@@ -1320,6 +1320,13 @@ async function unlockLesson(lessonId) {
 
 
 
+function formatTime(seconds) {
+    if (!seconds) return "0:00";
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
 function watchVideo(containerId, youtubeId) {
     const lesson = appData.lessons.find(l => l.id === containerId);
     logView(containerId, lesson ? lesson.title : 'درس فيديو');
@@ -1327,55 +1334,53 @@ function watchVideo(containerId, youtubeId) {
     // Look for wrapper by card id OR video- prefix
     const wrapper = document.getElementById(`video-${containerId}`) || document.getElementById(`card-${containerId}`)?.querySelector('.lesson-thumb');
     if (!wrapper) { console.error('Video wrapper not found for', containerId); return; }
+    wrapper.id = `active-video-${containerId}`; // Ensure it has a reliable ID for fullscreen
 
     const vidId = extractYouTubeId(youtubeId);
     if (!vidId) { alert('خطأ: رابط الفيديو غير صحيح'); return; }
 
     // Clear wrapper content and prepare for player
     wrapper.innerHTML = '';
-    wrapper.style.cssText = 'position:relative;background:#000;border-radius:0;overflow:hidden;height:280px;';
+    wrapper.style.cssText = 'position:relative;background:#000;border-radius:12px;overflow:hidden;height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;';
 
     // Create the player div that YT API will replace
+    // Put it in a container with pointer-events:none to block YT interactions
+    const playerContainer = document.createElement('div');
+    playerContainer.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
     const playerDiv = document.createElement('div');
     playerDiv.id = `player-${containerId}`;
-    playerDiv.style.cssText = 'width:100%;height:100%;';
-    wrapper.appendChild(playerDiv);
+    playerContainer.appendChild(playerDiv);
+    wrapper.appendChild(playerContainer);
 
-    // Protection shield container - blocks right-click & YouTube logo area
-    const shield = document.createElement('div');
-    shield.style.cssText = 'position:absolute;inset:0;z-index:10;pointer-events:none;';
-    shield.innerHTML = `
-        <!-- Shield Overlay -->
-        <div style="position:absolute;inset:0;pointer-events:none;"></div>
-        <!-- Watermark -->
-        <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.55);color:#f59e0b;font-size:0.75rem;font-weight:700;padding:5px 10px;border-radius:8px;font-family:'Tajawal',sans-serif;pointer-events:none;">
-            <i class="fas fa-shield-alt" style="margin-left:5px;"></i>منصة الأمين
-        </div>
-        <!-- Fullscreen button -->
-        <button onclick="toggleFullScreen('video-${containerId}')" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.7);border:1px solid #f59e0b;color:#fff;width:42px;height:42px;border-radius:10px;cursor:pointer;z-index:50;pointer-events:auto;font-size:1rem;" title="ملء الشاشة">
-            <i class="fas fa-expand"></i>
-        </button>
-    `;
-    wrapper.appendChild(shield);
+    // Interactive Overlay (captures clicks to toggle controls)
+    const interactOverlay = document.createElement('div');
+    interactOverlay.id = `interact-${containerId}`;
+    interactOverlay.style.cssText = 'position:absolute;inset:0;z-index:10;cursor:pointer;';
+    wrapper.appendChild(interactOverlay);
+
+    // Controls Container
+    const ctrlDiv = document.createElement('div');
+    ctrlDiv.id = `controls-${containerId}`;
+    ctrlDiv.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:linear-gradient(transparent, rgba(0,0,0,0.9));display:flex;flex-direction:column;padding:15px;z-index:20;transition:opacity 0.3s;opacity:1;';
+    wrapper.appendChild(ctrlDiv);
 
     // Disable right-click on wrapper
     wrapper.addEventListener('contextmenu', e => e.preventDefault());
 
     // Initialize YouTube player
     if (!isYouTubeAPIReady || typeof YT === 'undefined' || !YT.Player) {
-        // API not ready yet, wait for it
         const interval = setInterval(() => {
             if (typeof YT !== 'undefined' && YT.Player) {
                 clearInterval(interval);
-                createYTPlayer(containerId, vidId, playerDiv, wrapper);
+                createYTPlayer(containerId, vidId, playerDiv, wrapper, interactOverlay, ctrlDiv);
             }
         }, 300);
     } else {
-        createYTPlayer(containerId, vidId, playerDiv, wrapper);
+        createYTPlayer(containerId, vidId, playerDiv, wrapper, interactOverlay, ctrlDiv);
     }
 }
 
-function createYTPlayer(containerId, vidId, playerDiv, wrapper) {
+function createYTPlayer(containerId, vidId, playerDiv, wrapper, interactOverlay, ctrlDiv) {
     try {
         ytPlayers[containerId] = new YT.Player(playerDiv, {
             height: '100%',
@@ -1387,90 +1392,161 @@ function createYTPlayer(containerId, vidId, playerDiv, wrapper) {
                 rel: 0,
                 playsinline: 1,
                 controls: 0,
-                fs: 0,           // disable YouTube's own fullscreen button (we have ours)
+                disablekb: 1,
+                fs: 0,
                 iv_load_policy: 3,
                 origin: window.location.protocol === 'file:' ? undefined : window.location.origin
             },
             events: {
                 onReady: (e) => {
-                    e.target.playVideo();
-                    // Custom controls container
-                    const wrapper = document.getElementById(`video-${containerId}`) || document.getElementById(`card-${containerId}`)?.querySelector('.lesson-thumb');
-                    if (wrapper) {
-                        const ctrlDiv = document.createElement('div');
-                        ctrlDiv.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;padding:5px;color:#fff;font-size:0.9rem;z-index:20;';
-                        // Play/Pause button
-                        const playBtn = document.createElement('button');
-                        playBtn.textContent = '▶️';
-                        playBtn.style.cssText = 'background:none;border:none;color:#fff;cursor:pointer;font-size:1rem;margin-right:10px;';
-                        playBtn.onclick = () => {
-                            const state = e.target.getPlayerState();
-                            if (state === YT.PlayerState.PLAYING) { e.target.pauseVideo(); playBtn.textContent = '▶️'; }
-                            else { e.target.playVideo(); playBtn.textContent = '⏸️'; }
-                        };
-                        ctrlDiv.appendChild(playBtn);
-                        // Progress slider
-                        const progress = document.createElement('input');
-                        progress.type = 'range';
-                        progress.min = 0;
-                        progress.max = 100;
-                        progress.value = 0;
-                        progress.style.flex = '1';
-                        progress.oninput = () => {
-                            const duration = e.target.getDuration();
-                            if (duration) e.target.seekTo(duration * (progress.value / 100), true);
-                        };
-                        ctrlDiv.appendChild(progress);
-                        // Speed selector
-                        const speedSelect = document.createElement('select');
-                        [0.5,1,1.25,1.5,2].forEach(s => {
-                            const opt = document.createElement('option');
-                            opt.value = s; opt.textContent = `${s}x`;
-                            if (s === 1) opt.selected = true;
-                            speedSelect.appendChild(opt);
-                        });
-                        speedSelect.onchange = () => { e.target.setPlaybackRate(parseFloat(speedSelect.value)); };
-                        ctrlDiv.appendChild(speedSelect);
-                        wrapper.appendChild(ctrlDiv);
-                        // Update progress bar periodically
-                        setInterval(() => {
-                            const dur = e.target.getDuration();
-                            const cur = e.target.getCurrentTime();
-                            if (dur) progress.value = (cur / dur) * 100;
-                        }, 1000);
+                    const player = e.target;
+                    player.playVideo();
+                    
+                    // Setup UI
+                    ctrlDiv.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;width:100%;">
+                            <span id="time-current-${containerId}" style="color:#fff;font-size:0.85rem;font-family:sans-serif;min-width:40px;text-align:center;">0:00</span>
+                            <input type="range" id="progress-${containerId}" min="0" max="100" value="0" style="flex:1;height:5px;cursor:pointer;accent-color:#f59e0b;outline:none;">
+                            <span id="time-total-${containerId}" style="color:#fff;font-size:0.85rem;font-family:sans-serif;min-width:40px;text-align:center;">0:00</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+                            <div style="display:flex;align-items:center;gap:15px;">
+                                <button id="play-pause-${containerId}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.2rem;width:30px;"><i class="fas fa-pause"></i></button>
+                                <button id="rewind-${containerId}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1rem;" title="تأخير 10 ثوان"><i class="fas fa-undo"></i></button>
+                                <button id="forward-${containerId}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1rem;" title="تقديم 10 ثوان"><i class="fas fa-redo"></i></button>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <button id="mute-${containerId}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1rem;"><i class="fas fa-volume-up"></i></button>
+                                    <input type="range" id="volume-${containerId}" min="0" max="100" value="100" style="width:70px;height:4px;cursor:pointer;accent-color:#f59e0b;outline:none;">
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:15px;">
+                                <select id="speed-${containerId}" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 8px;cursor:pointer;font-family:'Tajawal',sans-serif;outline:none;">
+                                    <option value="0.5" style="color:#000">0.5x</option>
+                                    <option value="0.75" style="color:#000">0.75x</option>
+                                    <option value="1" style="color:#000" selected>1x عادي</option>
+                                    <option value="1.25" style="color:#000">1.25x</option>
+                                    <option value="1.5" style="color:#000">1.5x</option>
+                                    <option value="2" style="color:#000">2x</option>
+                                </select>
+                                <button id="fs-btn-${containerId}" class="custom-fs-btn" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.2rem;"><i class="fas fa-expand"></i></button>
+                            </div>
+                        </div>
+                    `;
+
+                    const playBtn = document.getElementById(`play-pause-${containerId}`);
+                    const progress = document.getElementById(`progress-${containerId}`);
+                    const rewindBtn = document.getElementById(`rewind-${containerId}`);
+                    const forwardBtn = document.getElementById(`forward-${containerId}`);
+                    const muteBtn = document.getElementById(`mute-${containerId}`);
+                    const volumeBar = document.getElementById(`volume-${containerId}`);
+                    const speedSel = document.getElementById(`speed-${containerId}`);
+                    const fsBtn = document.getElementById(`fs-btn-${containerId}`);
+                    const timeCur = document.getElementById(`time-current-${containerId}`);
+                    const timeTot = document.getElementById(`time-total-${containerId}`);
+
+                    let controlsTimeout;
+                    const showControls = () => {
+                        ctrlDiv.style.opacity = '1';
+                        wrapper.style.cursor = 'default';
+                        clearTimeout(controlsTimeout);
+                        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+                            controlsTimeout = setTimeout(() => { ctrlDiv.style.opacity = '0'; wrapper.style.cursor = 'none'; }, 3000);
+                        }
+                    };
+
+                    wrapper.addEventListener('mousemove', showControls);
+                    interactOverlay.addEventListener('click', () => {
+                        showControls();
+                        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+                            player.pauseVideo();
+                        } else {
+                            player.playVideo();
+                        }
+                    });
+
+                    playBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo(); 
+                        else player.playVideo();
+                    };
+                    
+                    rewindBtn.onclick = (e) => { e.stopPropagation(); player.seekTo(Math.max(player.getCurrentTime() - 10, 0), true); };
+                    forwardBtn.onclick = (e) => { e.stopPropagation(); player.seekTo(player.getCurrentTime() + 10, true); };
+                    
+                    muteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (player.isMuted() || player.getVolume() === 0) { player.unMute(); muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>'; player.setVolume(volumeBar.value > 0 ? volumeBar.value : 100); volumeBar.value = player.getVolume(); }
+                        else { player.mute(); muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>'; volumeBar.value = 0; }
+                    };
+                    volumeBar.oninput = (e) => {
+                        e.stopPropagation();
+                        player.unMute();
+                        player.setVolume(volumeBar.value);
+                        muteBtn.innerHTML = volumeBar.value == 0 ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                    };
+                    volumeBar.onclick = (e) => e.stopPropagation();
+                    
+                    speedSel.onchange = (e) => { e.stopPropagation(); player.setPlaybackRate(parseFloat(speedSel.value)); };
+                    speedSel.onclick = (e) => e.stopPropagation();
+                    
+                    fsBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleFullScreen(`active-video-${containerId}`);
+                    };
+
+                    let isDragging = false;
+                    progress.addEventListener('mousedown', () => isDragging = true);
+                    progress.addEventListener('mouseup', () => { isDragging = false; player.seekTo(player.getDuration() * (progress.value / 100), true); });
+                    progress.addEventListener('click', (e) => e.stopPropagation());
+
+                    // Update loop
+                    setInterval(() => {
+                        if (player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING && !isDragging) {
+                            const cur = player.getCurrentTime();
+                            const dur = player.getDuration();
+                            if (dur) {
+                                progress.value = (cur / dur) * 100;
+                                timeCur.textContent = formatTime(cur);
+                                timeTot.textContent = formatTime(dur);
+                            }
+                        }
+                    }, 500);
+                },
+                onStateChange: (e) => {
+                    const playBtn = document.getElementById(`play-pause-${containerId}`);
+                    if (playBtn) {
+                        playBtn.innerHTML = e.data === YT.PlayerState.PLAYING ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
                     }
                 },
                 onError: (e) => {
-                    console.error('YT Error:', e.data);
                     let msg = `تعذر تشغيل الفيديو (${e.data})`;
-                    let subMsg = "تأكد من أن الفيديو غير مقيّد";
-                    if (e.data === 101 || e.data === 150 || e.data === 153) {
-                        msg = "خطأ في سياسة التشغيل (150/153)";
-                        subMsg = "يجب تفعيل خيار 'السماح بالتضمين' (Allow embedding) في إعدادات الفيديو على YouTube Studio";
-                    }
-                    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ef4444;gap:10px;text-align:center;padding:20px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><p>${msg}</p><p style="font-size:0.8rem;color:rgba(255,255,255,0.4);">${subMsg}</p></div>`;
+                    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ef4444;gap:10px;text-align:center;padding:20px;z-index:100;"><i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><p>${msg}</p></div>`;
                 }
             }
         });
     } catch (err) {
-        console.error('Player creation error:', err);
-        wrapper.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444;">خطأ في تشغيل الفيديو</div>`;
+        wrapper.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444;z-index:100;">خطأ في تشغيل الفيديو</div>`;
     }
 }
 
 function toggleFullScreen(elementId) {
     const el = document.getElementById(elementId);
+    if (!el) return false;
     const btnIcon = el.querySelector('.custom-fs-btn i');
     if (!document.fullscreenElement) {
         if (el.requestFullscreen) el.requestFullscreen();
-        else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
         else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
         else if (el.msRequestFullscreen) el.msRequestFullscreen();
         if (btnIcon) btnIcon.classList.replace('fa-expand', 'fa-compress');
+        el.style.minHeight = '100vh';
+        el.style.borderRadius = '0';
     } else {
         if (document.exitFullscreen) document.exitFullscreen();
         if (btnIcon) btnIcon.classList.replace('fa-compress', 'fa-expand');
+        el.style.minHeight = '280px';
+        el.style.borderRadius = '12px';
     }
+    return true;
 }
 
 // Auth Form (Dashboard)

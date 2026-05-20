@@ -10,7 +10,7 @@ class AlAminAI {
         this.isListening = false;
         this.messages = [];
         this.aiName = "الآمين";
-        this.teacherName = "مستر عادل عكاشه";
+        this.teacherName = "مستر أمين الغازي";
         
         this.initRecognition();
         this.injectUI();
@@ -145,7 +145,7 @@ class AlAminAI {
             response = `لدينا ${count} اختباراً إلكترونياً لتقييم مستواك. ابحث عنها في قسم "الاختبارات".`;
         } else if (lowerText.includes('مذكرة') || lowerText.includes('ملف') || lowerText.includes('pdf')) {
             response = `جميع المذكرات والملخصات موجودة في قسم "المذكرات والملفات". يمكنك تحميلها مباشرة.`;
-        } else if (lowerText.includes('عادل عكاشه')) {
+        } else if (lowerText.includes('أمين الغازي')) {
             response = `${this.teacherName} هو خبير اللغة العربية وصانع هذا المحتوى التعليمي المتميز.`;
         } else if (lowerText.includes('شكرا') || lowerText.includes('شكراً')) {
             response = `العفو! أنا دائماً هنا لخدمتك. بالتوفيق في دراستك!`;
