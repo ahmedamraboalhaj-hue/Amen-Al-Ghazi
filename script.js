@@ -612,11 +612,11 @@ function printSingleVoucher(code, gradeKey) {
             </head>
             <body>
                 <div class="card">
-                    <div class="teacher">مستر أمين الغازي - لغة عربية</div>
+                    <div class="teacher">مستر عادل عكاشه - لغة عربية</div>
                     <div class="grade">${gradeName}</div>
                     <div style="font-size: 0.9rem;">كود التفعيل الخاص بك:</div>
                     <div class="code">${code}</div>
-                    <div class="footer">تستخدم مرة واحدة فقط - منصة مستر أمين التعليمية</div>
+                    <div class="footer">تستخدم مرة واحدة فقط - منصة مستر عادل عكاشه التعليمية</div>
                 </div>
                 <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
             </body>
@@ -1386,13 +1386,60 @@ function createYTPlayer(containerId, vidId, playerDiv, wrapper) {
                 modestbranding: 1,
                 rel: 0,
                 playsinline: 1,
-                controls: 1,
+                controls: 0,
                 fs: 0,           // disable YouTube's own fullscreen button (we have ours)
                 iv_load_policy: 3,
                 origin: window.location.protocol === 'file:' ? undefined : window.location.origin
             },
             events: {
-                onReady: (e) => { e.target.playVideo(); },
+                onReady: (e) => {
+                    e.target.playVideo();
+                    // Custom controls container
+                    const wrapper = document.getElementById(`video-${containerId}`) || document.getElementById(`card-${containerId}`)?.querySelector('.lesson-thumb');
+                    if (wrapper) {
+                        const ctrlDiv = document.createElement('div');
+                        ctrlDiv.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;padding:5px;color:#fff;font-size:0.9rem;z-index:20;';
+                        // Play/Pause button
+                        const playBtn = document.createElement('button');
+                        playBtn.textContent = '▶️';
+                        playBtn.style.cssText = 'background:none;border:none;color:#fff;cursor:pointer;font-size:1rem;margin-right:10px;';
+                        playBtn.onclick = () => {
+                            const state = e.target.getPlayerState();
+                            if (state === YT.PlayerState.PLAYING) { e.target.pauseVideo(); playBtn.textContent = '▶️'; }
+                            else { e.target.playVideo(); playBtn.textContent = '⏸️'; }
+                        };
+                        ctrlDiv.appendChild(playBtn);
+                        // Progress slider
+                        const progress = document.createElement('input');
+                        progress.type = 'range';
+                        progress.min = 0;
+                        progress.max = 100;
+                        progress.value = 0;
+                        progress.style.flex = '1';
+                        progress.oninput = () => {
+                            const duration = e.target.getDuration();
+                            if (duration) e.target.seekTo(duration * (progress.value / 100), true);
+                        };
+                        ctrlDiv.appendChild(progress);
+                        // Speed selector
+                        const speedSelect = document.createElement('select');
+                        [0.5,1,1.25,1.5,2].forEach(s => {
+                            const opt = document.createElement('option');
+                            opt.value = s; opt.textContent = `${s}x`;
+                            if (s === 1) opt.selected = true;
+                            speedSelect.appendChild(opt);
+                        });
+                        speedSelect.onchange = () => { e.target.setPlaybackRate(parseFloat(speedSelect.value)); };
+                        ctrlDiv.appendChild(speedSelect);
+                        wrapper.appendChild(ctrlDiv);
+                        // Update progress bar periodically
+                        setInterval(() => {
+                            const dur = e.target.getDuration();
+                            const cur = e.target.getCurrentTime();
+                            if (dur) progress.value = (cur / dur) * 100;
+                        }, 1000);
+                    }
+                },
                 onError: (e) => {
                     console.error('YT Error:', e.data);
                     let msg = `تعذر تشغيل الفيديو (${e.data})`;
