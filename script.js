@@ -1359,7 +1359,7 @@ function watchVideo(containerId, youtubeId) {
     // Dyntube logic
     if (vidId.startsWith('dyntube:')) {
         const dId = vidId.split(':')[1];
-        wrapper.innerHTML = \`<iframe src="https://embed.dyntube.com/v/\${dId}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%;height:100%;position:absolute;inset:0;border-radius:12px;"></iframe>\`;
+        wrapper.innerHTML = `<iframe src="https://embed.dyntube.com/v/${dId}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%;height:100%;position:absolute;inset:0;border-radius:12px;"></iframe>`;
         return; // Skip YouTube init
     }
 
