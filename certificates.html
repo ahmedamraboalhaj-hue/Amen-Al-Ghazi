@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشهادات والإنجازات - الأمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{ --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --success:#2ed573; --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569; --border:#e3f4f9; }
+[data-theme="dark"]{ --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --text2:#8ba3c0; --border:#1e293b; }
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
+
+.topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; }
+.logo{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
+
+.container{ max-width:1200px; margin:0 auto; padding:32px 20px; }
+.header{ margin-bottom:32px; }
+.page-title{ font-size:32px; font-weight:900; font-family:'Tajawal',sans-serif; margin-bottom:12px; }
+
+.tabs{ display:flex; gap:12px; margin-bottom:32px; border-bottom:2px solid var(--border); }
+.tab-btn{ padding:14px 20px; background:none; border:none; color:var(--text2); font-weight:700; font-size:15px; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+.tab-btn:hover{ color:var(--primary); }
+.tab-btn.active{ color:var(--primary); border-bottom-color:var(--primary); }
+
+.tab-content{ display:none; }
+.tab-content.active{ display:block; }
+
+.certificates-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
+.cert-card{ background:linear-gradient(135deg,#fff8dc,#fffacd); border-radius:16px; padding:32px; border:2px solid var(--accent); box-shadow:0 8px 32px rgba(245,166,35,.15); transition:all .3s; cursor:pointer; position:relative; overflow:hidden; }
+.cert-card::before{ content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(245,166,35,.1),transparent); opacity:0; transition:opacity .3s; }
+.cert-card:hover{ transform:translateY(-8px); box-shadow:0 16px 48px rgba(245,166,35,.25); }
+.cert-card:hover::before{ opacity:1; }
+
+.cert-badge{ position:absolute; top:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg,var(--accent),#f7b731); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 4px 16px rgba(245,166,35,.3); z-index:2; }
+
+.cert-content{ text-align:center; margin-top:40px; position:relative; z-index:1; }
+.cert-title{ font-size:22px; font-weight:900; color:var(--text); margin-bottom:12px; font-family:'Tajawal',sans-serif; }
+.cert-meta{ font-size:13px; color:var(--text2); margin-bottom:16px; line-height:1.8; }
+.cert-score{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; display:inline-block; padding:8px 16px; border-radius:8px; font-weight:700; font-size:14px; margin-bottom:16px; }
+.cert-actions{ display:flex; gap:10px; justify-content:center; }
+.btn{ padding:10px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:13px; transition:all .2s; }
+.btn-download{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; }
+.btn-download:hover{ transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,119,182,.3); }
+.btn-share{ background:var(--bg); color:var(--primary); border:2px solid var(--primary); }
+.btn-share:hover{ background:var(--primary); color:white; }
+
+.achievements-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:20px; }
+.achievement{ background:var(--card); border:2px solid var(--border); border-radius:16px; padding:24px; text-align:center; transition:all .3s; cursor:pointer; }
+.achievement:hover{ transform:scale(1.05); box-shadow:0 8px 24px rgba(0,119,182,.15); border-color:var(--primary); }
+.achievement.locked{ opacity:.6; }
+.achievement-icon{ font-size:48px; margin-bottom:12px; }
+.achievement-name{ font-size:14px; font-weight:800; margin-bottom:8px; }
+.achievement-desc{ font-size:11px; color:var(--text2); }
+
+.progress-section{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+.progress-title{ font-size:18px; font-weight:900; margin-bottom:16px; }
+.progress-item{ margin-bottom:20px; }
+.progress-label{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:14px; font-weight:600; }
+.progress-bar{ width:100%; height:8px; background:var(--border); border-radius:8px; overflow:hidden; }
+.progress-fill{ height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); transition:width .3s; border-radius:8px; }
+
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-box{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; text-align:center; }
+.stat-val{ font-size:32px; font-weight:900; color:var(--primary); }
+.stat-label{ font-size:13px; color:var(--text2); margin-top:8px; }
+
+@media(max-width:768px){ .certificates-grid{ grid-template-columns:1fr; } .achievements-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-icon">أ</div>
+    <div class="logo-text">الأمين</div>
+  </a>
+  <div class="topbar-right">
+    <button onclick="window.location='dashboard.html'">📊 لوحة التحكم</button>
+    <button onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="page-title">الشهادات والإنجازات 🏆</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-val">3</div>
+      <div class="stat-label">شهادات حصلت عليها</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val">12</div>
+      <div class="stat-label">إنجازات مفتوحة</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val">8</div>
+      <div class="stat-label">دورات مكتملة</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val">95%</div>
+      <div class="stat-label">معدل التقدم</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">📜 الشهادات</button>
+    <button class="tab-btn" onclick="switchTab(1)">🌟 الإنجازات</button>
+    <button class="tab-btn" onclick="switchTab(2)">📊 التقدم</button>
+  </div>
+
+  <!-- CERTIFICATES TAB -->
+  <div class="tab-content active" id="tab-0">
+    <div class="certificates-grid">
+      <div class="cert-card">
+        <div class="cert-badge">📜</div>
+        <div class="cert-content">
+          <div class="cert-title">شهادة أساسيات اللغة العربية</div>
+          <div class="cert-meta">
+            <p>أكملت بنجاح جميع دروس المقرر الأساسي</p>
+            <p>حصلت على: ٨٨٪ من النقاط</p>
+          </div>
+          <div class="cert-score">متقدم ✨</div>
+          <div class="cert-actions">
+            <button class="btn btn-download">📥 تحميل</button>
+            <button class="btn btn-share">📤 مشاركة</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-badge">📜</div>
+        <div class="cert-content">
+          <div class="cert-title">شهادة القواعد النحوية</div>
+          <div class="cert-meta">
+            <p>أتقنت قواعد النحو والإملاء</p>
+            <p>حصلت على: ٩٢٪ من النقاط</p>
+          </div>
+          <div class="cert-score">ممتاز 🌟</div>
+          <div class="cert-actions">
+            <button class="btn btn-download">📥 تحميل</button>
+            <button class="btn btn-share">📤 مشاركة</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-badge">📜</div>
+        <div class="cert-content">
+          <div class="cert-title">شهادة التعبير الكتابي</div>
+          <div class="cert-meta">
+            <p>أتقنت مهارات الكتابة والتعبير</p>
+            <p>حصلت على: ٨٥٪ من النقاط</p>
+          </div>
+          <div class="cert-score">جيد جداً 👍</div>
+          <div class="cert-actions">
+            <button class="btn btn-download">📥 تحميل</button>
+            <button class="btn btn-share">📤 مشاركة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS TAB -->
+  <div class="tab-content" id="tab-1">
+    <div class="achievements-grid">
+      <div class="achievement">
+        <div class="achievement-icon">🚀</div>
+        <div class="achievement-name">المبتدئ الماهر</div>
+        <div class="achievement-desc">أكملت أول 3 دروس</div>
+      </div>
+      <div class="achievement">
+        <div class="achievement-icon">⭐</div>
+        <div class="achievement-name">الطالب النجيب</div>
+        <div class="achievement-desc">حصلت على 90% أو أكثر</div>
+      </div>
+      <div class="achievement">
+        <div class="achievement-icon">🔥</div>
+        <div class="achievement-name">الحضور المنتظم</div>
+        <div class="achievement-desc">حضرت لمدة أسبوع متتالي</div>
+      </div>
+      <div class="achievement">
+        <div class="achievement-icon">💯</div>
+        <div class="achievement-name">الكمالي</div>
+        <div class="achievement-desc">حصلت على 100% في اختبار</div>
+      </div>
+      <div class="achievement">
+        <div class="achievement-icon">🎓</div>
+        <div class="achievement-name">الخريج</div>
+        <div class="achievement-desc">أكملت كورس بالكامل</div>
+      </div>
+      <div class="achievement">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-name">الرائد</div>
+        <div class="achievement-desc">الأول على الفصل</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">🌈</div>
+        <div class="achievement-name">المتعدد المواهب</div>
+        <div class="achievement-desc">أكملت 5 كورسات</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">🎯</div>
+        <div class="achievement-name">الهدف المحقق</div>
+        <div class="achievement-desc">وصلت ل 1000 نقطة</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">👑</div>
+        <div class="achievement-name">الملك</div>
+        <div class="achievement-desc">أكملت 10 كورسات</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">💎</div>
+        <div class="achievement-name">الماس</div>
+        <div class="achievement-desc">معدلك 95% أو أكثر</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">🌟</div>
+        <div class="achievement-name">النجم اللامع</div>
+        <div class="achievement-desc">ساعدت 10 طلاب</div>
+      </div>
+      <div class="achievement locked">
+        <div class="achievement-icon">🎨</div>
+        <div class="achievement-name">الفنان</div>
+        <div class="achievement-desc">أكملت كورس الكتابة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TAB -->
+  <div class="tab-content" id="tab-2">
+    <div class="progress-section">
+      <div class="progress-title">تقدمك في الكورسات 📈</div>
+      
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>أساسيات اللغة العربية</span>
+          <span>85%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:85%"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>القواعد النحوية المتقدمة</span>
+          <span>92%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:92%"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>مهارات التعبير الكتابي</span>
+          <span>78%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:78%"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>فهم النصوص الأدبية</span>
+          <span>65%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:65%"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>البلاغة والجماليات</span>
+          <span>45%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:45%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  localStorage.setItem('cert-theme',dark?'light':'dark');
+}
+const t=localStorage.getItem('cert-theme');
+if(t) document.documentElement.setAttribute('data-theme',t);
+
+function switchTab(idx){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+idx).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

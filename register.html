@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إنشاء حساب - الأمين في اللغة العربية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--primary:#00b4d8;--primary-dark:#0077b6;--accent:#f5a623;--bg:#f8fbff;--card-bg:#fff;--text:#1a1a2e;--border:#e3f4f9;--input-bg:#f4fbff;}
+  [data-theme="dark"]{--bg:#0d1117;--card-bg:#161b22;--text:#e6edf3;--border:#21262d;--input-bg:#0d1117;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:var(--card-bg);box-shadow:0 2px 16px rgba(0,180,216,.08);border-bottom:2px solid var(--border);}
+  .logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+  .logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;font-weight:900;}
+  .logo-text{font-size:20px;font-weight:900;color:var(--primary);font-family:'Tajawal',sans-serif;}
+  .logo-sub{font-size:10px;color:#888;display:block;margin-top:-4px;}
+  .theme-toggle{background:#f0f9ff;border:2px solid var(--primary);border-radius:30px;padding:6px 12px;cursor:pointer;font-size:15px;}
+  [data-theme="dark"] .theme-toggle{background:#21262d;}
+
+  .page-body{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .reg-card{background:var(--card-bg);border-radius:28px;padding:48px 44px;width:100%;max-width:540px;box-shadow:0 12px 48px rgba(0,180,216,.13);border:1px solid var(--border);}
+  .card-header{text-align:center;margin-bottom:32px;}
+  .card-icon{width:72px;height:72px;background:linear-gradient(135deg,var(--accent),#f7b731);border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 6px 20px rgba(245,166,35,.3);}
+  .card-header h2{font-size:28px;font-weight:900;font-family:'Tajawal',sans-serif;}
+  .card-header p{color:#888;font-size:15px;margin-top:6px;}
+
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-group{margin-bottom:18px;}
+  label{display:block;font-weight:700;font-size:14px;margin-bottom:8px;}
+  input,select{width:100%;padding:13px 18px;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:15px;background:var(--input-bg);color:var(--text);transition:all .2s;outline:none;}
+  input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(0,180,216,.1);}
+  .input-wrap{position:relative;}
+  .input-icon{position:absolute;top:50%;transform:translateY(-50%);right:16px;font-size:16px;pointer-events:none;}
+  .input-wrap input,.input-wrap select{padding-right:44px;}
+
+  .pass-strength{height:4px;border-radius:4px;margin-top:8px;background:#eee;overflow:hidden;}
+  .pass-strength-bar{height:100%;width:0;border-radius:4px;transition:all .3s;}
+
+  .terms{display:flex;align-items:flex-start;gap:10px;margin:16px 0;font-size:14px;color:#888;cursor:pointer;}
+  .terms input[type="checkbox"]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;flex-shrink:0;margin-top:2px;}
+  .terms a{color:var(--primary);font-weight:600;}
+
+  .btn-submit{width:100%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-family:'Cairo',sans-serif;font-weight:800;font-size:17px;padding:15px;border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(0,180,216,.3);transition:all .25s;}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,180,216,.4);}
+
+  .divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:#aaa;font-size:13px;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .login-link{text-align:center;font-size:15px;color:#888;}
+  .login-link a{color:var(--primary);font-weight:700;text-decoration:none;}
+
+  .alert{display:none;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;margin-bottom:20px;}
+  .alert.error{background:#fff0f3;color:#c0392b;border:1px solid #ffd0d8;}
+  .alert.success{background:#f0fff4;color:#27ae60;border:1px solid #b3f5d1;}
+
+  @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">أ</div>
+    <div><span class="logo-text">الأمين</span><span class="logo-sub">في اللغة العربية</span></div>
+  </a>
+  <button class="theme-toggle" onclick="toggleTheme()">☀️ 🌙</button>
+</nav>
+
+<div class="page-body">
+  <div class="reg-card">
+    <div class="card-header">
+      <div class="card-icon">🎓</div>
+      <h2>اعمل حساب جديد</h2>
+      <p>انضم لآلاف الطلاب المتفوقين في منصة الأمين!</p>
+    </div>
+
+    <div class="alert" id="alert"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>الاسم الأول</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="firstName" placeholder="الاسم الأول">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>الاسم الأخير</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="lastName" placeholder="الاسم الأخير">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>رقم الموبايل</label>
+      <div class="input-wrap">
+        <span class="input-icon">📱</span>
+        <input type="tel" id="phone" placeholder="01xxxxxxxxx">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>الصف الدراسي</label>
+      <div class="input-wrap">
+        <span class="input-icon">📚</span>
+        <select id="grade">
+          <option value="">اختر صفك الدراسي</option>
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+          <option value="prep3">الصف الثالث الإعدادي</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>كلمة المرور</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="password" placeholder="كلمة مرور قوية" oninput="checkStrength(this.value)">
+      </div>
+      <div class="pass-strength"><div class="pass-strength-bar" id="strengthBar"></div></div>
+    </div>
+
+    <div class="form-group">
+      <label>تأكيد كلمة المرور</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔑</span>
+        <input type="password" id="confirmPass" placeholder="أعد كتابة كلمة المرور">
+      </div>
+    </div>
+
+    <label class="terms">
+      <input type="checkbox" id="terms">
+      <span>موافق على <a href="#">الشروط والأحكام</a> وسياسة الخصوصية</span>
+    </label>
+
+    <button class="btn-submit" onclick="doRegister()">إنشاء الحساب 🚀</button>
+
+    <div class="divider">عندك حساب بالفعل؟</div>
+    <div class="login-link"><a href="login.html">سجّل دخولك هنا</a></div>
+  </div>
+</div>
+
+<script>
+  function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');localStorage.setItem('theme',h.getAttribute('data-theme'));}
+  const saved=localStorage.getItem('theme');if(saved)document.documentElement.setAttribute('data-theme',saved);
+
+  function checkStrength(v){
+    const bar=document.getElementById('strengthBar');
+    let score=0;
+    if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
+    const colors=['#e74c3c','#e67e22','#f1c40f','#2ecc71'];
+    bar.style.width=(score*25)+'%';bar.style.background=colors[score-1]||'#eee';
+  }
+
+  function showAlert(msg,type){const a=document.getElementById('alert');a.textContent=msg;a.className='alert '+type;a.style.display='block';setTimeout(()=>a.style.display='none',4000);}
+
+  function doRegister(){
+    const fn=document.getElementById('firstName').value.trim();
+    const ln=document.getElementById('lastName').value.trim();
+    const ph=document.getElementById('phone').value.trim();
+    const gr=document.getElementById('grade').value;
+    const pw=document.getElementById('password').value;
+    const cp=document.getElementById('confirmPass').value;
+    const tc=document.getElementById('terms').checked;
+
+    if(!fn||!ln||!ph||!gr||!pw||!cp){showAlert('من فضلك اكمل كل البيانات!','error');return;}
+    if(pw!==cp){showAlert('كلمتا المرور مش متطابقتين!','error');return;}
+    if(pw.length<6){showAlert('كلمة المرور لازم تكون 6 أحرف على الأقل!','error');return;}
+    if(!tc){showAlert('لازم توافق على الشروط والأحكام!','error');return;}
+
+    const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
+    if(users.find(u=>u.phone===ph)){showAlert('رقم الموبايل ده مسجّل بالفعل!','error');return;}
+
+    const newUser={
+      id:Date.now(),firstName:fn,lastName:ln,name:fn+' '+ln,
+      phone:ph,grade:gr,password:pw,
+      joinDate:new Date().toLocaleDateString('ar-EG'),
+      lastLogin:new Date().toLocaleDateString('ar-EG'),
+      enrolledCourses:[],status:'active',role:'student'
+    };
+    users.push(newUser);
+    localStorage.setItem('alamin_users',JSON.stringify(users));
+    localStorage.setItem('alamin_current',JSON.stringify(newUser));
+    showAlert('تم إنشاء الحساب بنجاح! يللا نتعلم 🎉','success');
+    setTimeout(()=>window.location='dashboard.html',1500);
+  }
+</script>
+</body>
+</html>

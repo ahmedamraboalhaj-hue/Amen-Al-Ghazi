@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الملف الشخصي - الأمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{ --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569; --border:#e3f4f9; }
+[data-theme="dark"]{ --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --text2:#8ba3c0; --border:#1e293b; }
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
+
+.topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; }
+.logo{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
+
+.container{ max-width:1200px; margin:0 auto; padding:32px 20px; }
+
+.profile-hero{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:20px; padding:40px; color:white; margin-bottom:32px; position:relative; overflow:hidden; }
+.profile-hero::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 20% 50%, rgba(255,255,255,.1), transparent); }
+.profile-header{ display:flex; align-items:center; gap:32px; position:relative; z-index:2; }
+.avatar{ width:140px; height:140px; background:rgba(255,255,255,.2); border:4px solid rgba(255,255,255,.4); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:64px; flex-shrink:0; }
+.profile-info{ flex:1; }
+.profile-name{ font-size:32px; font-weight:900; font-family:'Tajawal',sans-serif; margin-bottom:8px; }
+.profile-email{ font-size:14px; opacity:.9; margin-bottom:16px; }
+.profile-badges{ display:flex; gap:12px; flex-wrap:wrap; }
+.badge{ background:rgba(255,255,255,.2); padding:8px 14px; border-radius:8px; font-size:12px; font-weight:700; backdrop-filter:blur(10px); }
+
+.tabs{ display:flex; gap:12px; margin-bottom:32px; border-bottom:2px solid var(--border); }
+.tab-btn{ padding:14px 20px; background:none; border:none; color:var(--text2); font-weight:700; font-size:15px; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+.tab-btn.active{ color:var(--primary); border-bottom-color:var(--primary); }
+
+.tab-content{ display:none; }
+.tab-content.active{ display:block; }
+
+.profile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.form-group{ margin-bottom:20px; }
+.form-group label{ display:block; font-weight:700; margin-bottom:8px; font-size:14px; }
+.form-group input, .form-group textarea{ width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:14px; font-family:'Cairo',sans-serif; }
+.form-group input:focus, .form-group textarea:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(0,180,216,.1); }
+
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:32px; }
+.stat-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; }
+.stat-val{ font-size:36px; font-weight:900; color:var(--primary); margin-bottom:8px; }
+.stat-label{ font-size:13px; color:var(--text2); font-weight:600; }
+
+.activity-section{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+.activity-title{ font-size:18px; font-weight:900; margin-bottom:16px; }
+.activity-item{ padding:16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; }
+.activity-item:last-child{ border-bottom:none; }
+.activity-icon{ font-size:32px; }
+.activity-text{ flex:1; }
+.activity-desc{ font-size:13px; color:var(--text2); margin-top:4px; }
+.activity-time{ font-size:12px; color:var(--text2); }
+
+.settings-section{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px; }
+.settings-title{ font-size:16px; font-weight:900; margin-bottom:16px; }
+.setting-item{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+.setting-item:last-child{ border-bottom:none; }
+.toggle{ width:50px; height:28px; background:var(--border); border-radius:14px; cursor:pointer; position:relative; transition:background .3s; }
+.toggle.active{ background:var(--primary); }
+.toggle::after{ content:''; position:absolute; width:24px; height:24px; background:white; border-radius:50%; top:2px; right:2px; transition:right .3s; }
+.toggle.active::after{ right:24px; }
+
+.btn-save{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:14px 32px; border-radius:12px; font-weight:900; cursor:pointer; font-size:14px; transition:all .2s; }
+.btn-save:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,119,182,.3); }
+
+@media(max-width:768px){ .profile-grid{ grid-template-columns:1fr; } .profile-header{ flex-direction:column; text-align:center; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-icon">أ</div>
+    <div class="logo-text">الأمين</div>
+  </a>
+  <div class="topbar-right">
+    <button onclick="window.location='dashboard.html'">📊 لوحة التحكم</button>
+    <button onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="profile-hero">
+    <div class="profile-header">
+      <div class="avatar">👨‍🎓</div>
+      <div class="profile-info">
+        <div class="profile-name" id="heroName">أحمد محمد</div>
+        <div class="profile-email">ahmed@example.com</div>
+        <div class="profile-badges">
+          <div class="badge">🌟 متعلم نشط</div>
+          <div class="badge">🏆 صاحب شهادات</div>
+          <div class="badge">💪 الأفضل</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">📋 بيانات الملف</button>
+    <button class="tab-btn" onclick="switchTab(1)">📊 الإحصائيات</button>
+    <button class="tab-btn" onclick="switchTab(2)">📝 النشاط</button>
+    <button class="tab-btn" onclick="switchTab(3)">⚙️ الإعدادات</button>
+  </div>
+
+  <!-- TAB 1: PROFILE DATA -->
+  <div class="tab-content active" id="tab-0">
+    <div class="profile-grid">
+      <div class="form-group">
+        <label>الاسم الأول</label>
+        <input type="text" value="أحمد" id="firstName">
+      </div>
+      <div class="form-group">
+        <label>الاسم الأخير</label>
+        <input type="text" value="محمد" id="lastName">
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" value="0123456789" id="phone">
+      </div>
+      <div class="form-group">
+        <label>الصف الدراسي</label>
+        <input type="text" value="الصف الثاني الثانوي" id="grade">
+      </div>
+      <div class="form-group" style="grid-column:1/3;">
+        <label>النبذة الشخصية</label>
+        <textarea rows="4">مهتم بتعلم اللغة العربية وتحسين مهاراتي في الكتابة والتعبير</textarea>
+      </div>
+    </div>
+    <button class="btn-save" onclick="saveProfile()">💾 حفظ البيانات</button>
+  </div>
+
+  <!-- TAB 2: STATISTICS -->
+  <div class="tab-content" id="tab-1">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val">24</div>
+        <div class="stat-label">ساعات التعلم</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">8</div>
+        <div class="stat-label">دورات مكتملة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">42</div>
+        <div class="stat-label">دروس مكتملة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">88%</div>
+        <div class="stat-label">متوسط النتيجة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">156</div>
+        <div class="stat-label">نقاط مكتسبة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">3</div>
+        <div class="stat-label">شهادات حصلت عليها</div>
+      </div>
+    </div>
+
+    <div class="activity-section">
+      <div class="activity-title">تقدمك الأسبوعي 📊</div>
+      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:20px;">
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">📚</div>
+          <div style="font-size:12px; color:var(--text2);">السبت: 3 ساعات</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">📚</div>
+          <div style="font-size:12px; color:var(--text2);">الأحد: 2 ساعات</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">🎓</div>
+          <div style="font-size:12px; color:var(--text2);">الإثنين: 4 ساعات</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">📚</div>
+          <div style="font-size:12px; color:var(--text2);">الثلاثاء: 3 ساعات</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px; opacity:.6;">
+          <div style="font-size:24px; margin-bottom:8px;">❌</div>
+          <div style="font-size:12px; color:var(--text2);">الأربعاء: راحة</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">🎓</div>
+          <div style="font-size:12px; color:var(--text2);">الخميس: 5 ساعات</div>
+        </div>
+        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
+          <div style="font-size:24px; margin-bottom:8px;">🔥</div>
+          <div style="font-size:12px; color:var(--text2);">الجمعة: 6 ساعات</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: ACTIVITY -->
+  <div class="tab-content" id="tab-2">
+    <div class="activity-section">
+      <div class="activity-title">آخر الأنشطة 🎯</div>
+      <div class="activity-item">
+        <div class="activity-icon">🎓</div>
+        <div class="activity-text">
+          <div style="font-weight:700;">أكملت دورة القواعس النحوية</div>
+          <div class="activity-desc">حصلت على 92% وشهادة معترف بها</div>
+          <div class="activity-time">منذ يومين</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">⭐</div>
+        <div class="activity-text">
+          <div style="font-weight:700;">حصلت على إنجاز جديد</div>
+          <div class="activity-desc">الطالب النجيب - حصلت على 90% أو أكثر</div>
+          <div class="activity-time">منذ 4 أيام</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">📝</div>
+        <div class="activity-text">
+          <div style="font-weight:700;">أكملت اختبار التعبير الكتابي</div>
+          <div class="activity-desc">النتيجة: 85% - جيد جداً</div>
+          <div class="activity-time">منذ أسبوع</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon">🏆</div>
+        <div class="activity-text">
+          <div style="font-weight:700;">حصلت على شهادة جديدة</div>
+          <div class="activity-desc">شهادة أساسيات اللغة العربية - ممتاز</div>
+          <div class="activity-time">منذ أسبوعين</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: SETTINGS -->
+  <div class="tab-content" id="tab-3">
+    <div class="settings-section">
+      <div class="settings-title">التنبيهات والإشعارات 🔔</div>
+      <div class="setting-item">
+        <span>إشعارات الدروس الجديدة</span>
+        <div class="toggle active" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="setting-item">
+        <span>إشعارات الاختبارات</span>
+        <div class="toggle active" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="setting-item">
+        <span>إشعارات التحديثات</span>
+        <div class="toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="setting-item">
+        <span>إشعارات البريد الإلكتروني</span>
+        <div class="toggle active" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title">الخصوصية والأمان 🔐</div>
+      <div class="setting-item">
+        <span>جعل ملفي الشخصي عام</span>
+        <div class="toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="setting-item">
+        <span>السماح بالبحث عني</span>
+        <div class="toggle active" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="setting-item">
+        <span>إظهار معدلاتي العلمية</span>
+        <div class="toggle active" onclick="toggleSwitch(this)"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title">حساب وأمان 🛡️</div>
+      <div class="setting-item" style="cursor:pointer;" onclick="alert('تم تغيير كلمة المرور بنجاح')">
+        <span>تغيير كلمة المرور</span>
+        <span>→</span>
+      </div>
+      <div class="setting-item" style="cursor:pointer;" onclick="alert('تفعيل التحقق الثنائي')">
+        <span>التحقق الثنائي</span>
+        <span>→</span>
+      </div>
+      <div class="setting-item" style="cursor:pointer;" onclick="if(confirm('هل تريد تنزيل بيانات حسابك؟')){alert('جاري التنزيل...')}">
+        <span>تنزيل البيانات</span>
+        <span>→</span>
+      </div>
+      <div class="setting-item" style="cursor:pointer; color:#ff4757;" onclick="if(confirm('هل تريد حذف حسابك نهائياً؟')){alert('تم طلب حذف الحساب')}">
+        <span>حذف الحساب</span>
+        <span>→</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  localStorage.setItem('profile-theme',dark?'light':'dark');
+}
+const t=localStorage.getItem('profile-theme');
+if(t) document.documentElement.setAttribute('data-theme',t);
+
+function switchTab(idx){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+idx).classList.add('active');
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+function toggleSwitch(el){
+  el.classList.toggle('active');
+}
+
+function saveProfile(){
+  alert('✅ تم حفظ البيانات بنجاح');
+}
+</script>
+</body>
+</html>

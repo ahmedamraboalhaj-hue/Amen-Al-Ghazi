@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول - منصة الأمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root { --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --accent2:#ff6b9d; --success:#2ed573; --danger:#ff4757; --bg:#f0f9ff; --card:#fff; --text:#0f172a; --text2:#475569; --border:#bde0fe; }
+[data-theme="dark"] { --bg:#060d1a; --card:#0f1e30; --text:#e2eaf4; --text2:#8ba3c0; --border:#1a3050; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; transition:background .3s,color .3s; }
+
+nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px solid var(--border); display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 12px rgba(0,119,182,.08); }
+.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo-box { width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; color:white; font-weight:900; }
+.nav-brand { font-family:'Tajawal',sans-serif; font-size:19px; font-weight:900; color:var(--primary); }
+.nav-sub { font-size:10px; color:var(--text2); display:block; margin-top:-3px; }
+.theme-btn { width:40px; height:40px; border-radius:10px; background:var(--bg); border:2px solid var(--border); cursor:pointer; font-size:17px; }
+
+.page-wrap { flex:1; display:grid; grid-template-columns:1fr 1fr; min-height:calc(100vh - 72px); }
+
+/* LEFT PANEL */
+.left-panel {
+  background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 50%,#00d4ff 100%);
+  padding:60px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden;
+}
+.left-panel::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.07); }
+.left-panel::after { content:''; position:absolute; bottom:-80px; left:-80px; width:250px; height:250px; border-radius:50%; background:rgba(255,255,255,0.05); }
+.panel-icon { font-size:80px; margin-bottom:24px; position:relative; z-index:1; animation:floatY 4s ease-in-out infinite; }
+@keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.panel-title { font-family:'Tajawal',sans-serif; font-size:34px; font-weight:900; color:white; margin-bottom:14px; position:relative; z-index:1; }
+.panel-sub { font-size:16px; color:rgba(255,255,255,.8); line-height:1.8; position:relative; z-index:1; margin-bottom:36px; }
+.panel-feats { display:flex; flex-direction:column; gap:14px; text-align:right; position:relative; z-index:1; width:100%; }
+.panel-feat { background:rgba(255,255,255,0.12); border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:12px; }
+.panel-feat .ico { font-size:22px; }
+.panel-feat .txt { color:white; font-size:14px; font-weight:600; }
+
+/* RIGHT PANEL */
+.right-panel { display:flex; align-items:center; justify-content:center; padding:48px 60px; }
+.login-box { width:100%; max-width:460px; }
+
+.login-header { text-align:center; margin-bottom:36px; }
+.login-icon { width:72px; height:72px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:20px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 6px 24px rgba(0,119,182,.3); }
+.login-title { font-family:'Tajawal',sans-serif; font-size:30px; font-weight:900; margin-bottom:6px; }
+.login-sub { font-size:15px; color:var(--text2); }
+
+.form-grp { margin-bottom:20px; }
+.form-label { display:block; font-weight:700; font-size:14px; margin-bottom:8px; color:var(--text); }
+.input-wrap { position:relative; }
+.input-ico { position:absolute; top:50%; transform:translateY(-50%); right:16px; font-size:17px; pointer-events:none; z-index:2; }
+.form-input {
+  width:100%; padding:14px 48px 14px 16px;
+  border:2px solid var(--border); border-radius:13px;
+  font-family:'Cairo',sans-serif; font-size:15px;
+  background:var(--bg); color:var(--text);
+  outline:none; transition:all .2s;
+}
+.form-input:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(0,180,216,.1); background:var(--card); }
+.eye-toggle { position:absolute; top:50%; transform:translateY(-50%); left:14px; background:none; border:none; cursor:pointer; font-size:17px; color:var(--text2); z-index:2; }
+
+.forgot-row { text-align:left; margin-top:8px; }
+.forgot-link { color:var(--accent); font-size:13px; font-weight:700; text-decoration:none; }
+.forgot-link:hover { text-decoration:underline; }
+
+.remember-row { display:flex; align-items:center; gap:10px; margin:6px 0 20px; }
+.remember-row input[type="checkbox"] { width:18px; height:18px; accent-color:var(--primary); cursor:pointer; }
+.remember-row label { font-size:14px; color:var(--text2); cursor:pointer; }
+
+.btn-login-submit {
+  width:100%; padding:15px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white; border:none; border-radius:13px;
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:17px;
+  cursor:pointer; box-shadow:0 6px 20px rgba(0,119,182,.3);
+  transition:all .25s; display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.btn-login-submit:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(0,119,182,.4); }
+.btn-login-submit:active { transform:translateY(0); }
+.btn-spinner { display:none; width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top-color:white; border-radius:50%; animation:spin .6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.divider { display:flex; align-items:center; gap:12px; margin:22px 0; color:var(--text2); font-size:13px; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.register-row { text-align:center; font-size:15px; color:var(--text2); }
+.register-row a { color:var(--primary); font-weight:800; text-decoration:none; }
+.register-row a:hover { text-decoration:underline; }
+
+.admin-hint {
+  margin-top:24px; padding:14px 18px;
+  background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2);
+  border-radius:12px; font-size:13px; color:var(--text2); text-align:center;
+}
+.admin-hint strong { color:var(--primary); }
+
+/* ALERTS */
+.alert { display:none; padding:14px 18px; border-radius:12px; font-size:14px; font-weight:600; margin-bottom:20px; animation:slideDown .3s; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+.alert.err { background:#fff0f3; color:#c0392b; border:1.5px solid #ffd0d8; }
+[data-theme="dark"] .alert.err { background:#2d1518; border-color:#7b2d36; color:#ff8896; }
+.alert.ok { background:#f0fff6; color:#27ae60; border:1.5px solid #b3f5d1; }
+[data-theme="dark"] .alert.ok { background:#0e2318; border-color:#1a6640; color:#4ddb8a; }
+
+@media(max-width:900px) { .page-wrap{grid-template-columns:1fr;} .left-panel{display:none;} .right-panel{padding:32px 24px;} }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-box">أ</div>
+    <div><span class="nav-brand">الأمين</span><span class="nav-sub">في اللغة العربية</span></div>
+  </a>
+  <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+</nav>
+
+<div class="page-wrap">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="panel-icon">👨‍🏫</div>
+    <div class="panel-title">أهلاً بك مرة تانية!</div>
+    <div class="panel-sub">سجّل دخولك وادخل على كورساتك وملفاتك ومراجعاتك في أي وقت</div>
+    <div class="panel-feats">
+      <div class="panel-feat"><span class="ico">📚</span><span class="txt">+٥٠ كورس متاح في اللغة العربية</span></div>
+      <div class="panel-feat"><span class="ico">🎥</span><span class="txt">فيديوهات شرح وملفات PDF</span></div>
+      <div class="panel-feat"><span class="ico">🆓</span><span class="txt">مراجعات نهائية مجانية للكل</span></div>
+      <div class="panel-feat"><span class="ico">💬</span><span class="txt">دعم مستمر من الأستاذ الأمين</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="login-box">
+      <div class="login-header">
+        <div class="login-icon">🔐</div>
+        <div class="login-title">سجّل دخولك</div>
+        <div class="login-sub">ادخل بياناتك وابدأ المذاكرة على طول!</div>
+      </div>
+
+      <div class="alert" id="alertBox"></div>
+
+      <div class="form-grp">
+        <label class="form-label">رقم الموبايل</label>
+        <div class="input-wrap">
+          <span class="input-ico">📱</span>
+          <input class="form-input" type="tel" id="phoneInp" placeholder="ادخل رقم الموبايل" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="form-grp">
+        <label class="form-label">كلمة المرور</label>
+        <div class="input-wrap">
+          <span class="input-ico">🔒</span>
+          <input class="form-input" type="password" id="passInp" placeholder="ادخل كلمة المرور">
+          <button class="eye-toggle" onclick="toggleEye()" id="eyeBtn">👁️</button>
+        </div>
+        <div class="forgot-row"><a href="#" class="forgot-link">نسيت كلمة المرور؟</a></div>
+      </div>
+
+      <div class="remember-row">
+        <input type="checkbox" id="rememberMe">
+        <label for="rememberMe">ابقى متسجّل دخول</label>
+      </div>
+
+      <button class="btn-login-submit" onclick="doLogin()" id="loginBtn">
+        <span id="loginBtnText">دخول 🚀</span>
+        <div class="btn-spinner" id="loginSpinner"></div>
+      </button>
+
+      <div class="divider">أو</div>
+      <div class="register-row">مش عندك حساب؟ <a href="register.html">اعمل حساب جديد!</a></div>
+
+      <div class="admin-hint">
+        للدخول كـ أدمن: <strong>01000000000</strong> / <strong>admin123</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  document.querySelector('.theme-btn').textContent=dark?'🌙':'☀️';
+  localStorage.setItem('alamin_theme',dark?'light':'dark');
+}
+const t=localStorage.getItem('alamin_theme');
+if(t){document.documentElement.setAttribute('data-theme',t);document.querySelector('.theme-btn').textContent=t==='dark'?'☀️':'🌙';}
+
+function toggleEye(){
+  const i=document.getElementById('passInp');
+  const b=document.getElementById('eyeBtn');
+  i.type=i.type==='password'?'text':'password';
+  b.textContent=i.type==='password'?'👁️':'🙈';
+}
+
+function showAlert(msg,type){
+  const a=document.getElementById('alertBox');
+  a.textContent=msg; a.className='alert '+(type==='error'?'err':'ok');
+  a.style.display='block';
+  setTimeout(()=>a.style.display='none',4000);
+}
+
+function setLoading(v){
+  document.getElementById('loginBtnText').style.display=v?'none':'block';
+  document.getElementById('loginSpinner').style.display=v?'block':'none';
+  document.getElementById('loginBtn').disabled=v;
+}
+
+function doLogin(){
+  const phone=document.getElementById('phoneInp').value.trim();
+  const pass=document.getElementById('passInp').value;
+  if(!phone||!pass){showAlert('❌ من فضلك ادخل رقم الموبايل وكلمة المرور','error');return;}
+
+  setLoading(true);
+  setTimeout(()=>{
+    // Admin login
+    if(phone==='01000000000'&&pass==='admin123'){
+      localStorage.setItem('alamin_current',JSON.stringify({id:0,name:'الأستاذ الأمين',phone:'01000000000',role:'admin'}));
+      showAlert('✅ أهلاً بك يا أدمن! جاري التوجيه...','success');
+      setTimeout(()=>window.location.href='dashboard.html',1000);
+      return;
+    }
+    // Student login
+    const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
+    const user=users.find(u=>u.phone===phone&&u.password===pass);
+    if(user){
+      user.lastLogin=new Date().toLocaleDateString('ar-EG');
+      user.role='student';
+      // Update last login in storage
+      const idx=users.findIndex(u=>u.id===user.id);
+      users[idx]=user;
+      localStorage.setItem('alamin_users',JSON.stringify(users));
+      localStorage.setItem('alamin_current',JSON.stringify(user));
+      showAlert('✅ أهلاً بيك يا '+user.firstName+'! جاري التوجيه...','success');
+      setTimeout(()=>window.location.href='dashboard.html',1000);
+    } else {
+      showAlert('❌ رقم الموبايل أو كلمة المرور غلط!','error');
+      setLoading(false);
+    }
+  },800);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

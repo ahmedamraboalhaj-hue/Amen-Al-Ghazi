@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الدروس - الأمين في اللغة العربية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --success:#2ed573;
+  --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569; --border:#e3f4f9;
+}
+[data-theme="dark"]{ --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --text2:#8ba3c0; --border:#1e293b; }
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
+
+.topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.logo-link{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
+.topbar-right button:hover{ border-color:var(--primary); color:var(--primary); }
+.theme-toggle{ background:#f0f9ff; border:2px solid var(--primary); border-radius:30px; padding:6px 12px; cursor:pointer; font-size:14px; }
+[data-theme="dark"] .theme-toggle{ background:#1e293b; }
+.logout-btn{ background:#fff0f3; color:#c0392b; border:none; }
+.logout-btn:hover{ background:#ffc0d0; }
+
+.container{ max-width:1400px; margin:0 auto; padding:32px 20px; }
+
+.lesson-header{ margin-bottom:32px; }
+.lesson-title{ font-size:32px; font-weight:900; font-family:'Tajawal',sans-serif; margin-bottom:8px; }
+.lesson-meta{ display:flex; gap:20px; font-size:14px; color:var(--text2); margin-bottom:20px; }
+.breadcrumb{ font-size:13px; color:var(--text2); margin-bottom:16px; }
+.breadcrumb a{ color:var(--primary); text-decoration:none; font-weight:700; }
+
+.lesson-content{ display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+
+.main-content{ background:var(--card); border-radius:16px; border:1px solid var(--border); padding:24px; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+.video-player{ background:#000; border-radius:12px; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; color:white; font-size:48px; margin-bottom:24px; }
+.lesson-description{ line-height:1.8; color:var(--text2); margin-bottom:24px; }
+.lesson-resources{ background:var(--bg); border-radius:12px; padding:16px; margin-bottom:24px; }
+.resource-title{ font-weight:700; font-size:15px; margin-bottom:12px; }
+.resource-list{ display:flex; flex-direction:column; gap:10px; }
+.resource-item{ display:flex; align-items:center; gap:10px; padding:10px 14px; background:white; border-radius:10px; text-decoration:none; color:var(--primary); font-weight:600; border:1px solid var(--border); transition:all .2s; }
+[data-theme="dark"] .resource-item{ background:#161b22; }
+.resource-item:hover{ background:var(--primary); color:white; transform:translateX(-4px); }
+
+.sidebar{ background:var(--card); border-radius:16px; border:1px solid var(--border); padding:20px; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+.sidebar-section{ margin-bottom:24px; }
+.sidebar-title{ font-size:15px; font-weight:900; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.lesson-nav{ display:flex; flex-direction:column; gap:8px; }
+.lesson-item{ padding:10px 12px; border-radius:10px; text-decoration:none; color:var(--text2); font-size:13px; font-weight:600; border-left:3px solid transparent; cursor:pointer; transition:all .2s; }
+.lesson-item:hover{ background:var(--bg); color:var(--primary); border-left-color:var(--primary); }
+.lesson-item.active{ background:linear-gradient(90deg,rgba(0,180,216,.1),transparent); color:var(--primary); border-left-color:var(--primary); }
+
+.test-box{ background:linear-gradient(135deg,#e8f4ff,#f0f9ff); border-radius:12px; padding:16px; margin-bottom:16px; text-align:center; border:2px dashed var(--primary); }
+.test-box h4{ color:var(--primary); font-size:15px; margin-bottom:10px; }
+.test-btn{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:700; font-size:14px; transition:all .2s; }
+.test-btn:hover{ transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,119,182,.3); }
+
+.progress-bar{ width:100%; height:6px; background:var(--border); border-radius:6px; overflow:hidden; margin:12px 0; }
+.progress-fill{ height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:6px; width:65%; transition:width .3s; }
+
+.notes-section{ background:var(--bg); border-radius:12px; padding:16px; margin-top:24px; }
+.notes-title{ font-weight:700; font-size:15px; margin-bottom:12px; }
+.note-input{ width:100%; padding:12px; border:2px solid var(--border); border-radius:10px; font-family:'Cairo',sans-serif; font-size:14px; background:var(--card); color:var(--text); outline:none; resize:vertical; }
+.note-input:focus{ border-color:var(--primary); box-shadow:0 0 0 4px rgba(0,180,216,.1); }
+.note-save-btn{ background:var(--primary); color:white; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:700; margin-top:10px; transition:all .2s; }
+.note-save-btn:hover{ background:var(--primary-dark); }
+
+@media(max-width:768px){ .lesson-content{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo-link">
+    <div class="logo-icon">أ</div>
+    <div class="logo-text">الأمين</div>
+  </a>
+  <div class="topbar-right">
+    <button onclick="window.location='dashboard.html'">📊 لوحة التحكم</button>
+    <button class="theme-toggle" onclick="toggleTheme()">☀️ 🌙</button>
+    <button class="logout-btn" onclick="logout()">🚪 خروج</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="dashboard.html">الرئيسية</a> / <a href="#">كورسات</a> / <span id="courseName">الكورس</span> / <strong id="lessonName">الدرس</strong>
+  </div>
+
+  <div class="lesson-header">
+    <div class="lesson-title" id="mainTitle">مبادئ اللغة العربية</div>
+    <div class="lesson-meta">
+      <span>👨‍🏫 الأستاذ الأمين</span>
+      <span>📅 تاريخ النشر: ١٥ مايو ٢٠٢٦</span>
+      <span>⏱️ المدة: ٣٥ دقيقة</span>
+    </div>
+  </div>
+
+  <div class="lesson-content">
+    <div class="main-content">
+      <div class="video-player">🎥 فيديو الدرس</div>
+      
+      <div class="lesson-description">
+        <h3 style="margin-bottom:12px;">وصف الدرس</h3>
+        <p>في هذا الدرس سنتعلم أساسيات اللغة العربية من الصفر. نغطي القواعد الأساسية والمفردات الضرورية لكل طالب.</p>
+      </div>
+
+      <div class="lesson-resources">
+        <div class="resource-title">📁 موارد الدرس</div>
+        <div class="resource-list">
+          <a href="#" class="resource-item">📄 ملخص الدرس (PDF)</a>
+          <a href="#" class="resource-item">📋 أسئلة المراجعة (DOC)</a>
+          <a href="#" class="resource-item">🎨 شرائح العرض (PPT)</a>
+          <a href="#" class="resource-item">📝 كراسة التمارين</a>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-title">📝 ملاحظاتك على الدرس</div>
+        <textarea class="note-input" id="noteInput" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+        <button class="note-save-btn" onclick="saveNote()">💾 حفظ الملاحظات</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">📚 الدروس في هذا الكورس</div>
+        <div class="lesson-nav">
+          <div class="lesson-item active">الدرس ١: المقدمة</div>
+          <div class="lesson-item">الدرس ٢: القواعد الأساسية</div>
+          <div class="lesson-item">الدرس ٣: المفردات</div>
+          <div class="lesson-item">الدرس ٤: التطبيقات العملية</div>
+          <div class="lesson-item">الدرس ٥: التقويم</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">📊 تقدمك</div>
+        <p style="font-size:13px; margin-bottom:10px;">اكتمل: ٦٥٪</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:65%"></div>
+        </div>
+        <p style="font-size:12px; color:var(--text2);">درسان أكملتهما من ٥ دروس</p>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="test-box">
+          <h4>اختبر نفسك! ✏️</h4>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">هل تشعر أنك جاهز؟ خذ اختبار الدرس</p>
+          <button class="test-btn" onclick="startTest()">ابدأ الاختبار</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">💡 نصائح</div>
+        <ul style="font-size:13px; color:var(--text2); line-height:1.8; list-style:none;">
+          <li>✓ ركز على الأمثلة العملية</li>
+          <li>✓ أعد مشاهدة الأجزاء الصعبة</li>
+          <li>✓ طبق ما تعلمته فوراً</li>
+          <li>✓ لا تتردد في طرح الأسئلة</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  localStorage.setItem('lesson-theme',dark?'light':'dark');
+}
+const t=localStorage.getItem('lesson-theme');
+if(t) document.documentElement.setAttribute('data-theme',t);
+
+function logout(){
+  localStorage.removeItem('alamin_current');
+  window.location='login.html';
+}
+
+function saveNote(){
+  const note=document.getElementById('noteInput').value.trim();
+  if(!note){alert('الرجاء كتابة ملاحظة');return;}
+  const lessons=JSON.parse(localStorage.getItem('alamin_lesson_notes')||'{}');
+  lessons['lesson_1']={text:note,date:new Date().toLocaleString('ar-EG')};
+  localStorage.setItem('alamin_lesson_notes',JSON.stringify(lessons));
+  alert('تم حفظ الملاحظات بنجاح ✅');
+}
+
+function startTest(){
+  alert('🎯 اختبار الدرس\n\n١. ما هي أساسيات اللغة العربية؟\n٢. عرّف الاسم\n٣. أعط ثلاثة أمثلة من الدرس');
+}
+
+// Load saved notes
+window.addEventListener('load',()=>{
+  const lessons=JSON.parse(localStorage.getItem('alamin_lesson_notes')||'{}');
+  if(lessons['lesson_1']){
+    document.getElementById('noteInput').value=lessons['lesson_1'].text;
+  }
+});
+</script>
+</body>
+</html>
