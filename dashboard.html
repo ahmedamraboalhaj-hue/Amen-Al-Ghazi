@@ -317,9 +317,23 @@ tr:hover td{background:rgba(0,180,216,.03);}
           <h3>جميع الطلاب المسجّلين 👨‍🎓</h3>
           <div class="table-search">
             <input type="text" id="searchStudents" placeholder="ابحث عن طالب..." oninput="filterStudents()">
+            <select id="studentsSourceFilter" onchange="filterStudents()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+              <option value="all">كل الطلاب</option>
+              <option value="platform">طلاب المنصة</option>
+              <option value="center">طلاب السيستم / السنتر</option>
+            </select>
+            <select id="studentsGradeFilter" onchange="filterStudents()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+              <option value="all">كل الصفوف</option>
+              <option value="1">الأول الثانوي</option>
+              <option value="2">الثاني الثانوي</option>
+              <option value="3">الثالث الثانوي</option>
+              <option value="prep3">الثالث الإعدادي</option>
+            </select>
+            <button class="btn-add" onclick="refreshCenterStudentsForStudentsPage()">استيراد طلاب السيستم</button>
             <button class="btn-add" onclick="openAddStudentModal()">➕ إضافة طالب</button>
           </div>
         </div>
+        <div id="studentsGradeSummary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 24px 18px"></div>
         <table>
           <thead>
             <tr>
@@ -589,8 +603,8 @@ tr:hover td{background:rgba(0,180,216,.03);}
             <div class="modal-form">
               <div class="form-group">
                 <label>الصف الدراسي</label>
-                <select id="vcGrade" onchange="populateVoucherStudents();toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
-                  <option value="all">كل الصفوف</option>
+                <select id="vcGrade" onchange="populateVoucherCourses();populateVoucherStudents();toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                  <option value="">اختر الصف الدراسي</option>
                   <option value="1">الصف الأول الثانوي</option>
                   <option value="2">الصف الثاني الثانوي</option>
                   <option value="3">الصف الثالث الثانوي</option>
@@ -600,9 +614,9 @@ tr:hover td{background:rgba(0,180,216,.03);}
             </div>
             <div class="modal-form">
               <div class="form-group">
-                <label>الكورس (اختياري)</label>
+                <label>الكورس</label>
                 <select id="vcCourseId" onchange="toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
-                  <option value="">غير مرتبط بكورس</option>
+                  <option value="">اختر الصف أولاً</option>
                 </select>
               </div>
             </div>
@@ -623,8 +637,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
               <div class="form-group">
                 <label>نوع الطالب</label>
                 <select id="vcStudentType" onchange="populateVoucherStudents();toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
-                  <option value="all">كل الطلاب</option>
-                  <option value="center">طلاب السنتر</option>
+                  <option value="center">طلاب السنتر / السيستم</option>
                   <option value="outside">طلاب خارج السنتر</option>
                 </select>
               </div>
@@ -979,7 +992,7 @@ function showPage(id) {
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
   });
-  if(id==='students') renderStudentsTable();
+  if(id==='students') initStudentsPage();
   if(id==='courses') renderCoursesAdmin();
   if(id==='analytics') renderAnalytics();
   if(id==='overview') renderOverview();
@@ -1073,6 +1086,11 @@ function addLessonToCourse(courseId, lesson){
   saveCourses(cs);
   return lesson;
 }
+
+async function initStudentsPage(){
+  await syncCenterStudentsFromFirebase();
+  renderStudentsTable();
+}
 function updateLesson(courseId, lessonId, updates){
   const cs = getCourses();
   const c = cs.find(x=>x.id==courseId);
@@ -1108,11 +1126,49 @@ function renderOverview(){
 }
 
 // ---- STUDENTS TABLE ----
+function normalizeStudentId(id){return String(id);}
+function getStudentsSourceFilter(){
+  return document.getElementById('studentsSourceFilter')?.value || 'all';
+}
+function getStudentsGradeFilter(){
+  return document.getElementById('studentsGradeFilter')?.value || 'all';
+}
+function renderStudentsGradeSummary(users){
+  const wrap = document.getElementById('studentsGradeSummary');
+  if(!wrap) return;
+  const source = getStudentsSourceFilter();
+  const base = users.filter(u => source === 'all' || (source === 'center' ? getStudentType(u) === 'center' : getStudentType(u) !== 'center'));
+  const cards = [
+    ['1','الأول الثانوي'],
+    ['2','الثاني الثانوي'],
+    ['3','الثالث الثانوي'],
+    ['prep3','الثالث الإعدادي']
+  ];
+  wrap.innerHTML = cards.map(([grade,label]) => {
+    const count = base.filter(u => String(u.grade) === grade).length;
+    return `<button onclick="document.getElementById('studentsGradeFilter').value='${grade}';filterStudents()" style="text-align:right;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--bg);cursor:pointer;font-family:'Cairo',sans-serif;color:var(--text)">
+      <div style="font-size:13px;color:var(--text2);font-weight:700">${label}</div>
+      <div style="font-size:24px;font-weight:900;color:var(--primary);margin-top:4px">${count}</div>
+    </button>`;
+  }).join('');
+}
+async function refreshCenterStudentsForStudentsPage(){
+  const added = await syncCenterStudentsFromFirebase();
+  renderStudentsTable();
+  showAlert(added ? `تم استيراد ${added} طالب من السيستم.` : 'تم التحديث، لا يوجد طلاب جدد من السيستم.');
+}
 function renderStudentsTable(filter=''){
   const users=getUsers();
   const tbody=document.getElementById('studentsTableBody');
   document.getElementById('studentsBadge').textContent=users.length;
-  let filtered=users.filter(u=>!filter||(u.name&&u.name.includes(filter))||(u.phone&&u.phone.includes(filter))||(u.email&&u.email.includes(filter)));
+  const sourceFilter = getStudentsSourceFilter();
+  const gradeFilter = getStudentsGradeFilter();
+  renderStudentsGradeSummary(users);
+  let filtered=users.filter(u=>!filter||(u.name&&u.name.includes(filter))||(u.phone&&u.phone.includes(filter))||(u.email&&u.email.includes(filter))||(u.qrCode&&String(u.qrCode).includes(filter)));
+  if(sourceFilter !== 'all') {
+    filtered = filtered.filter(u => sourceFilter === 'center' ? getStudentType(u) === 'center' : getStudentType(u) !== 'center');
+  }
+  if(gradeFilter !== 'all') filtered = filtered.filter(u => String(u.grade) === gradeFilter);
   if(!filtered.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد نتائج</p></div></td></tr>';return;}
   tbody.innerHTML=filtered.map((u,i)=>`
     <tr>
@@ -1124,15 +1180,15 @@ function renderStudentsTable(filter=''){
       <td>${u.joinDate||'-'}</td>
       <td><span class="badge active">نشط ✅</span></td>
       <td><div class="action-btns">
-        <button class="btn-view" onclick="viewStudent(${u.id})">عرض</button>
-        <button class="btn-delete" onclick="deleteStudent(${u.id})">حذف</button>
+        <button class="btn-view" onclick="viewStudent('${normalizeStudentId(u.id)}')">عرض</button>
+        <button class="btn-delete" onclick="deleteStudent('${normalizeStudentId(u.id)}')">حذف</button>
       </div></td>
     </tr>`).join('');
 }
 function filterStudents(){renderStudentsTable(document.getElementById('searchStudents').value.trim());}
 
 function viewStudent(id){
-  const u=getUsers().find(u=>u.id===id);
+  const u=getUsers().find(u=>normalizeStudentId(u.id)===normalizeStudentId(id));
   if(!u) return;
   document.getElementById('modalTitle').textContent='تفاصيل الطالب: '+u.name;
   const enrolled = u.enrolledCourses || [];
@@ -1163,7 +1219,7 @@ function viewStudent(id){
       <select id="grantCourseSelect" style="flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:12px;background:var(--bg);font-family:'Cairo',sans-serif">
         ${courseOptions}
       </select>
-      <button class="btn-save" onclick="grantCourseToStudent(${u.id})" style="padding:10px 18px;">منح وصول</button>
+      <button class="btn-save" onclick="grantCourseToStudent('${normalizeStudentId(u.id)}')" style="padding:10px 18px;">منح وصول</button>
     </div>
   `;
   document.getElementById('studentModal').classList.add('open');
@@ -1173,7 +1229,7 @@ function grantCourseToStudent(userId){
   if(!select || !select.value){ alert('اختر كورس للتفعيل'); return; }
   const courseId = parseInt(select.value,10);
   const users = getUsers();
-  const idx = users.findIndex(u=>u.id===userId);
+  const idx = users.findIndex(u=>normalizeStudentId(u.id)===normalizeStudentId(userId));
   if(idx === -1){ alert('الطالب غير موجود'); return; }
   if(!users[idx].enrolledCourses) users[idx].enrolledCourses = [];
   if(users[idx].enrolledCourses.includes(courseId)){ alert('هذا الطالب لديه وصول بالفعل'); return; }
@@ -1184,7 +1240,7 @@ function grantCourseToStudent(userId){
 }
 function deleteStudent(id){
   if(!confirm('هل أنت متأكد من حذف هذا الطالب؟')) return;
-  let users=getUsers().filter(u=>u.id!==id);
+  let users=getUsers().filter(u=>normalizeStudentId(u.id)!==normalizeStudentId(id));
   saveUsers(users);
   renderStudentsTable();
   renderOverview();
@@ -1687,8 +1743,8 @@ async function syncCenterStudentsFromFirebase() {
     snapshot.forEach(doc => {
       const data = doc.data() || {};
       const id = String(data.id || data.qrCode || doc.id);
-      if (!id || users.some(u => String(u.id) === id || String(u.qrCode || '') === id)) return;
-      users.push({
+      if (!id) return;
+      const incoming = {
         ...data,
         id,
         qrCode: data.qrCode || id,
@@ -1697,10 +1753,16 @@ async function syncCenterStudentsFromFirebase() {
         studentType: 'center',
         role: 'student',
         enrolledCourses: data.enrolledCourses || []
-      });
-      added++;
+      };
+      const existingIndex = users.findIndex(u => String(u.id) === id || String(u.qrCode || '') === id);
+      if (existingIndex > -1) {
+        users[existingIndex] = { ...users[existingIndex], ...incoming };
+      } else {
+        users.push(incoming);
+        added++;
+      }
     });
-    if (added) saveUsers(users);
+    saveUsers(users);
     return added;
   } catch (err) {
     console.warn('Could not sync center students', err);
@@ -1759,7 +1821,14 @@ function gotoPrintFromGenerate() {
   doPrint();
 }
 function toggleGenType() {
-  const type = document.getElementById('vcGenType').value;
+  const genTypeSelect = document.getElementById('vcGenType');
+  const studentType = document.getElementById('vcStudentType')?.value || 'center';
+  const type = studentType === 'center' ? 'students' : 'count';
+  if(genTypeSelect) {
+    genTypeSelect.value = type;
+    const genTypeWrap = genTypeSelect.closest('.modal-form');
+    if(genTypeWrap) genTypeWrap.style.display = 'none';
+  }
   const countWrap = document.getElementById('vcCountWrap');
   const studentListWrap = document.getElementById('vcStudentListWrap');
   const countLabel = document.querySelector('#vcCountWrap label');
@@ -1770,11 +1839,10 @@ function toggleGenType() {
   } else if(type === 'students') {
     countWrap.style.display = 'block';
     studentListWrap.style.display = 'none';
-    countLabel.textContent = 'أكواد لكل طالب في الصف المحدد';
+    countLabel.textContent = 'عدد طلاب السنتر المطابقين';
     const grade = document.getElementById('vcGrade').value;
-    const typeFilter = document.getElementById('vcStudentType').value;
     const courseId = document.getElementById('vcCourseId').value;
-    const count = filterStudentsMissingCourseCode(filterUsersByGradeAndType(getUsers(), grade, typeFilter), courseId).length;
+    const count = filterStudentsMissingCourseCode(filterUsersByGradeAndType(getUsers(), grade, 'center'), courseId).length;
     countInput.value = count || 0;
     countInput.readOnly = true;
   } else {
@@ -1798,7 +1866,11 @@ function getSelectedStudentIds() {
 function populateVoucherCourses() {
   const select = document.getElementById('vcCourseId');
   if(!select) return;
-  select.innerHTML = '<option value="">غير مرتبط بكورس</option>' + courses.map(c => `<option value="${c.id}">${c.title} (${gradeLabel(c.grade)})</option>`).join('');
+  const grade = document.getElementById('vcGrade')?.value || '';
+  const filteredCourses = grade ? courses.filter(c => String(c.grade) === String(grade)) : [];
+  select.innerHTML = '<option value="">' + (grade ? 'اختر الكورس' : 'اختر الصف أولاً') + '</option>' +
+    filteredCourses.map(c => `<option value="${c.id}">${c.title} (${c.type==='paid' ? 'مدفوع' : 'مجاني'})</option>`).join('');
+  if(filteredCourses.length === 1) select.value = filteredCourses[0].id;
 }
 function populateVoucherStudents() {
   const wrap = document.getElementById('vcStudentCheckList');
@@ -1874,6 +1946,8 @@ async function generateMissingCenterCourseCodes() {
   const course = courses.find(c => String(c.id) === String(courseId));
   if (!course) { alert('اختار الكورس المدفوع الأول.'); return; }
   document.getElementById('vcGrade').value = course.grade || 'all';
+  populateVoucherCourses();
+  document.getElementById('vcCourseId').value = course.id;
   document.getElementById('vcStudentType').value = 'center';
   document.getElementById('vcGenType').value = 'students';
   toggleGenType();
@@ -1918,16 +1992,21 @@ async function exportPlatformCourseCodesToSystem() {
   renderPrintPreview();
   alert(`تم تصدير ${exportable.length} كود للسيستم بنجاح.`);
 }
-function generateVouchers() {
+async function generateVouchers() {
+  await syncCenterStudentsFromFirebase();
   const month = document.getElementById('vcMonth').value.trim() || 'غير محدد';
   const grade = document.getElementById('vcGrade').value;
   const courseId = document.getElementById('vcCourseId').value;
   const course = courses.find(c => c.id.toString() === courseId);
   const courseTitle = course ? course.title : 'غير مرتبط بكورس';
-  const genType = document.getElementById('vcGenType').value;
+  const studentType = document.getElementById('vcStudentType').value;
+  const genType = studentType === 'center' ? 'students' : 'count';
   const countInput = parseInt(document.getElementById('vcCount').value, 10) || 0;
   const selectedStudentIds = getSelectedStudentIds();
   let batch = [];
+  if (!month || month === 'غير محدد') { alert('اكتب اسم الشهر / الفترة أولاً'); return; }
+  if (!grade) { alert('اختار الصف الدراسي أولاً'); return; }
+  if (!course) { alert('اختار كورس من كورسات الصف المحدد'); return; }
   if (genType === 'list') {
     if (!selectedStudentIds.length) { alert('اختر طالب واحد على الأقل'); return; }
     const users = getUsers();
@@ -1935,8 +2014,7 @@ function generateVouchers() {
     const missingUsers = filterStudentsMissingCourseCode(selectedUsers, course ? course.id : '');
     batch = missingUsers.map((user, i) => buildStudentVoucher(user, course, month, grade, i));
   } else if (genType === 'students') {
-    const typeFilter = document.getElementById('vcStudentType').value;
-    const users = filterStudentsMissingCourseCode(filterUsersByGradeAndType(getUsers(), grade, typeFilter), course ? course.id : '');
+    const users = filterStudentsMissingCourseCode(filterUsersByGradeAndType(getUsers(), grade, 'center'), course.id);
     if (!users.length) { alert('لا يوجد طلاب متطابقين مع الفلتر'); return; }
     batch = users.map((user, i) => buildStudentVoucher(user, course, month, grade, i));
   } else {
@@ -1947,10 +2025,11 @@ function generateVouchers() {
         code: generateUniqueCode(),
         month,
         grade,
-        courseId: course ? course.id : '',
+        courseId: course.id,
         courseTitle,
         linkedStudentId: '',
         linkedStudentName: 'غير مرتبط',
+        linkedStudentType: 'outside',
         date: new Date().toLocaleDateString('ar-EG'),
         createdAt: new Date().toISOString(),
         status: 'غير مستخدم'
