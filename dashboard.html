@@ -153,6 +153,9 @@ tr:hover td{background:rgba(0,180,216,.03);}
   #printPreviewInfo { display:block !important; color:#000 !important; font-size:12px !important; margin-bottom:12px !important; }
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="assets/backend-sync.js"></script>
 </head>
 <body>
@@ -1152,13 +1155,99 @@ function renderStudentsGradeSummary(users){
     </button>`;
   }).join('');
 }
+// ---- SYNC FROM LOCAL INDEXEDDB (نظام إدارة السنتر المحلي) ----
+async function syncStudentsFromIndexedDB() {
+  return new Promise((resolve) => {
+    let openReq;
+    try {
+      openReq = indexedDB.open('EduMasterLargeDB', 4);
+    } catch(e) {
+      return resolve({ added: 0, imported: 0, error: e });
+    }
+    openReq.onerror = () => resolve({ added: 0, imported: 0, error: new Error('لا يوجد قاعدة بيانات السيستم المحلية') });
+    openReq.onsuccess = (e) => {
+      const idb = e.target.result;
+      if (!idb.objectStoreNames.contains('students')) {
+        idb.close();
+        return resolve({ added: 0, imported: 0, error: new Error('لم يتم العثور على جدول الطلاب في السيستم') });
+      }
+      const tx = idb.transaction(['students'], 'readonly');
+      const store = tx.objectStore('students');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const centerStudents = req.result || [];
+        idb.close();
+        if (!centerStudents.length) return resolve({ added: 0, imported: 0 });
+        const users = getUsers();
+        let added = 0;
+        centerStudents.forEach(s => {
+          if (!s.id && !s.name) return;
+          const id = String(s.id || s.qrCode || Date.now());
+          const existingIndex = users.findIndex(u =>
+            String(u.id) === id ||
+            (s.qrCode && String(u.qrCode || '') === String(s.qrCode))
+          );
+          const mapped = {
+            id,
+            name: s.name || 'طالب من السيستم',
+            phone: s.phone || '',
+            grade: normalizeImportedStudentGrade(s),
+            studentType: 'center',
+            role: 'student',
+            qrCode: s.qrCode || id,
+            joinDate: s.joinDate || new Date().toLocaleDateString('ar-EG'),
+            lastLogin: s.lastLogin || '',
+            status: 'active',
+            enrolledCourses: s.enrolledCourses || [],
+            fromSystem: true
+          };
+          if (existingIndex > -1) {
+            users[existingIndex] = { ...users[existingIndex], ...mapped };
+          } else {
+            users.push(mapped);
+            added++;
+          }
+        });
+        saveUsers(users);
+        resolve({ added, imported: centerStudents.length });
+      };
+      req.onerror = () => { idb.close(); resolve({ added: 0, imported: 0, error: new Error('خطأ في قراءة بيانات السيستم') }); };
+    };
+  });
+}
+
 async function refreshCenterStudentsForStudentsPage(){
-  const result = await syncCenterStudentsFromFirebase();
+  showAlert('جاري استيراد الطلاب...');
+
+  // 1) Read from local IndexedDB (center system)
+  const idbResult = await syncStudentsFromIndexedDB();
+
+  // 2) Also read from Firebase if available
+  let fbResult = { added: 0, imported: 0, scanned: 0 };
+  if (window.db) {
+    fbResult = await syncCenterStudentsFromFirebase();
+  }
+
   renderStudentsTable();
-  if(result.error) {
-    showAlert('تعذر استيراد طلاب السيستم من Firebase: ' + (result.error.message || result.error));
+  renderOverview();
+
+  const totalAdded = (idbResult.added || 0) + (fbResult.added || 0);
+  const totalImported = (idbResult.imported || 0) + (fbResult.imported || 0);
+
+  if (totalImported > 0) {
+    showAlert(totalAdded
+      ? `✅ تم استيراد ${totalAdded} طالب جديد! إجمالي طلاب السيستم: ${totalImported}.`
+      : `✅ تم تحديث البيانات. إجمالي طلاب السيستم: ${totalImported}.`
+    );
   } else {
-    showAlert(result.added ? `تم استيراد ${result.added} طالب جديد من السيستم. تمت قراءة ${result.scanned} طالب/مستند، والمتطابق ${result.imported}.` : `تم التحديث. تمت قراءة ${result.scanned} طالب/مستند، والمتطابق كطلاب سيستم ${result.imported}.`);
+    // Both failed - give helpful message
+    const noIdb = idbResult.error && String(idbResult.error.message || '').includes('لا يوجد');
+    showAlert(
+      noIdb
+        ? '⚠️ لم يتم العثور على بيانات السيستم. افتح نظام السنتر (index.html) على نفس المتصفح ثم حاول مرة أخرى.'
+        : `⚠️ لم يتم العثور على طلاب. ${idbResult.error ? idbResult.error.message : ''}`,
+      'error'
+    );
   }
 }
 function renderStudentsTable(filter=''){
