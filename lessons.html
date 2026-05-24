@@ -393,19 +393,29 @@ function renderCoursePage(){
 function getLessonSegments(lesson){
   if(Array.isArray(lesson.segments) && lesson.segments.length){
     return lesson.segments
-      .filter(segment => segment && segment.videoUrl)
-      .map((segment, index)=>({
-        id: segment.id || `${lesson.id}_${index + 1}`,
-        title: segment.title || `المقطع ${index + 1}`,
-        videoUrl: segment.videoUrl,
-        duration: segment.duration || '',
-        position: segment.position || index + 1
-      }));
+      .filter(segment => segment && (segment.videoUrl || segment.bunnyVideoId))
+      .map((segment, index)=>{
+        // بناء videoUrl من bunnyVideoId لو videoUrl فاضي
+        const videoUrl = segment.videoUrl ||
+          (segment.bunnyVideoId ? `https://iframe.mediadelivery.net/embed/${segment.bunnyLibraryId || '666877'}/${segment.bunnyVideoId}` : '');
+        return {
+          id: segment.id || `${lesson.id}_${index + 1}`,
+          title: segment.title || `المقطع ${index + 1}`,
+          videoUrl: videoUrl,
+          bunnyVideoId: segment.bunnyVideoId || '',
+          duration: segment.duration || '',
+          position: segment.position || index + 1
+        };
+      });
   }
-  return lesson.videoUrl ? [{
+  // fallback: lesson-level videoUrl أو bunnyVideoId
+  const fallbackUrl = lesson.videoUrl ||
+    (lesson.bunnyVideoId ? `https://iframe.mediadelivery.net/embed/${lesson.bunnyLibraryId || '666877'}/${lesson.bunnyVideoId}` : '');
+  return fallbackUrl ? [{
     id: `${lesson.id}_1`,
     title: lesson.title || 'المقطع الأول',
-    videoUrl: lesson.videoUrl,
+    videoUrl: fallbackUrl,
+    bunnyVideoId: lesson.bunnyVideoId || '',
     duration: lesson.duration || '',
     position: 1
   }] : [];
@@ -444,7 +454,8 @@ function renderCourseContentItem(lessonId, item){
     return `<div class="segment-item" data-lesson="${lessonId}" data-segment="${escapeHTML(item.id)}" onclick="selectLessonSegment(${lessonId}, '${safeId}')"><span class="segment-dot"></span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">${escapeHTML(item.duration || '')}</span></div>`;
   }
   if(item.type === 'pdf'){
-    return `<a class="segment-item" href="${escapeHTML(item.url)}" target="_blank" data-lesson="${lessonId}" data-content="${escapeHTML(item.id)}"><span class="content-icon">PDF</span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">فتح</span></a>`;
+    const pdfLink = fixDriveUrl(item.url);
+    return `<a class="segment-item" href="${escapeHTML(pdfLink)}" target="_blank" rel="noopener noreferrer" data-lesson="${lessonId}" data-content="${escapeHTML(item.id)}"><span class="content-icon">PDF</span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">فتح</span></a>`;
   }
   if(item.type === 'quiz'){
     const cls = item.locked ? 'segment-item locked' : 'segment-item';
@@ -601,13 +612,32 @@ function selectLesson(courseId, lessonId){
 
   const rl = document.querySelector('.resource-list');
   const items = [];
-  if(lesson.pdfUrl) items.push(`<a href="${lesson.pdfUrl}" target="_blank" class="resource-item">📄 تحميل الملف (PDF)</a>`);
+  if(lesson.pdfUrl){
+    const pdfLink = fixDriveUrl(lesson.pdfUrl);
+    items.push(`<a href="${pdfLink}" target="_blank" class="resource-item" rel="noopener noreferrer">📄 تحميل الملف (PDF)</a>`);
+  }
   if(lesson.quizId) {
     const attempted = hasQuizAttempt(lesson.quizId);
     items.push(attempted ? `<div class="resource-item" style="cursor:default;opacity:.75">✏️ تم الدخول لهذا الاختبار من قبل</div>` : `<a href="#" onclick="startQuiz(${lesson.quizId})" class="resource-item">✏️ اختبار الدرس #${lesson.quizId}</a>`);
   }
   if(lesson.extraNotes) items.push(`<div class="resource-item" style="cursor:default">💡 ${lesson.extraNotes}</div>`);
   rl.innerHTML = items.join('') || '<div style="color:var(--text2);padding:8px">لا توجد موارد لهذا الدرس.</div>';
+}
+
+// ---- تحويل روابط Google Drive لروابط تحميل مباشر ----
+function fixDriveUrl(url){
+  if(!url) return url;
+  // نموذج: https://drive.google.com/file/d/FILE_ID/view
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if(driveMatch){
+    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+  }
+  // نموذج: https://drive.google.com/open?id=FILE_ID
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if(openMatch){
+    return `https://drive.google.com/uc?export=download&id=${openMatch[1]}`;
+  }
+  return url;
 }
 
 function escapeHTML(value){
@@ -641,13 +671,28 @@ function selectLessonSegment(lessonId, segmentId){
   if(selected) selected.classList.add('active');
   const unit = document.querySelector(`.lesson-unit[data-lesson-unit="${lessonId}"]`);
   if(unit) unit.classList.add('open');
-  renderVideo(segment.videoUrl);
+  renderVideo(segment.videoUrl, segment);
 }
 
-function renderVideo(url){
+function renderVideo(url, segment){
   const vpElement = document.querySelector('.video-player');
   const v = url || '';
-  if(v.includes('youtube') || v.includes('youtu.be')){
+
+  // 1) Bunny.net embed
+  if(v.includes('mediadelivery.net') || v.includes('iframe.mediadelivery') || (segment && segment.bunnyVideoId)){
+    const libraryId = (segment && segment.bunnyLibraryId) || '666877';
+    const videoId   = (segment && segment.bunnyVideoId) || '';
+    const bunnyUrl  = v || `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`;
+    vpElement.innerHTML = `<iframe
+      src="${bunnyUrl}"
+      style="width:100%;height:100%;border:none;border-radius:12px"
+      allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen"
+      allowfullscreen
+      referrerpolicy="origin"
+      loading="lazy"></iframe>`;
+
+  // 2) YouTube
+  } else if(v.includes('youtube') || v.includes('youtu.be')){
     let id = '';
     if(v.includes('watch')){
       const m = v.match(/[?&]v=([^&]+)/);
@@ -656,11 +701,37 @@ function renderVideo(url){
       const m = v.match(/youtu\.be\/([^?&]+)/);
       id = m ? m[1] : v;
     }
-    vpElement.innerHTML = `<iframe width="100%" height="420" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe>`;
+    vpElement.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="border-radius:12px"></iframe>`;
+
+  // 3) Direct video file
   } else if(v){
-    vpElement.innerHTML = `<video width="100%" height="420" controls src="${v}">متصفحك لا يدعم عرض الفيديو</video>`;
+    vpElement.innerHTML = `<video width="100%" height="100%" controls src="${v}" style="border-radius:12px">متصفحك لا يدعم عرض الفيديو</video>`;
+
+  // 4) No video
   } else {
-    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">لا يوجد فيديو لهذا المقطع</div>';
+    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">⏳ الفيديو جاري الترميز، سيظهر قريباً</div>';
+  }
+}
+
+  // 2) YouTube
+  } else if(v.includes('youtube') || v.includes('youtu.be')){
+    let id = '';
+    if(v.includes('watch')){
+      const m = v.match(/[?&]v=([^&]+)/);
+      id = m ? m[1] : '';
+    } else {
+      const m = v.match(/youtu\.be\/([^?&]+)/);
+      id = m ? m[1] : v;
+    }
+    vpElement.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="border-radius:12px"></iframe>`;
+
+  // 3) Direct video file
+  } else if(v){
+    vpElement.innerHTML = `<video width="100%" height="100%" controls src="${v}" style="border-radius:12px">متصفحك لا يدعم عرض الفيديو</video>`;
+
+  // 4) No video
+  } else {
+    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">⏳ الفيديو جاري الترميز، سيظهر قريباً</div>';
   }
 }
 
