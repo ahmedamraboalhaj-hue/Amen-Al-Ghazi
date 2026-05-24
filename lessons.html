@@ -89,6 +89,9 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 @media(max-width:768px){ .lesson-content{ grid-template-columns:1fr; } }
 </style>
 <script src="assets/backend-sync.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -246,18 +249,53 @@ function grantCourseAccessToCurrentUser(courseId){
   return true;
 }
 
-function verifyCourseCode(courseId){
+async function findVoucherByCode(code) {
+  const localVouchers = JSON.parse(localStorage.getItem('alamin_vouchers')||'[]');
+  const localIndex = localVouchers.findIndex(v => v.code === code && v.status === 'غير مستخدم');
+  if(localIndex > -1) return { voucher: localVouchers[localIndex], source: 'local', localVouchers, localIndex };
+  if(!window.db) return null;
+  const snap = await window.db.collection('course_codes').where('code', '==', code).limit(1).get();
+  if(snap.empty) return null;
+  const doc = snap.docs[0];
+  return { voucher: { id: doc.id, ...doc.data() }, source: 'firebase', docRef: doc.ref };
+}
+async function markVoucherUsed(match, user, courseId) {
+  if(match.source === 'local') {
+    match.localVouchers[match.localIndex].status = 'مستخدم';
+    match.localVouchers[match.localIndex].usedAt = new Date().toISOString();
+    match.localVouchers[match.localIndex].usedBy = user?.id || '';
+    localStorage.setItem('alamin_vouchers', JSON.stringify(match.localVouchers));
+    return;
+  }
+  await match.docRef.set({
+    status: 'مستخدم',
+    usedAt: new Date().toISOString(),
+    usedBy: user?.id || '',
+    usedCourseId: courseId
+  }, { merge: true });
+}
+async function syncStudentCourseAccess(user, courseId) {
+  if(!window.db || !user?.id) return;
+  try {
+    const enrolledCourses = Array.isArray(user.enrolledCourses) ? [...new Set([...user.enrolledCourses, courseId])] : [courseId];
+    await window.db.collection('students').doc(String(user.id)).set({ enrolledCourses }, { merge: true });
+  } catch(err) {
+    console.warn('Could not sync enrolled course', err);
+  }
+}
+async function verifyCourseCode(courseId){
   const code = document.getElementById('voucherCodeInput')?.value.trim().toUpperCase();
   if(!code){ alert('اكتب كود التفعيل أولاً'); return; }
-  const vouchers = JSON.parse(localStorage.getItem('alamin_vouchers')||'[]');
-  const voucher = vouchers.find(v => v.code === code && v.status === 'غير مستخدم');
+  const match = await findVoucherByCode(code);
+  const voucher = match?.voucher;
   if(!voucher){ alert('الكود غير صحيح أو مستخدم بالفعل'); return; }
+  if(voucher.status === 'مستخدم'){ alert('الكود مستخدم بالفعل'); return; }
   if(voucher.courseId && voucher.courseId.toString() !== courseId.toString()){ alert('الكود غير مخصّص لهذا الكورس'); return; }
   const user = getCurrentUser();
   if(voucher.linkedStudentId && voucher.linkedStudentId !== user?.id){ alert('هذا الكود مخصّص لطالب آخر'); return; }
-  voucher.status = 'مستخدم';
-  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchers));
+  await markVoucherUsed(match, user, courseId);
   grantCourseAccessToCurrentUser(courseId);
+  await syncStudentCourseAccess(user, courseId);
   alert('تم تفعيل الكورس بنجاح! يمكنك الآن مشاهدة الفيديوهات.');
   renderCoursePage();
 }
