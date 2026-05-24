@@ -992,7 +992,7 @@ function showPage(id) {
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
   });
-  if(id==='students') initStudentsPage();
+  if(id==='students') renderStudentsTable();
   if(id==='courses') renderCoursesAdmin();
   if(id==='analytics') renderAnalytics();
   if(id==='overview') renderOverview();
@@ -1156,9 +1156,9 @@ async function refreshCenterStudentsForStudentsPage(){
   const result = await syncCenterStudentsFromFirebase();
   renderStudentsTable();
   if(result.error) {
-    showAlert('تعذر استيراد طلاب السيستم من Firebase. تأكد من الاتصال بالإنترنت.');
+    showAlert('تعذر استيراد طلاب السيستم من Firebase: ' + (result.error.message || result.error));
   } else {
-    showAlert(result.added ? `تم استيراد ${result.added} طالب جديد من السيستم. إجمالي المستورد: ${result.imported}` : `تم التحديث. إجمالي طلاب السيستم المتاحين: ${result.imported}`);
+    showAlert(result.added ? `تم استيراد ${result.added} طالب جديد من السيستم. تمت قراءة ${result.scanned} طالب/مستند، والمتطابق ${result.imported}.` : `تم التحديث. تمت قراءة ${result.scanned} طالب/مستند، والمتطابق كطلاب سيستم ${result.imported}.`);
   }
 }
 function renderStudentsTable(filter=''){
@@ -1747,19 +1747,29 @@ function normalizeImportedStudentGrade(data) {
 function isSystemStudentDoc(doc, data) {
   const docId = String(doc.id || '');
   const qrCode = String(data.qrCode || data.id || '');
+  const hasOfflineCodeShape = /^[12]\d{8,}$/.test(docId) || /^[12]\d{8,}$/.test(qrCode);
   return data.studentType === 'center' ||
     !!data.offlineStudentId ||
     !!data.offlineGrade ||
-    (!!qrCode && docId === qrCode && data.role === 'student');
+    (!!qrCode && docId === qrCode) ||
+    (hasOfflineCodeShape && data.role !== 'admin');
 }
 async function syncCenterStudentsFromFirebase() {
-  if (!window.db) return 0;
+  if (!window.db) return { added: 0, imported: 0, error: new Error('Firebase غير متاح') };
   try {
-    const snapshot = await window.db.collection('students').get();
+    let snapshot;
+    try {
+      snapshot = await window.db.collection('students').get();
+    } catch (err) {
+      console.warn('Full students import failed, trying role query', err);
+      snapshot = await window.db.collection('students').where('role', '==', 'student').get();
+    }
     const users = getUsers();
     let added = 0;
     let imported = 0;
+    let scanned = 0;
     snapshot.forEach(doc => {
+      scanned++;
       const data = doc.data() || {};
       if (!isSystemStudentDoc(doc, data)) return;
       const id = String(data.id || data.qrCode || doc.id);
@@ -1784,10 +1794,10 @@ async function syncCenterStudentsFromFirebase() {
       imported++;
     });
     saveUsers(users);
-    return { added, imported };
+    return { added, imported, scanned };
   } catch (err) {
     console.warn('Could not sync center students', err);
-    return { added: 0, imported: 0, error: err };
+    return { added: 0, imported: 0, scanned: 0, error: err };
   }
 }
 async function initVouchersPage() {
