@@ -99,6 +99,49 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .course-admin-meta{font-size:12px;color:#888;margin-bottom:12px;}
 .course-admin-footer{display:flex;gap:8px;}
 
+/* STUDENT COURSE CARDS - rich design like reference screenshots */
+.student-courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+.student-course-card{background:var(--card-bg);border-radius:18px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);transition:all .3s;cursor:pointer;position:relative;}
+.student-course-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(0,119,182,.15);border-color:var(--primary);}
+.scc-cover{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:72px;}
+.scc-cover-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.scc-badge{position:absolute;top:14px;right:14px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;z-index:2;}
+.scc-badge.free{background:linear-gradient(135deg,#2ed573,#1ea760);color:white;}
+.scc-badge.paid{background:linear-gradient(135deg,#ff6b9d,#c0392b);color:white;}
+.scc-badge.enrolled{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;}
+.scc-teacher{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:white;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;z-index:2;}
+.scc-grade-tag{position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,.9);color:var(--text);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800;z-index:2;}
+.scc-body{padding:20px;}
+.scc-title{font-size:17px;font-weight:900;font-family:'Tajawal',sans-serif;margin-bottom:10px;line-height:1.4;}
+.scc-desc{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.scc-meta-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.scc-dates{display:flex;gap:12px;font-size:11px;color:var(--text2);}
+.scc-dates span{display:flex;align-items:center;gap:4px;}
+.scc-price-tag{font-size:14px;font-weight:900;color:var(--accent);}
+.scc-price-free{font-size:13px;font-weight:800;color:#2ed573;background:#e8fff3;padding:4px 12px;border-radius:8px;}
+.scc-actions{display:flex;gap:8px;}
+.scc-btn-enter{flex:1;padding:11px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
+.scc-btn-enter:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,119,182,.3);}
+.scc-btn-pay{flex:1;padding:11px;background:linear-gradient(135deg,#ff6b9d,#e91e8c);color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
+.scc-btn-free{flex:1;padding:11px;background:linear-gradient(135deg,#2ed573,#1ea760);color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
+.scc-btn-code{padding:11px 14px;background:var(--bg);color:var(--primary);border:2px solid var(--primary);border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.scc-btn-code:hover{background:var(--primary);color:white;}
+.scc-enrolled-bar{background:#e8fff3;border-top:2px solid #2ed573;padding:10px 20px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#1ea760;}
+
+/* Activation code modal */
+.code-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;}
+.code-modal-overlay.open{display:flex;}
+.code-modal{background:var(--card-bg);border-radius:24px;padding:40px;width:100%;max-width:480px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.2);}
+.code-modal-icon{font-size:64px;margin-bottom:16px;}
+.code-modal h3{font-size:22px;font-weight:900;font-family:'Tajawal',sans-serif;margin-bottom:8px;}
+.code-modal p{color:var(--text2);margin-bottom:24px;font-size:14px;}
+.code-input-wrap{position:relative;margin-bottom:16px;}
+.code-input-wrap input{width:100%;padding:16px 20px;border:2px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;letter-spacing:4px;text-transform:uppercase;text-align:center;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;}
+.code-input-wrap input:focus{border-color:var(--primary);}
+.code-result{padding:14px;border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:700;display:none;}
+.code-result.success{background:#e8fff3;color:#1ea760;border:1px solid #b3f5d1;}
+.code-result.error{background:#fff0f3;color:#c0392b;border:1px solid #ffd0d8;}
+
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
@@ -421,12 +464,25 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
     <!-- STUDENT COURSES PAGE -->
     <div class="page student-only" id="page-student-courses">
-      <h3 style="font-size:20px;font-weight:900;margin-bottom:20px">كورساتي المشترك بها 🎓</h3>
-      <div class="courses-admin-grid" id="myCoursesGrid">
+
+      <!-- Activation code bar -->
+      <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:16px;padding:20px 28px;margin-bottom:32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="font-size:32px">🎟️</div>
+        <div style="flex:1;min-width:200px">
+          <div style="color:white;font-weight:900;font-size:16px;margin-bottom:4px">عندك كود تفعيل؟</div>
+          <div style="color:rgba(255,255,255,.8);font-size:13px">ادخل كود التفعيل الخاص بيك وهيتفعّل الكورس فوراً!</div>
+        </div>
+        <button onclick="openCodeModal()" style="background:white;color:var(--primary);border:none;padding:12px 24px;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:900;font-size:15px;cursor:pointer;white-space:nowrap">إدخال كود التفعيل 🔑</button>
       </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h3 style="font-size:20px;font-weight:900">كورساتي المشترك بها 🎓</h3>
+        <span id="myCoursesCount" style="background:var(--primary);color:white;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800">0 كورسات</span>
+      </div>
+      <div class="student-courses-grid" id="myCoursesGrid"></div>
+
       <h3 style="font-size:20px;font-weight:900;margin:40px 0 20px">الكورسات المتاحة لصفك 🚀</h3>
-      <div class="courses-admin-grid" id="availableCoursesGrid">
-      </div>
+      <div class="student-courses-grid" id="availableCoursesGrid"></div>
     </div>
 
     <!-- MESSAGES PAGE -->
@@ -1672,6 +1728,76 @@ function verifyPayment(txId) {
 }
 
 // ---- STUDENT COURSES ----
+function buildStudentCourseCard(c, enrolled) {
+  const today = new Date().toLocaleDateString('ar-EG');
+  const gradeText = gradeLabel(c.grade);
+  const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
+  const teacherName = settings.teacherName || 'الأستاذ الأمين';
+  const coverEmoji = c.emoji || '📚';
+  const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#0077b6)';
+  const createdDate = c.created || today;
+  
+  if (enrolled) {
+    return `
+    <div class="student-course-card">
+      <div class="scc-cover" style="background:${coverBg}">
+        <span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>
+        <div class="scc-badge enrolled">مشترك ✅</div>
+        <div class="scc-teacher">${teacherName}</div>
+        <div class="scc-grade-tag">${gradeText}</div>
+      </div>
+      <div class="scc-body">
+        <div class="scc-title">${c.title}</div>
+        <div class="scc-desc">${c.desc || 'كورس شامل لتعلم اللغة العربية باحترافية'}</div>
+        <div class="scc-meta-row">
+          <div class="scc-dates">
+            <span>📅 ${createdDate}</span>
+            <span>📚 ${(c.lessons||[]).length} درس</span>
+          </div>
+          <span class="scc-price-free">مسجّل ✅</span>
+        </div>
+        <div class="scc-actions">
+          <button class="scc-btn-enter" onclick="window.location='lessons.html?course=${c.id}'">الدخول للمحتوى 🚀</button>
+        </div>
+      </div>
+      <div class="scc-enrolled-bar">✅ أنت مشترك في هذا الكورس</div>
+    </div>`;
+  } else {
+    const isFree = c.type === 'free';
+    const priceHTML = isFree 
+      ? '<span class="scc-price-free">مجاني! 🆓</span>'
+      : `<span class="scc-price-tag">${c.price || '؟'} ج.م 💰</span>`;
+    const badgeHTML = isFree 
+      ? '<div class="scc-badge free">كورس مجاني!</div>'
+      : '<div class="scc-badge paid">كورس مدفوع</div>';
+    const actionHTML = isFree
+      ? `<button class="scc-btn-free" onclick="enrollCourse(${c.id})">الدخول للكورس 🆓</button>`
+      : `<button class="scc-btn-pay" onclick="showPaymentForCourse(${c.id})">اشترك الآن 💳</button>
+         <button class="scc-btn-code" onclick="openCodeModal(${c.id})">كود تفعيل 🔑</button>`;
+    return `
+    <div class="student-course-card">
+      <div class="scc-cover" style="background:${coverBg}">
+        <span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>
+        ${badgeHTML}
+        <div class="scc-teacher">${teacherName}</div>
+        <div class="scc-grade-tag">${gradeText}</div>
+      </div>
+      <div class="scc-body">
+        <div class="scc-title">${c.title}</div>
+        <div class="scc-desc">${c.desc || 'كورس شامل لتعلم اللغة العربية باحترافية'}</div>
+        <div class="scc-meta-row">
+          <div class="scc-dates">
+            <span>📅 ${createdDate}</span>
+            <span>📚 ${(c.lessons||[]).length} درس</span>
+          </div>
+          ${priceHTML}
+        </div>
+        <div class="scc-actions">${actionHTML}</div>
+      </div>
+    </div>`;
+  }
+}
+
 function renderStudentCourses() {
   const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
   if(!current || current.role !== 'student') return;
@@ -1681,38 +1807,20 @@ function renderStudentCourses() {
   
   const myGrid = document.getElementById('myCoursesGrid');
   const myCourses = courses.filter(c=>enrolledIds.includes(c.id));
-  if(!myCourses.length) myGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لم تشترك في أي كورس بعد.</div>';
-  else {
-    myGrid.innerHTML = myCourses.map(c=>`
-      <div class="course-admin-card">
-        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
-        <div class="course-admin-body">
-          <div class="course-admin-title">${c.title}</div>
-          <div class="course-admin-meta">${c.desc||''}<br>أنت مشترك في هذا الكورس ✅</div>
-          <div class="course-admin-footer">
-            <button class="btn-view" style="width:100%;text-align:center" onclick="window.location='lessons.html?course=${c.id}'">الدخول للمحتوى 🚀</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
+  const countEl = document.getElementById('myCoursesCount');
+  if(countEl) countEl.textContent = myCourses.length + ' كورسات';
+  if(!myCourses.length) {
+    myGrid.innerHTML = '<div style="color:#888;padding:40px 20px;text-align:center;grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">🎓</div><p>لم تشترك في أي كورس بعد. استخدم كود التفعيل أو اشترك في أحد الكورسات أدناه!</p></div>';
+  } else {
+    myGrid.innerHTML = myCourses.map(c => buildStudentCourseCard(c, true)).join('');
   }
 
   const availGrid = document.getElementById('availableCoursesGrid');
   const available = courses.filter(c=>(c.grade===user.grade || c.grade==='all') && !enrolledIds.includes(c.id));
-  if(!available.length) availGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لا توجد كورسات متاحة حالياً.</div>';
-  else {
-    availGrid.innerHTML = available.map(c=>`
-      <div class="course-admin-card">
-        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
-        <div class="course-admin-body">
-          <div class="course-admin-title">${c.title}</div>
-          <div class="course-admin-meta">${c.desc||''}<br>${c.type==='free'?'مجاني 🆓':`مدفوع 💰 ${c.price || 'سعر غير محدد'} ج.م`}</div>
-          <div class="course-admin-footer">
-            <button class="btn-add" style="width:100%;text-align:center" onclick="enrollCourse(${c.id})">${c.type==='free'?'اشترك الآن':'اطلب اشتراك'}</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
+  if(!available.length) {
+    availGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لا توجد كورسات متاحة حالياً.</div>';
+  } else {
+    availGrid.innerHTML = available.map(c => buildStudentCourseCard(c, false)).join('');
   }
 }
 
@@ -2441,6 +2549,174 @@ document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click
 function toggleTheme(){const h=document.documentElement;const next=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',next);localStorage.setItem('theme',next);}
 const saved=localStorage.getItem('theme');if(saved)document.documentElement.setAttribute('data-theme',saved);
 
+
+// ---- ACTIVATION CODE MODAL ----
+let _pendingCodeCourseId = null;
+
+function openCodeModal(courseId) {
+  _pendingCodeCourseId = courseId || null;
+  document.getElementById('codeInput').value = '';
+  const result = document.getElementById('codeResult');
+  result.style.display = 'none';
+  result.className = 'code-result';
+  document.getElementById('codeModal').classList.add('open');
+  setTimeout(() => document.getElementById('codeInput').focus(), 100);
+}
+
+function closeCodeModal() {
+  document.getElementById('codeModal').classList.remove('open');
+}
+
+function submitActivationCode() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const resultEl = document.getElementById('codeResult');
+  if (!code) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '❌ من فضلك اكتب الكود أولاً';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  // Load vouchers from localStorage
+  const vouchers = JSON.parse(localStorage.getItem('alamin_vouchers') || '[]');
+  const voucher = vouchers.find(v => v.code === code);
+  
+  if (!voucher) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '❌ الكود غير صحيح أو غير موجود. تأكد من الكود وحاول مرة تانية.';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  if (voucher.status === 'مستخدم') {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '⚠️ هذا الكود مستخدم بالفعل! كل كود يُستخدم مرة واحدة فقط.';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  // Get current user
+  const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
+  if (!current) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '❌ حدث خطأ في بيانات المستخدم. حاول تسجيل الدخول مرة أخرى.';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  // Find course linked to voucher
+  const courseId = voucher.courseId;
+  const course = courses.find(c => String(c.id) === String(courseId));
+  if (!courseId || !course) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '❌ هذا الكود غير مرتبط بكورس صالح. تواصل مع المسؤول.';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  // Check if student already enrolled
+  const users = getUsers();
+  const userIdx = users.findIndex(u => String(u.id) === String(current.id));
+  if (userIdx === -1) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '❌ حدث خطأ في بيانات المستخدم.';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  if (!users[userIdx].enrolledCourses) users[userIdx].enrolledCourses = [];
+  if (users[userIdx].enrolledCourses.includes(Number(courseId)) || users[userIdx].enrolledCourses.includes(String(courseId))) {
+    resultEl.className = 'code-result error';
+    resultEl.textContent = '⚠️ أنت مشترك في هذا الكورس بالفعل!';
+    resultEl.style.display = 'block';
+    return;
+  }
+  
+  // ACTIVATE: enroll student + mark voucher as used
+  users[userIdx].enrolledCourses.push(Number(courseId));
+  saveUsers(users);
+  const updated = { ...current, enrolledCourses: users[userIdx].enrolledCourses };
+  localStorage.setItem('alamin_current', JSON.stringify(updated));
+  currentUser = updated;
+  
+  // Mark voucher as used
+  voucher.status = 'مستخدم';
+  voucher.usedAt = new Date().toLocaleDateString('ar-EG');
+  voucher.usedByStudentId = String(current.id);
+  voucher.usedByStudentName = current.name || current.firstName;
+  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchers));
+  // Also sync if using runtime vouchersData
+  const vIdx = vouchersData.findIndex(v => v.code === code);
+  if (vIdx > -1) {
+    vouchersData[vIdx] = voucher;
+  }
+  
+  // Also sync to Firebase if available
+  if (window.db) {
+    window.db.collection('students').doc(String(current.id)).update({
+      enrolledCourses: users[userIdx].enrolledCourses
+    }).catch(() => {});
+  }
+  
+  resultEl.className = 'code-result success';
+  resultEl.innerHTML = `✅ تم تفعيل الكورس بنجاح! "<strong>${course.title}</strong>" أُضيف لكورساتك فوراً 🎉`;
+  resultEl.style.display = 'block';
+  
+  // Refresh courses display
+  setTimeout(() => {
+    closeCodeModal();
+    renderStudentCourses();
+    showAlert(`✅ تم تفعيل "${course.title}" بنجاح! يمكنك الدخول الآن.`);
+  }, 1800);
+}
+
+// Allow Enter key in code input
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('codeModal').classList.contains('open')) {
+    submitActivationCode();
+  }
+  if (e.key === 'Escape' && document.getElementById('codeModal').classList.contains('open')) {
+    closeCodeModal();
+  }
+});
+
+// Close on overlay click
+document.getElementById('codeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCodeModal();
+});
+
+function showPaymentForCourse(courseId) {
+  const course = courses.find(c => c.id === courseId);
+  if (!course) return;
+  const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
+  const phone = settings.contactPhone || '';
+  const msg = phone 
+    ? `للاشتراك في كورس "${course.title}" (${course.price} ج.م)، تواصل عبر واتساب:
+${phone}`
+    : `للاشتراك في كورس "${course.title}" (${course.price} ج.م)، تواصل مع المسؤول للحصول على كود التفعيل.`;
+  // Show a nice payment modal
+  const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  const already = pending.some(p=>p.courseId===courseId && p.studentId===current.id && p.status==='pending');
+  if(already){ alert('طلبك قيد المراجعة بالفعل. سيتم تفعيل الكورس فور تأكيد الدفع.'); return; }
+  if(confirm(`للاشتراك في "${course.title}" بسعر ${course.price} ج.م
+
+هل تريد إرسال طلب اشتراك للمسؤول؟`)) {
+    pending.push({
+      transactionId: Date.now(),
+      studentId: current.id,
+      studentName: current.name,
+      courseId: courseId,
+      amount: course.price,
+      senderPhone: current.phone || '',
+      timestamp: new Date().toLocaleDateString('ar-EG'),
+      status: 'pending'
+    });
+    localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+    showAlert('تم إرسال طلب الاشتراك! انتظر تأكيد المسؤول أو احصل على كود تفعيل.');
+  }
+}
+
 // ---- INIT ----
 loadPlatformSettings();
 if(currentUser && currentUser.role === 'student') {
@@ -2463,5 +2739,22 @@ if(currentUser && currentUser.role === 'student') {
 }
 
 </script>
+<!-- ACTIVATION CODE MODAL -->
+<div class="code-modal-overlay" id="codeModal">
+  <div class="code-modal">
+    <div class="code-modal-icon">🔑</div>
+    <h3>إدخال كود التفعيل</h3>
+    <p>اكتب كود التفعيل الخاص بيك وهيتفعّل الكورس على طول!</p>
+    <div class="code-input-wrap">
+      <input type="text" id="codeInput" placeholder="XXXXXXXX" maxlength="12" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="code-result" id="codeResult"></div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="submitActivationCode()" style="flex:1;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-weight:900;font-size:16px;cursor:pointer">تفعيل الكود ✅</button>
+      <button onclick="closeCodeModal()" style="padding:14px 20px;background:var(--bg);color:var(--text);border:2px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
