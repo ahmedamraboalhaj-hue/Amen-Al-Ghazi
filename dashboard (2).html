@@ -1217,9 +1217,7 @@ function addLessonToCourse(courseId, lesson){
   lesson.segments = Array.isArray(lesson.segments) ? lesson.segments.map((segment, index)=>({
     id: segment.id || (lesson.id + index + 1),
     title: segment.title || `المقطع ${index + 1}`,
-    videoUrl: segment.videoUrl || (segment.bunnyVideoId ? `https://iframe.mediadelivery.net/embed/666877/${segment.bunnyVideoId}` : ''),
-    bunnyVideoId: segment.bunnyVideoId || '',
-    bunnyLibraryId: segment.bunnyLibraryId || (segment.bunnyVideoId ? '666877' : ''),
+    videoUrl: segment.videoUrl || '',
     duration: segment.duration || '',
     position: index + 1
   })) : [];
@@ -1456,7 +1454,7 @@ function viewStudent(id){
   `;
   document.getElementById('studentModal').classList.add('open');
 }
-function grantCourseToStudent(userId){
+async function grantCourseToStudent(userId){
   const select = document.getElementById('grantCourseSelect');
   if(!select || !select.value){ alert('اختر كورس للتفعيل'); return; }
   const courseId = parseInt(select.value,10);
@@ -1467,6 +1465,15 @@ function grantCourseToStudent(userId){
   if(users[idx].enrolledCourses.includes(courseId)){ alert('هذا الطالب لديه وصول بالفعل'); return; }
   users[idx].enrolledCourses.push(courseId);
   saveUsers(users);
+  // ✅ مزامنة مع Firebase
+  if(window.db){
+    try {
+      const docId = String(users[idx].id);
+      await window.db.collection('students').doc(docId).update({
+        enrolledCourses: users[idx].enrolledCourses
+      });
+    } catch(e){ console.warn('Could not sync enrolledCourses to Firebase:', e); }
+  }
   alert('تم تفعيل الوصول للكورس للطالب بنجاح ✅');
   viewStudent(userId);
 }
@@ -2202,15 +2209,42 @@ function buildStudentCourseCard(c, enrolled) {
   }
 }
 
-function renderStudentCourses() {
+async function renderStudentCourses() {
   const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
   if(!current || current.role !== 'student') return;
-  const users = getUsers();
-  const user = users.find(u=>u.id === current.id) || current;
-  const enrolledIds = user.enrolledCourses || [];
-  
+
+  // تحميل الكورسات من Firebase لو مش موجودة محلياً
+  let allCourses = getCourses();
+  if(!allCourses.length && window.db){
+    const fb = await loadCoursesFromFirebase();
+    if(fb && fb.length){
+      courses = fb;
+      localStorage.setItem('alamin_courses', JSON.stringify(fb));
+      allCourses = fb;
+    }
+  }
+
+  // جيب enrolledCourses الحديثة من Firebase
+  let enrolledIds = (current.enrolledCourses || []).map(String);
+  if(window.db){
+    try {
+      const docId = String(current.id);
+      const snap = await window.db.collection('students').doc(docId).get();
+      if(snap.exists){
+        const fresh = snap.data();
+        enrolledIds = (fresh.enrolledCourses || enrolledIds).map(String);
+        // حدّث localStorage بأحدث بيانات
+        const updated = {...current, enrolledCourses: enrolledIds};
+        localStorage.setItem('alamin_current', JSON.stringify(updated));
+        const users = getUsers();
+        const idx = users.findIndex(u => normalizeStudentId(u.id) === normalizeStudentId(current.id));
+        if(idx > -1){ users[idx].enrolledCourses = enrolledIds; saveUsers(users); }
+      }
+    } catch(e){ console.warn('Could not fetch student from Firebase:', e); }
+  }
+
   const myGrid = document.getElementById('myCoursesGrid');
-  const myCourses = courses.filter(c=>enrolledIds.includes(c.id));
+  const myCourses = allCourses.filter(c => enrolledIds.includes(String(c.id)));
   const countEl = document.getElementById('myCoursesCount');
   if(countEl) countEl.textContent = myCourses.length + ' كورسات';
   if(!myCourses.length) {
@@ -2219,8 +2253,9 @@ function renderStudentCourses() {
     myGrid.innerHTML = myCourses.map(c => buildStudentCourseCard(c, true)).join('');
   }
 
+  const updatedCurrent = JSON.parse(localStorage.getItem('alamin_current')) || current;
+  const available = allCourses.filter(c => (c.grade === updatedCurrent.grade || c.grade === 'all') && !enrolledIds.includes(String(c.id)));
   const availGrid = document.getElementById('availableCoursesGrid');
-  const available = courses.filter(c=>(c.grade===user.grade || c.grade==='all') && !enrolledIds.includes(c.id));
   if(!available.length) {
     availGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لا توجد كورسات متاحة حالياً.</div>';
   } else {
