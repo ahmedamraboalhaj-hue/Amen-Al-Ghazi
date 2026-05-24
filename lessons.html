@@ -113,7 +113,7 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
   </div>
 
   <div class="lesson-header">
-    <div class="lesson-title" id="mainTitle">مبادئ اللغة العربية</div>
+    <div class="lesson-title" id="mainTitle">جاري التحميل...</div>
     <div class="lesson-meta">
       <span>👨‍🏫 الأستاذ الأمين</span>
       <span>📅 تاريخ النشر: ١٥ مايو ٢٠٢٦</span>
@@ -231,7 +231,7 @@ const paymentReceiverNumber = '010XXXXXXXX';
 
 function hasCourseAccess(courseId){
   const user = getCurrentUser();
-  return user && Array.isArray(user.enrolledCourses) && user.enrolledCourses.includes(courseId);
+  return user && Array.isArray(user.enrolledCourses) && user.enrolledCourses.some(id => String(id) === String(courseId));
 }
 
 function grantCourseAccessToCurrentUser(courseId){
@@ -329,18 +329,36 @@ function getQueryParam(key){
   return params.get(key);
 }
 
-function renderCoursePage(){
+async function renderCoursePage(){
   const user = getCurrentUser();
   if(!user){
     alert('برجاء تسجيل الدخول للوصول إلى الكورس');
     window.location='login.html';
     return;
   }
-  const courseId = parseInt(getQueryParam('course'),10);
+  const courseId = parseInt(getQueryParam('course'), 10);
   if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
-  const stored = localStorage.getItem('alamin_courses');
-  const courses = stored ? JSON.parse(stored) : [];
-  const course = courses.find(c=>c.id===courseId);
+
+  // جيب الكورسات من Firebase أولاً، وبعدين fallback للـ localStorage
+  let courses = [];
+  if(window.db){
+    try{
+      const doc = await window.db.collection('platform_data').doc('courses_list').get();
+      if(doc.exists){
+        const data = doc.data();
+        if(Array.isArray(data.items) && data.items.length){
+          courses = data.items;
+          localStorage.setItem('alamin_courses', JSON.stringify(courses));
+        }
+      }
+    }catch(e){ console.warn('Firebase courses load failed in lessons:', e); }
+  }
+  if(!courses.length){
+    const stored = localStorage.getItem('alamin_courses');
+    courses = stored ? JSON.parse(stored) : [];
+  }
+
+  const course = courses.find(c=>String(c.id)===String(courseId));
   if(!course){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
 
   document.getElementById('courseName').textContent = course.title;
@@ -511,7 +529,7 @@ function toggleLesson(courseId, lessonId){
 function selectLesson(courseId, lessonId){
   const stored = localStorage.getItem('alamin_courses');
   const courses = stored ? JSON.parse(stored) : [];
-  const course = courses.find(c=>c.id===courseId);
+  const course = courses.find(c=>String(c.id)===String(courseId));
   if(!course) return;
   const lesson = (course.lessons||[]).find(l=>l.id===lessonId);
   if(!lesson) return;
@@ -659,7 +677,7 @@ function renderLessonSegments(courseId, lesson, segments){
 
 function selectLessonSegment(lessonId, segmentId){
   const courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
-  const course = courses.find(c=>c.id===currentCourseId);
+  const course = courses.find(c=>String(c.id)===String(currentCourseId));
   const lesson = course ? (course.lessons || []).find(l=>l.id===lessonId) : null;
   if(!lesson) return;
   const segments = getLessonSegments(lesson);
@@ -744,8 +762,8 @@ function startQuiz(quizId){
   window.location.href = 'tests.html?quiz=' + quizId;
 }
 
-window.addEventListener('load', ()=>{
-  renderCoursePage();
+window.addEventListener('load', async ()=>{
+  await renderCoursePage();
 });
 </script>
 </body>
