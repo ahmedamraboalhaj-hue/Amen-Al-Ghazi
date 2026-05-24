@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الدروس - الأمين في اللغة العربية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --success:#2ed573;
+  --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569; --border:#e3f4f9;
+}
+[data-theme="dark"]{ --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --text2:#8ba3c0; --border:#1e293b; }
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
+
+.topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.logo-link{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
+.topbar-right button:hover{ border-color:var(--primary); color:var(--primary); }
+.theme-toggle{ background:#f0f9ff; border:2px solid var(--primary); border-radius:30px; padding:6px 12px; cursor:pointer; font-size:14px; }
+[data-theme="dark"] .theme-toggle{ background:#1e293b; }
+.logout-btn{ background:#fff0f3; color:#c0392b; border:none; }
+.logout-btn:hover{ background:#ffc0d0; }
+
+.container{ max-width:1400px; margin:0 auto; padding:32px 20px; }
+
+.lesson-header{ margin-bottom:32px; }
+.lesson-title{ font-size:32px; font-weight:900; font-family:'Tajawal',sans-serif; margin-bottom:8px; }
+.lesson-meta{ display:flex; gap:20px; font-size:14px; color:var(--text2); margin-bottom:20px; }
+.breadcrumb{ font-size:13px; color:var(--text2); margin-bottom:16px; }
+.breadcrumb a{ color:var(--primary); text-decoration:none; font-weight:700; }
+
+.lesson-content{ display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+
+.main-content{ background:var(--card); border-radius:16px; border:1px solid var(--border); padding:24px; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+.video-player{ background:#000; border-radius:12px; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; color:white; font-size:48px; margin-bottom:24px; }
+.lesson-description{ line-height:1.8; color:var(--text2); margin-bottom:24px; }
+.lesson-resources{ background:var(--bg); border-radius:12px; padding:16px; margin-bottom:24px; }
+.resource-title{ font-weight:700; font-size:15px; margin-bottom:12px; }
+.resource-list{ display:flex; flex-direction:column; gap:10px; }
+.resource-item{ display:flex; align-items:center; gap:10px; padding:10px 14px; background:white; border-radius:10px; text-decoration:none; color:var(--primary); font-weight:600; border:1px solid var(--border); transition:all .2s; }
+[data-theme="dark"] .resource-item{ background:#161b22; }
+.resource-item:hover{ background:var(--primary); color:white; transform:translateX(-4px); }
+
+.sidebar{ background:var(--card); border-radius:16px; border:1px solid var(--border); padding:20px; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+.sidebar-section{ margin-bottom:24px; }
+.sidebar-title{ font-size:15px; font-weight:900; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.lesson-nav{ display:flex; flex-direction:column; gap:6px; }
+.lesson-unit{ border:1px solid var(--border); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.45); }
+[data-theme="dark"] .lesson-unit{ background:rgba(15,23,42,.45); }
+.lesson-item{ padding:12px; text-decoration:none; color:var(--text); font-size:13px; font-weight:800; cursor:pointer; transition:all .2s; display:grid; grid-template-columns:auto 1fr auto; gap:9px; align-items:center; }
+.lesson-item:hover{ background:var(--bg); color:var(--primary); }
+.lesson-item.active{ background:linear-gradient(90deg,rgba(0,180,216,.13),transparent); color:var(--primary); }
+.lesson-arrow{ font-size:16px; color:var(--primary); transition:transform .2s; }
+.lesson-unit.open .lesson-arrow{ transform:rotate(-90deg); }
+.lesson-count{font-size:11px;color:var(--text2);font-weight:700;white-space:nowrap;}
+.lesson-segments-menu{display:none;flex-direction:column;border-top:1px solid var(--border);background:rgba(15,23,42,.03);}
+.lesson-unit.open .lesson-segments-menu{display:flex;}
+.segment-dot{width:18px;height:18px;border-radius:50%;border:2px solid #7c879a;flex-shrink:0;}
+.content-icon{width:22px;height:22px;border-radius:7px;background:rgba(0,180,216,.12);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;}
+.segment-title{flex:1;line-height:1.5;}
+.segment-duration{font-size:12px;color:#87a5dc;white-space:nowrap;}
+.segment-nav{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.segment-item{display:flex;align-items:center;gap:9px;padding:10px 12px;color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border-bottom:1px solid var(--border);}
+.segment-item:last-child{border-bottom:none;}
+.segment-item:hover,.segment-item.active{color:var(--primary);background:rgba(0,180,216,.1);}
+.segment-item.active .segment-dot{border-color:var(--primary);background:var(--primary);box-shadow:inset 0 0 0 4px var(--card);}
+.segment-item.locked{opacity:.65;cursor:not-allowed;}
+
+.test-box{ background:linear-gradient(135deg,#e8f4ff,#f0f9ff); border-radius:12px; padding:16px; margin-bottom:16px; text-align:center; border:2px dashed var(--primary); }
+.test-box h4{ color:var(--primary); font-size:15px; margin-bottom:10px; }
+.test-btn{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:700; font-size:14px; transition:all .2s; }
+.test-btn:hover{ transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,119,182,.3); }
+
+.progress-bar{ width:100%; height:6px; background:var(--border); border-radius:6px; overflow:hidden; margin:12px 0; }
+.progress-fill{ height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:6px; width:65%; transition:width .3s; }
+
+.notes-section{ background:var(--bg); border-radius:12px; padding:16px; margin-top:24px; }
+.notes-title{ font-weight:700; font-size:15px; margin-bottom:12px; }
+.note-input{ width:100%; padding:12px; border:2px solid var(--border); border-radius:10px; font-family:'Cairo',sans-serif; font-size:14px; background:var(--card); color:var(--text); outline:none; resize:vertical; }
+.note-input:focus{ border-color:var(--primary); box-shadow:0 0 0 4px rgba(0,180,216,.1); }
+.note-save-btn{ background:var(--primary); color:white; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:700; margin-top:10px; transition:all .2s; }
+.note-save-btn:hover{ background:var(--primary-dark); }
+
+@media(max-width:768px){ .lesson-content{ grid-template-columns:1fr; } }
+</style>
+<script src="assets/backend-sync.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo-link">
+    <div class="logo-icon">أ</div>
+    <div class="logo-text">الأمين</div>
+  </a>
+  <div class="topbar-right">
+    <button onclick="window.location='dashboard.html'">📊 لوحة التحكم</button>
+    <button class="theme-toggle" onclick="toggleTheme()">☀️ 🌙</button>
+    <button class="logout-btn" onclick="logout()">🚪 خروج</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="dashboard.html">الرئيسية</a> / <a href="#">كورسات</a> / <span id="courseName">الكورس</span> / <strong id="lessonName">الدرس</strong>
+  </div>
+
+  <div class="lesson-header">
+    <div class="lesson-title" id="mainTitle">مبادئ اللغة العربية</div>
+    <div class="lesson-meta">
+      <span>👨‍🏫 الأستاذ الأمين</span>
+      <span>📅 تاريخ النشر: ١٥ مايو ٢٠٢٦</span>
+      <span>⏱️ المدة: ٣٥ دقيقة</span>
+    </div>
+  </div>
+
+  <div class="lesson-content">
+    <div class="main-content">
+      <div class="video-player">🎥 فيديو الدرس</div>
+      <div id="accessGate" style="margin:20px 0"></div>
+      <div class="lesson-resources" id="segmentsBox" style="display:none">
+        <div class="resource-title">مقاطع الدرس</div>
+        <div class="segment-nav" id="segmentsList"></div>
+      </div>
+      <div class="lesson-description">
+        <h3 style="margin-bottom:12px;" id="lessonDescriptionTitle">وصف الدرس</h3>
+        <p id="lessonDescriptionText">في هذا الدرس سنتعلم أساسيات اللغة العربية من الصفر. نغطي القواعد الأساسية والمفردات الضرورية لكل طالب.</p>
+      </div>
+
+      <div class="lesson-resources">
+        <div class="resource-title">📁 موارد الدرس</div>
+        <div class="resource-list">
+          <a href="#" class="resource-item">📄 ملخص الدرس (PDF)</a>
+          <a href="#" class="resource-item">📋 أسئلة المراجعة (DOC)</a>
+          <a href="#" class="resource-item">🎨 شرائح العرض (PPT)</a>
+          <a href="#" class="resource-item">📝 كراسة التمارين</a>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-title">📝 ملاحظاتك على الدرس</div>
+        <textarea class="note-input" id="noteInput" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+        <button class="note-save-btn" onclick="saveNote()">💾 حفظ الملاحظات</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">📚 محتويات الكورس</div>
+        <div class="lesson-nav"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">📊 تقدمك</div>
+        <p style="font-size:13px; margin-bottom:10px;">اكتمل: ٦٥٪</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:65%"></div>
+        </div>
+        <p style="font-size:12px; color:var(--text2);">درسان أكملتهما من ٥ دروس</p>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="test-box">
+          <h4>اختبر نفسك! ✏️</h4>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">هل تشعر أنك جاهز؟ خذ اختبار الدرس</p>
+          <button class="test-btn" onclick="startTest()">ابدأ الاختبار</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">💡 نصائح</div>
+        <ul style="font-size:13px; color:var(--text2); line-height:1.8; list-style:none;">
+          <li>✓ ركز على الأمثلة العملية</li>
+          <li>✓ أعد مشاهدة الأجزاء الصعبة</li>
+          <li>✓ طبق ما تعلمته فوراً</li>
+          <li>✓ لا تتردد في طرح الأسئلة</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  localStorage.setItem('lesson-theme',dark?'light':'dark');
+}
+const t=localStorage.getItem('lesson-theme');
+if(t) document.documentElement.setAttribute('data-theme',t);
+
+function logout(){
+  localStorage.removeItem('alamin_current');
+  window.location='login.html';
+}
+
+let currentCourseId = null;
+let currentLessonId = null;
+let currentSegmentId = null;
+
+function saveNote(){
+  const note=document.getElementById('noteInput').value.trim();
+  if(!note){alert('الرجاء كتابة ملاحظة');return;}
+  if(!currentCourseId || !currentLessonId){ alert('لا يوجد درس محدد لحفظ الملاحظات'); return; }
+  const lessons=JSON.parse(localStorage.getItem('alamin_lesson_notes')||'{}');
+  lessons[`lesson_${currentCourseId}_${currentLessonId}`]={
+    text:note,
+    date:new Date().toLocaleString('ar-EG')
+  };
+  localStorage.setItem('alamin_lesson_notes',JSON.stringify(lessons));
+  alert('تم حفظ الملاحظات بنجاح ✅');
+}
+
+function startTest(){
+  if(!currentCourseId || !currentLessonId){ alert('اختر درساً أولاً'); return; }
+  alert('🎯 اختبار الدرس\n\n١. ما هي النقاط الأساسية في هذا الدرس؟\n٢. اشرح ما تعلمته من الدرس.\n٣. كمثال، اكتب جملة واحدة أو تمرينًا مرتبطًا بالمحتوى.');
+}
+
+function getCurrentUser(){
+  return JSON.parse(localStorage.getItem('alamin_current') || 'null');
+}
+const paymentReceiverNumber = '010XXXXXXXX';
+
+function hasCourseAccess(courseId){
+  const user = getCurrentUser();
+  return user && Array.isArray(user.enrolledCourses) && user.enrolledCourses.includes(courseId);
+}
+
+function grantCourseAccessToCurrentUser(courseId){
+  const user = getCurrentUser();
+  if(!user) return false;
+  if(!Array.isArray(user.enrolledCourses)) user.enrolledCourses = [];
+  if(!user.enrolledCourses.includes(courseId)) user.enrolledCourses.push(courseId);
+  localStorage.setItem('alamin_current', JSON.stringify(user));
+  const users = JSON.parse(localStorage.getItem('alamin_users')||'[]');
+  const idx = users.findIndex(u=>u.id===user.id);
+  if(idx > -1){
+    users[idx].enrolledCourses = user.enrolledCourses;
+    localStorage.setItem('alamin_users', JSON.stringify(users));
+  }
+  return true;
+}
+
+async function findVoucherByCode(code) {
+  const localVouchers = JSON.parse(localStorage.getItem('alamin_vouchers')||'[]');
+  const localIndex = localVouchers.findIndex(v => v.code === code && v.status === 'غير مستخدم');
+  if(localIndex > -1) return { voucher: localVouchers[localIndex], source: 'local', localVouchers, localIndex };
+  if(!window.db) return null;
+  const snap = await window.db.collection('course_codes').where('code', '==', code).limit(1).get();
+  if(snap.empty) return null;
+  const doc = snap.docs[0];
+  return { voucher: { id: doc.id, ...doc.data() }, source: 'firebase', docRef: doc.ref };
+}
+async function markVoucherUsed(match, user, courseId) {
+  if(match.source === 'local') {
+    match.localVouchers[match.localIndex].status = 'مستخدم';
+    match.localVouchers[match.localIndex].usedAt = new Date().toISOString();
+    match.localVouchers[match.localIndex].usedBy = user?.id || '';
+    localStorage.setItem('alamin_vouchers', JSON.stringify(match.localVouchers));
+    return;
+  }
+  await match.docRef.set({
+    status: 'مستخدم',
+    usedAt: new Date().toISOString(),
+    usedBy: user?.id || '',
+    usedCourseId: courseId
+  }, { merge: true });
+}
+async function syncStudentCourseAccess(user, courseId) {
+  if(!window.db || !user?.id) return;
+  try {
+    const enrolledCourses = Array.isArray(user.enrolledCourses) ? [...new Set([...user.enrolledCourses, courseId])] : [courseId];
+    await window.db.collection('students').doc(String(user.id)).set({ enrolledCourses }, { merge: true });
+  } catch(err) {
+    console.warn('Could not sync enrolled course', err);
+  }
+}
+async function verifyCourseCode(courseId){
+  const code = document.getElementById('voucherCodeInput')?.value.trim().toUpperCase();
+  if(!code){ alert('اكتب كود التفعيل أولاً'); return; }
+  const match = await findVoucherByCode(code);
+  const voucher = match?.voucher;
+  if(!voucher){ alert('الكود غير صحيح أو مستخدم بالفعل'); return; }
+  if(voucher.status === 'مستخدم'){ alert('الكود مستخدم بالفعل'); return; }
+  if(voucher.courseId && voucher.courseId.toString() !== courseId.toString()){ alert('الكود غير مخصّص لهذا الكورس'); return; }
+  const user = getCurrentUser();
+  if(voucher.linkedStudentId && voucher.linkedStudentId !== user?.id){ alert('هذا الكود مخصّص لطالب آخر'); return; }
+  await markVoucherUsed(match, user, courseId);
+  grantCourseAccessToCurrentUser(courseId);
+  await syncStudentCourseAccess(user, courseId);
+  alert('تم تفعيل الكورس بنجاح! يمكنك الآن مشاهدة الفيديوهات.');
+  renderCoursePage();
+}
+function submitCoursePaymentRequest(courseId){
+  const phone = document.getElementById('paymentPhoneInput')?.value.trim();
+  const amount = document.getElementById('paymentAmountInput')?.value.trim();
+  if(!phone || !amount){ alert('من فضلك أدخل رقم المحفظة والمبلغ المحول'); return; }
+  const user = getCurrentUser();
+  if(!user){ alert('برجاء تسجيل الدخول أولاً'); window.location='login.html'; return; }
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  pending.push({
+    transactionId: Date.now(),
+    studentId: user.id,
+    courseId,
+    senderPhone: phone,
+    amount,
+    timestamp: new Date().toLocaleString('ar-EG'),
+    status: 'pending'
+  });
+  localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+  alert('تم إرسال طلب التفعيل بنجاح. سيتم تفعيل الكورس بعد مراجعة الإدارة.');
+  document.getElementById('paymentPhoneInput').value = '';
+  document.getElementById('paymentAmountInput').value = '';
+}
+function requestCourseActivation(courseId){
+  document.getElementById('paymentPhoneInput')?.focus();
+}
+// ---- Dynamic course & lesson rendering ----
+function getQueryParam(key){
+  const params = new URLSearchParams(window.location.search);
+  return params.get(key);
+}
+
+function renderCoursePage(){
+  const user = getCurrentUser();
+  if(!user){
+    alert('برجاء تسجيل الدخول للوصول إلى الكورس');
+    window.location='login.html';
+    return;
+  }
+  const courseId = parseInt(getQueryParam('course'),10);
+  if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
+  const stored = localStorage.getItem('alamin_courses');
+  const courses = stored ? JSON.parse(stored) : [];
+  const course = courses.find(c=>c.id===courseId);
+  if(!course){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
+
+  document.getElementById('courseName').textContent = course.title;
+  document.getElementById('mainTitle').textContent = course.title;
+  const meta = document.querySelector('.lesson-meta');
+  if(meta){
+    meta.innerHTML = `
+      <span>👨‍🏫 الأستاذ الأمين</span>
+      <span>📅 آخر تحديث: ${course.updated || course.created || 'غير محدد'}</span>
+      <span>${course.type==='free' ? '🆓 مجاني' : `💰 السعر: ${course.price || 'غير محدد'} ج.م`}</span>
+    `;
+  }
+  const descEl = document.querySelector('.lesson-description p');
+  if(descEl) descEl.textContent = course.desc || '';
+
+  const lessonsList = course.lessons && course.lessons.length ? course.lessons : [];
+  const nav = document.querySelector('.lesson-nav');
+  if(nav){
+    nav.innerHTML = lessonsList.map((ls,i)=>{
+      const items = getLessonContentItems(ls);
+      return `
+        <div class="lesson-unit" data-lesson-unit="${ls.id}">
+          <div class="lesson-item" data-lesson="${ls.id}" onclick="toggleLesson(${courseId},${ls.id})">
+            <span class="lesson-arrow">›</span>
+            <span>${i+1}. ${escapeHTML(ls.title)}</span>
+            <span class="lesson-count">0/${items.length}</span>
+          </div>
+          <div class="lesson-segments-menu">
+            ${items.length ? items.map(item => renderCourseContentItem(ls.id, item)).join('') : '<div class="segment-item" style="cursor:default"><span class="segment-title">لا توجد محتويات داخل هذا الدرس</span></div>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  updateProgress(0, lessonsList.length);
+
+  // select first lesson by default
+  if(lessonsList.length){
+    const first = lessonsList[0];
+    selectLesson(courseId, first.id);
+  } else {
+    document.querySelector('.video-player').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">لا توجد دروس حتى الآن</div>';
+    document.querySelector('.resource-list').innerHTML = '<div style="color:var(--text2);padding:8px">لا توجد موارد</div>';
+    document.getElementById('segmentsBox').style.display = 'none';
+    document.getElementById('lessonDescriptionTitle').textContent = 'لا يوجد درس متاح';
+    document.getElementById('lessonDescriptionText').textContent = 'أضف دروسًا من لوحة التحكم ليتم عرضها هنا.';
+  }
+}
+
+function getLessonSegments(lesson){
+  if(Array.isArray(lesson.segments) && lesson.segments.length){
+    return lesson.segments
+      .filter(segment => segment && segment.videoUrl)
+      .map((segment, index)=>({
+        id: segment.id || `${lesson.id}_${index + 1}`,
+        title: segment.title || `المقطع ${index + 1}`,
+        videoUrl: segment.videoUrl,
+        duration: segment.duration || '',
+        position: segment.position || index + 1
+      }));
+  }
+  return lesson.videoUrl ? [{
+    id: `${lesson.id}_1`,
+    title: lesson.title || 'المقطع الأول',
+    videoUrl: lesson.videoUrl,
+    duration: lesson.duration || '',
+    position: 1
+  }] : [];
+}
+
+function getLessonContentItems(lesson){
+  const videos = getLessonSegments(lesson).map(segment => ({...segment, type:'video'}));
+  const items = [...videos];
+  if(lesson.pdfUrl){
+    items.push({
+      id:`${lesson.id}_pdf`,
+      type:'pdf',
+      title: lesson.pdfName || 'ملزمة الدرس PDF',
+      url: lesson.pdfUrl,
+      duration:'PDF'
+    });
+  }
+  if(lesson.quizId){
+    const quiz = getQuizById(lesson.quizId);
+    const attempted = hasQuizAttempt(lesson.quizId);
+    items.push({
+      id:`${lesson.id}_quiz_${lesson.quizId}`,
+      type:'quiz',
+      title: quiz ? quiz.title : `اختبار الدرس #${lesson.quizId}`,
+      quizId: lesson.quizId,
+      duration: attempted ? 'تم الدخول' : `ID ${lesson.quizId}`,
+      locked: attempted
+    });
+  }
+  return items;
+}
+
+function renderCourseContentItem(lessonId, item){
+  if(item.type === 'video'){
+    const safeId = String(item.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `<div class="segment-item" data-lesson="${lessonId}" data-segment="${escapeHTML(item.id)}" onclick="selectLessonSegment(${lessonId}, '${safeId}')"><span class="segment-dot"></span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">${escapeHTML(item.duration || '')}</span></div>`;
+  }
+  if(item.type === 'pdf'){
+    return `<a class="segment-item" href="${escapeHTML(item.url)}" target="_blank" data-lesson="${lessonId}" data-content="${escapeHTML(item.id)}"><span class="content-icon">PDF</span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">فتح</span></a>`;
+  }
+  if(item.type === 'quiz'){
+    const cls = item.locked ? 'segment-item locked' : 'segment-item';
+    const action = item.locked ? `alert('أنت دخلت الاختبار ده قبل كده، ومتاح مرة واحدة فقط.')` : `startQuiz(${item.quizId})`;
+    return `<div class="${cls}" data-lesson="${lessonId}" data-content="${escapeHTML(item.id)}" onclick="${action}"><span class="content-icon">اختبار</span><span class="segment-title">${escapeHTML(item.title)}</span><span class="segment-duration">${escapeHTML(item.duration)}</span></div>`;
+  }
+  return '';
+}
+
+function getQuizById(quizId){
+  const quizzes = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
+  return quizzes.find(q=>String(q.id)===String(quizId));
+}
+
+function getQuizAttempts(){
+  return JSON.parse(localStorage.getItem('alamin_quiz_attempts') || '{}');
+}
+
+function getQuizAttemptKey(quizId){
+  const user = getCurrentUser();
+  const userId = user ? (user.id || user.phone || user.email || user.name) : 'guest';
+  return `${userId}_${quizId}`;
+}
+
+function hasQuizAttempt(quizId){
+  const attempts = getQuizAttempts();
+  return !!attempts[getQuizAttemptKey(quizId)];
+}
+
+function updateProgress(currentIndex, totalLessons){
+  const total = totalLessons || 0;
+  const done = total ? Math.max(0, currentIndex) : 0;
+  const percent = total ? Math.round((done / total) * 100) : 0;
+  const progressText = document.querySelector('.progress-bar')?.previousElementSibling;
+  const progressFill = document.querySelector('.progress-fill');
+  const progressDetails = document.querySelector('.progress-bar')?.nextElementSibling;
+  if(progressText) progressText.textContent = `اكتمل: ${percent}%`;
+  if(progressFill) progressFill.style.width = `${percent}%`;
+  if(progressDetails) progressDetails.textContent = `${done} من ${total} دروس تم فتحها`;
+}
+
+function toggleLesson(courseId, lessonId){
+  const unit = document.querySelector(`.lesson-unit[data-lesson-unit="${lessonId}"]`);
+  if(unit && unit.classList.contains('open') && currentLessonId === lessonId){
+    unit.classList.remove('open');
+    const item = document.querySelector(`.lesson-item[data-lesson="${lessonId}"]`);
+    if(item) item.classList.remove('active');
+    return;
+  }
+  selectLesson(courseId, lessonId);
+}
+
+function selectLesson(courseId, lessonId){
+  const stored = localStorage.getItem('alamin_courses');
+  const courses = stored ? JSON.parse(stored) : [];
+  const course = courses.find(c=>c.id===courseId);
+  if(!course) return;
+  const lesson = (course.lessons||[]).find(l=>l.id===lessonId);
+  if(!lesson) return;
+
+  // set active in nav
+  document.querySelectorAll('.lesson-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.lesson-unit').forEach(el=>el.classList.remove('open'));
+  const sel = document.querySelector(`.lesson-item[data-lesson="${lessonId}"]`);
+  if(sel) sel.classList.add('active');
+  const unit = document.querySelector(`.lesson-unit[data-lesson-unit="${lessonId}"]`);
+  if(unit) unit.classList.add('open');
+
+  currentCourseId = courseId;
+  currentLessonId = lessonId;
+  currentSegmentId = null;
+  document.getElementById('lessonName').textContent = lesson.title || 'الدرس';
+  const lessonIndex = (course.lessons || []).findIndex(l=>l.id===lessonId);
+  updateProgress(lessonIndex + 1, (course.lessons || []).length);
+
+  const notes = JSON.parse(localStorage.getItem('alamin_lesson_notes')||'{}');
+  const noteEntry = notes[`lesson_${courseId}_${lessonId}`];
+  document.getElementById('noteInput').value = noteEntry ? noteEntry.text : '';
+
+  const gate = document.getElementById('accessGate');
+  const vpElement = document.querySelector('.video-player');
+  const hasAccess = hasCourseAccess(courseId);
+  if(!hasAccess){
+    gate.innerHTML = `
+      <div style="background:#fff4e5;border:1px solid #ffce9d;padding:18px;border-radius:16px;">
+        <div style="font-size:16px;font-weight:800;margin-bottom:10px;color:#c46200">🔒 هذا الكورس مقفول حتى يتم التفعيل</div>
+        ${course.type==='paid' ? `<div style="font-size:15px;font-weight:700;margin-bottom:10px;color:#2f3b52">💰 سعر الكورس: ${course.price || 'غير محدد'} ج.م</div>` : ''}
+        <div style="color:#5f4b32;margin-bottom:14px">${course.type==='paid' ? 'يمكنك تحويل المبلغ ثم طلب تفعيل من الإدارة، أو استخدام كود التفعيل إذا كان لديك.' : 'لديك خياران: إما أن تمنحك الإدارة تفعيل الوصول، أو تدخل كود التفعيل الصحيح هنا.'}</div>
+
+        <!-- Show subscribe button first -->
+        <div style="margin-bottom:12px;">
+          <button id="subscribeBtn" style="padding:12px 18px;background:#0077b6;color:white;border:none;border-radius:12px;font-weight:900;cursor:pointer">اشترك الآن</button>
+        </div>
+
+        <!-- Hidden options (voucher + payment) -->
+        <div id="subscribeOptions" style="display:none;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+            <input id="voucherCodeInput" placeholder="أدخل كود التفعيل" style="flex:1;padding:12px 14px;border:1px solid #e5c07b;border-radius:12px;background:#fff;color:#000;outline:none">
+            <button id="checkVoucherBtn" style="padding:12px 20px;background:linear-gradient(135deg,#ff6b9d,#ff4757);color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer">تحقق من الكود</button>
+          </div>
+          ${course.type==='paid' ? `
+          <div style="margin-top:8px;padding:16px;border-radius:14px;background:#f3f8ff;border:1px solid #cbe4ff;">
+            <div style="font-weight:800;margin-bottom:10px;color:#0b3d91">💳 يمكنك تحويل المبلغ: ${course.price || 'غير محدد'} ج.م</div>
+            <div style="font-size:14px;color:#334155;margin-bottom:12px">حول المبلغ على الرقم: <strong>${paymentReceiverNumber}</strong> ثم أدخل بيانات التحويل هنا.</div>
+            <div style="display:grid;gap:10px;">
+              <input id="paymentPhoneInput" placeholder="رقم المحفظة التي حولت منها" style="padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#000;outline:none">
+              <input id="paymentAmountInput" placeholder="المبلغ المحول" type="number" min="0" style="padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#000;outline:none">
+              <button id="submitPaymentBtn" style="padding:12px 20px;background:#0077b6;color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer">أرسل طلب التفعيل بعد الدفع</button>
+            </div>
+          </div>` : ''}
+        </div>
+      </div>`;
+
+    // attach event handlers for the subscribe button and inner controls
+    setTimeout(()=>{
+      const subBtn = document.getElementById('subscribeBtn');
+      const opts = document.getElementById('subscribeOptions');
+      const checkBtn = document.getElementById('checkVoucherBtn');
+      const submitBtn = document.getElementById('submitPaymentBtn');
+      if(subBtn && opts){
+        subBtn.addEventListener('click', ()=>{
+          opts.style.display = 'block';
+          subBtn.style.display = 'none';
+          opts.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+      }
+      if(checkBtn){
+        checkBtn.addEventListener('click', ()=> verifyCourseCode(courseId));
+      }
+      if(submitBtn){
+        submitBtn.addEventListener('click', ()=> submitCoursePaymentRequest(courseId));
+      }
+    },50);
+    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">محتوى الفيديوهات مقفل حتى يتم التفعيل.</div>';
+    document.getElementById('segmentsBox').style.display = 'none';
+    document.querySelector('.resource-list').innerHTML = '<div style="color:var(--text2);padding:8px">الملفات والاختبارات متاحة بعد التفعيل.</div>';
+    document.getElementById('lessonDescriptionTitle').textContent = lesson.title || 'الدرس';
+    document.getElementById('lessonDescriptionText').textContent = 'ستظهر تفاصيل هذا الدرس عندما يتم تفعيل الكورس.';
+    return;
+  }
+
+  gate.innerHTML = '';
+  const videoItems = getLessonSegments(lesson);
+  renderLessonSegments(courseId, lesson, videoItems);
+  if(videoItems.length){
+    selectLessonSegment(lesson.id, videoItems[0].id);
+  } else {
+    document.getElementById('segmentsBox').style.display = 'none';
+    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">لا يوجد فيديو لهذا الدرس</div>';
+  }
+
+  document.getElementById('lessonDescriptionTitle').textContent = lesson.title || 'وصف الدرس';
+  document.getElementById('lessonDescriptionText').textContent = lesson.description || course.desc || 'لا توجد تفاصيل إضافية لهذا الدرس حالياً.';
+
+  const rl = document.querySelector('.resource-list');
+  const items = [];
+  if(lesson.pdfUrl) items.push(`<a href="${lesson.pdfUrl}" target="_blank" class="resource-item">📄 تحميل الملف (PDF)</a>`);
+  if(lesson.quizId) {
+    const attempted = hasQuizAttempt(lesson.quizId);
+    items.push(attempted ? `<div class="resource-item" style="cursor:default;opacity:.75">✏️ تم الدخول لهذا الاختبار من قبل</div>` : `<a href="#" onclick="startQuiz(${lesson.quizId})" class="resource-item">✏️ اختبار الدرس #${lesson.quizId}</a>`);
+  }
+  if(lesson.extraNotes) items.push(`<div class="resource-item" style="cursor:default">💡 ${lesson.extraNotes}</div>`);
+  rl.innerHTML = items.join('') || '<div style="color:var(--text2);padding:8px">لا توجد موارد لهذا الدرس.</div>';
+}
+
+function escapeHTML(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+
+function escapeSelectorValue(value){
+  if(window.CSS && CSS.escape) return CSS.escape(String(value));
+  return String(value).replace(/["\\]/g, '\\$&');
+}
+
+function renderLessonSegments(courseId, lesson, segments){
+  const box = document.getElementById('segmentsBox');
+  const list = document.getElementById('segmentsList');
+  if(!box || !list) return;
+  box.style.display = 'none';
+  list.innerHTML = '';
+}
+
+function selectLessonSegment(lessonId, segmentId){
+  const courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
+  const course = courses.find(c=>c.id===currentCourseId);
+  const lesson = course ? (course.lessons || []).find(l=>l.id===lessonId) : null;
+  if(!lesson) return;
+  const segments = getLessonSegments(lesson);
+  const segment = segments.find(s=>String(s.id)===String(segmentId)) || segments[0];
+  if(!segment) return;
+  currentSegmentId = segment.id;
+  document.querySelectorAll('.segment-item').forEach(el=>el.classList.remove('active'));
+  const selected = document.querySelector(`.segment-item[data-lesson="${lessonId}"][data-segment="${escapeSelectorValue(segment.id)}"]`);
+  if(selected) selected.classList.add('active');
+  const unit = document.querySelector(`.lesson-unit[data-lesson-unit="${lessonId}"]`);
+  if(unit) unit.classList.add('open');
+  renderVideo(segment.videoUrl, segment);
+}
+
+function renderVideo(url, segment){
+  const vpElement = document.querySelector('.video-player');
+  const v = url || '';
+
+  // 1) Bunny.net embed (iframe.mediadelivery.net)
+  if(v.includes('mediadelivery.net') || v.includes('iframe.mediadelivery') || (segment && segment.bunnyVideoId)){
+    const bunnyUrl = v || `https://iframe.mediadelivery.net/embed/666877/${segment.bunnyVideoId}`;
+    vpElement.innerHTML = `<iframe
+      src="${bunnyUrl}?autoplay=false&loop=false&muted=false&preload=true"
+      style="width:100%;height:100%;border:none;border-radius:12px"
+      allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture"
+      allowfullscreen></iframe>`;
+
+  // 2) YouTube
+  } else if(v.includes('youtube') || v.includes('youtu.be')){
+    let id = '';
+    if(v.includes('watch')){
+      const m = v.match(/[?&]v=([^&]+)/);
+      id = m ? m[1] : '';
+    } else {
+      const m = v.match(/youtu\.be\/([^?&]+)/);
+      id = m ? m[1] : v;
+    }
+    vpElement.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="border-radius:12px"></iframe>`;
+
+  // 3) Direct video file
+  } else if(v){
+    vpElement.innerHTML = `<video width="100%" height="100%" controls src="${v}" style="border-radius:12px">متصفحك لا يدعم عرض الفيديو</video>`;
+
+  // 4) No video
+  } else {
+    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">⏳ الفيديو جاري الترميز، سيظهر قريباً</div>';
+  }
+}
+
+function startQuiz(quizId){
+  if(hasQuizAttempt(quizId)){
+    alert('أنت دخلت الاختبار ده قبل كده، والاختبار متاح مرة واحدة فقط لكل حساب.');
+    return;
+  }
+  localStorage.setItem('alamin_selected_quiz', String(quizId));
+  window.location.href = 'tests.html?quiz=' + quizId;
+}
+
+window.addEventListener('load', ()=>{
+  renderCoursePage();
+});
+</script>
+</body>
+</html>
