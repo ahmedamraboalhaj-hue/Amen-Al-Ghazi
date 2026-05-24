@@ -976,6 +976,49 @@ if(!courses.length) {
   localStorage.setItem('alamin_courses', JSON.stringify(courses));
 }
 
+// ---- FIREBASE COURSE SYNC ----
+async function pushCoursesToFirebase(coursesArray) {
+  if (!window.db) return;
+  try {
+    await window.db.collection('platform_data').doc('courses_list').set({
+      items: coursesArray,
+      updatedAt: Date.now()
+    });
+  } catch(e) { console.warn('Course push to Firebase failed:', e); }
+}
+
+async function loadCoursesFromFirebase() {
+  if (!window.db) return null;
+  try {
+    const doc = await window.db.collection('platform_data').doc('courses_list').get();
+    if (doc.exists) {
+      const data = doc.data();
+      return Array.isArray(data.items) ? data.items : null;
+    }
+  } catch(e) { console.warn('Course load from Firebase failed:', e); }
+  return null;
+}
+
+// Load courses from Firebase on startup and refresh UI
+(async () => {
+  const fbCourses = await loadCoursesFromFirebase();
+  if (fbCourses && fbCourses.length) {
+    courses = fbCourses;
+    localStorage.setItem('alamin_courses', JSON.stringify(courses));
+    // Refresh whichever page is active
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+      const id = activePage.id.replace('page-', '');
+      if (id === 'courses') renderCoursesAdmin();
+      if (id === 'student-courses') renderStudentCourses();
+      if (id === 'overview') renderOverview();
+    }
+  } else if (courses.length) {
+    // First time: push local defaults to Firebase so all users see them
+    pushCoursesToFirebase(courses);
+  }
+})();
+
 // ---- NAVIGATION ----
 const pageTitles = {
   overview:'نظرة عامة 📊', students:'الطلاب 👨‍🎓',
@@ -1052,11 +1095,13 @@ function filterUsersByGradeAndType(users, grade, type){
 */
 
 function getCourses(){
-  return JSON.parse(localStorage.getItem('alamin_courses')||'[]');
+  // Return runtime variable (always in sync with Firebase) - fallback to localStorage
+  return courses.length ? courses : JSON.parse(localStorage.getItem('alamin_courses')||'[]');
 }
 function saveCourses(c){
   localStorage.setItem('alamin_courses', JSON.stringify(c));
-  courses = c; // update runtime variable
+  courses = c;
+  pushCoursesToFirebase(c);
 }
 function getCourseById(id){
   const cs = getCourses();
@@ -1360,7 +1405,7 @@ function renderCoursesAdmin(){
 function deleteCourse(id){
   if(!confirm('حذف هذا الكورس؟')) return;
   courses=courses.filter(c=>c.id!==id);
-  localStorage.setItem('alamin_courses',JSON.stringify(courses));
+  saveCourses(courses);
   renderCoursesAdmin();
 }
 
@@ -1427,17 +1472,18 @@ function saveNewCourse(){
         type,
         price,
       };
-      localStorage.setItem('alamin_courses',JSON.stringify(courses));
+      saveCourses(courses);
       closeModal('addCourseModal');
       renderCoursesAdmin();
-      showAlert('تم حفظ تعديل الكورس بنجاح');
+      showAlert('تم حفظ تعديل الكورس بنجاح ✅ (يظهر للطلاب فوراً)');
       return;
     }
   }
   courses.push({id:Date.now(),title,desc,grade,type,price,emoji:emojis[Math.floor(Math.random()*emojis.length)],color:colors[Math.floor(Math.random()*colors.length)],created:new Date().toLocaleDateString('ar-EG'),lessons:[]});
-  localStorage.setItem('alamin_courses',JSON.stringify(courses));
+  saveCourses(courses);
   closeModal('addCourseModal');
   renderCoursesAdmin();
+  showAlert('تم إضافة الكورس بنجاح ✅ (يظهر للطلاب فوراً)');
 }
 
 // ---- ADD LESSON HELPERS ----
