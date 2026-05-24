@@ -155,8 +155,38 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .btn-save{flex:1;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;padding:13px;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
 .btn-cancel{background:var(--bg);color:var(--text);border:2px solid var(--border);padding:13px 20px;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
 .lesson-segments{display:flex;flex-direction:column;gap:10px;}
-.lesson-segment-row{display:grid;grid-template-columns:1fr 1.4fr .7fr auto;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px;}
+.lesson-segment-row{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;}
 .lesson-segment-row input{background:var(--card-bg);}
+.seg-row-top{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;}
+.seg-upload-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;font-family:"Cairo",sans-serif;}
+.seg-upload-btn:hover{opacity:.88;}
+.seg-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.seg-upload-btn input[type=file]{display:none;}
+.seg-progress-wrap{display:none;margin-top:4px;}
+.seg-progress-bar{height:7px;background:var(--border);border-radius:6px;overflow:hidden;}
+.seg-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .25s;border-radius:6px;}
+.seg-progress-text{font-size:11px;color:var(--text2);margin-top:4px;font-weight:600;}
+.seg-video-ready{background:#d1e7dd;color:#0f5132;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;display:none;}
+.seg-del-btn{padding:8px 12px;background:#fff0f3;color:#c0392b;border:none;border-radius:10px;cursor:pointer;font-size:13px;}
+
+/* ---- BUNNY VIDEO UPLOAD ---- */
+.bunny-upload-area{border:3px dashed var(--border);border-radius:16px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;}
+.bunny-upload-area:hover,.bunny-upload-area.drag-over{border-color:var(--primary);background:rgba(0,180,216,.04);}
+.bunny-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.bunny-upload-icon{font-size:40px;margin-bottom:10px;}
+.bunny-upload-text{font-size:14px;color:var(--text2);font-weight:600;}
+.bunny-progress-wrap{display:none;margin-top:16px;}
+.bunny-progress-bar{height:10px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;}
+.bunny-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .3s;border-radius:8px;}
+.bunny-progress-text{font-size:13px;font-weight:700;color:var(--primary);}
+.bunny-status-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px;}
+.bunny-status-badge.queued{background:#fff3cd;color:#856404;}
+.bunny-status-badge.encoding{background:#cff4fc;color:#055160;}
+.bunny-status-badge.ready{background:#d1e7dd;color:#0f5132;}
+.bunny-status-badge.error{background:#f8d7da;color:#842029;}
+.segment-bunny-id{display:none;}
+.bunny-video-preview{margin-top:12px;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;}
+.bunny-video-preview iframe{width:100%;height:100%;border:none;}
 .btn-mini{border:none;border-radius:9px;padding:9px 12px;font-family:'Cairo',sans-serif;font-weight:800;cursor:pointer;background:#e8f4ff;color:var(--primary);}
 .btn-mini.danger{background:#fff0f3;color:var(--danger);}
 .field-hint{font-size:12px;color:#888;margin-top:6px;line-height:1.7;}
@@ -919,36 +949,42 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
 <!-- ADD LESSON MODAL -->
 <div class="modal-overlay" id="addLessonModal">
-  <div class="modal">
+  <div class="modal" style="max-width:700px">
     <h3>إضافة درس جديد 🎬</h3>
     <div class="modal-form">
       <div class="form-group">
         <label>اختر الكورس</label>
         <select id="alCourseId"></select>
       </div>
-      <div class="form-group"><label>عنوان الدرس</label><input type="text" id="alTitle"></div>
-      <div class="form-group"><label>وصف الدرس (اختياري)</label><textarea id="alDescription" rows="3" style="resize:vertical" placeholder="اكتب وصف مختصر للدرس"></textarea></div>
+      <div class="form-group"><label>عنوان الدرس</label><input type="text" id="alTitle" placeholder="مثال: شرح الفاعل والمفعول به"></div>
+      <div class="form-group"><label>وصف الدرس (اختياري)</label><textarea id="alDescription" rows="2" style="resize:vertical" placeholder="اكتب وصف مختصر للدرس"></textarea></div>
+
+      <input type="hidden" id="bunnyUploadedVideoId">
+      <div style="display:none" id="bunnyProgressWrap"><div class="bunny-progress-bar"><div class="bunny-progress-fill" id="bunnyProgressFill"></div></div><div id="bunnyProgressText"></div><div id="bunnyStatusBadge"></div></div>
+      <div id="bunnyPreviewWrap"></div>
+
       <div class="form-group">
-        <label>مقاطع الدرس</label>
+        <label>مقاطع الدرس 📹</label>
         <div class="lesson-segments" id="lessonSegments"></div>
-        <button type="button" class="btn-mini" onclick="addLessonSegmentField()">➕ إضافة مقطع آخر</button>
-        <div class="field-hint">اكتب عنوان كل مقطع ورابط الفيديو والمدة لو حابب. مثال: هكتب الكود على إيه - 07:50.</div>
+        <button type="button" class="btn-mini" onclick="addLessonSegmentField()" style="margin-top:8px">➕ إضافة مقطع آخر</button>
+        <div class="field-hint">كل مقطع فيه زر "ارفع الفيديو" يرفع مباشرة على Bunny.net. يمكنك إضافة أكثر من مقطع للدرس الواحد.</div>
       </div>
+
       <div class="form-group">
         <label>ملزمة PDF (اختياري)</label>
         <input type="text" id="alPdf" placeholder="رابط PDF خارجي https://...">
         <input type="file" id="alPdfFile" accept="application/pdf" style="margin-top:10px">
-        <div class="field-hint">يمكنك وضع رابط PDF أو رفع ملف PDF من جهازك. الرفع هنا بيتخزن داخل المتصفح.</div>
+        <div class="field-hint">رابط PDF خارجي أو ارفع ملف من جهازك.</div>
       </div>
       <div class="form-group">
         <label>اختبار الدرس (اختياري)</label>
         <input type="number" id="alQuizId" list="lessonQuizOptions" placeholder="اكتب ID الاختبار">
         <datalist id="lessonQuizOptions"></datalist>
-        <div class="field-hint">هتلاقي ID كل اختبار ظاهر في صفحة الاختبارات. اكتب الـ ID هنا لربط الاختبار بالدرس.</div>
+        <div class="field-hint">هتلاقي ID كل اختبار في صفحة الاختبارات.</div>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-save" onclick="saveNewLesson()">حفظ الدرس ✅</button>
+      <button class="btn-save" id="saveLessonBtn" onclick="saveNewLesson()">حفظ الدرس ✅</button>
       <button class="btn-cancel" onclick="closeModal('addLessonModal')">إلغاء</button>
     </div>
   </div>
@@ -1579,31 +1615,169 @@ function resetLessonSegments(){
   const container = document.getElementById('lessonSegments');
   if(!container) return;
   container.innerHTML = '';
+  document.getElementById('bunnyUploadedVideoId').value = '';
+  document.getElementById('bunnyProgressWrap').style.display = 'none';
+  document.getElementById('bunnyPreviewWrap').innerHTML = '';
   addLessonSegmentField('المقطع الأول', '', true);
 }
 
-function addLessonSegmentField(title='', videoUrl='', locked=false, duration=''){
+function addLessonSegmentField(title='', videoUrl='', locked=false, duration='', bunnyVideoId=''){
   const container = document.getElementById('lessonSegments');
   if(!container) return;
+  const segId = 'seg_' + Date.now() + '_' + Math.floor(Math.random()*9999);
   const row = document.createElement('div');
   row.className = 'lesson-segment-row';
+  row.dataset.segid = segId;
+
+  const isReady = !!bunnyVideoId || (videoUrl && videoUrl.includes('mediadelivery'));
+  const readyText = isReady ? '✅ الفيديو جاهز' : '';
+
   row.innerHTML = `
-    <input type="text" class="segment-title" placeholder="عنوان المقطع" value="${escapeHTML(title)}">
-    <input type="text" class="segment-url" placeholder="رابط الفيديو" value="${escapeHTML(videoUrl)}">
-    <input type="text" class="segment-duration" placeholder="المدة 18:52" value="${escapeHTML(duration)}">
-    <button type="button" class="btn-mini danger" ${locked ? 'style="visibility:hidden"' : ''} onclick="this.closest('.lesson-segment-row').remove()">حذف</button>
+    <div class="seg-row-top">
+      <input type="text" class="segment-title" placeholder="عنوان المقطع (مثال: شرح الفاعل)" value="${escapeHTML(title)}">
+      <input type="text" class="segment-duration" placeholder="المدة" value="${escapeHTML(duration)}" style="width:80px">
+      ${locked ? '<span></span>' : '<button type="button" class="seg-del-btn" onclick="this.closest(\'.lesson-segment-row\').remove()">🗑️</button>'}
+    </div>
+
+    <label class="seg-upload-btn" style="position:relative;overflow:hidden">
+      <input type="file" accept="video/*" onchange="uploadSegmentVideo(this, '${segId}')">
+      📹 ارفع الفيديو
+    </label>
+
+    <div class="seg-progress-wrap" id="swrap_${segId}">
+      <div class="seg-progress-bar"><div class="seg-progress-fill" id="sfill_${segId}"></div></div>
+      <div class="seg-progress-text" id="stext_${segId}">جاري الرفع...</div>
+    </div>
+
+    <span class="seg-video-ready" id="sready_${segId}" style="${isReady ? 'display:inline-block' : 'display:none'}">✅ الفيديو جاهز</span>
+
+    <input type="hidden" class="segment-url" value="${escapeHTML(videoUrl)}">
+    <input type="hidden" class="segment-bunny-id" value="${escapeHTML(bunnyVideoId)}">
   `;
   container.appendChild(row);
+}
+
+async function uploadSegmentVideo(input, segId){
+  const file = input.files[0];
+  if(!file) return;
+
+  const row = document.querySelector(`[data-segid="${segId}"]`);
+  const uploadBtn = row.querySelector('.seg-upload-btn');
+  const progressWrap = document.getElementById('swrap_' + segId);
+  const progressFill = document.getElementById('sfill_' + segId);
+  const progressText = document.getElementById('stext_' + segId);
+  const readyBadge   = document.getElementById('sready_' + segId);
+  const urlInput     = row.querySelector('.segment-url');
+  const bunnyInput   = row.querySelector('.segment-bunny-id');
+
+  uploadBtn.disabled = true;
+  progressWrap.style.display = 'block';
+  readyBadge.style.display = 'none';
+  progressFill.style.width = '0%';
+  progressText.textContent = 'جاري إنشاء الفيديو...';
+
+  try {
+    // Step 1: Create video slot on Bunny
+    const videoName = (row.querySelector('.segment-title')?.value.trim()) || file.name.replace(/\.[^.]+$/, '') || 'مقطع';
+    const res = await fetch(
+      `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos`,
+      {
+        method: 'POST',
+        headers: { 'AccessKey': BUNNY_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: videoName })
+      }
+    );
+    if(!res.ok) throw new Error('فشل إنشاء الفيديو: ' + res.status);
+    const { guid: videoId } = await res.json();
+
+    progressFill.style.width = '5%';
+    progressText.textContent = 'جاري رفع الفيديو...';
+
+    // Register in Firebase
+    if(window.db){
+      window.db.collection('videos').doc(videoId).set({
+        bunnyVideoId: videoId, bunnyLibraryId: BUNNY_LIBRARY_ID,
+        title: videoName, status: 'Queued', statusAr: 'في الانتظار',
+        statusCode: 0, isReady: false, createdAt: new Date().toISOString()
+      });
+    }
+
+    // Step 2: Upload bytes with progress
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos/${videoId}`);
+      xhr.setRequestHeader('AccessKey', BUNNY_API_KEY);
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+      xhr.upload.onprogress = (e) => {
+        if(e.lengthComputable){
+          const pct = Math.round(5 + (e.loaded / e.total) * 90);
+          progressFill.style.width = pct + '%';
+          progressText.textContent = `جاري الرفع... ${pct}%`;
+        }
+      };
+      xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error('فشل الرفع: ' + xhr.status));
+      xhr.onerror = () => reject(new Error('خطأ في الشبكة'));
+      xhr.send(file);
+    });
+
+    progressFill.style.width = '100%';
+    progressText.textContent = '✅ تم الرفع — جاري الترميز على Bunny...';
+
+    // Save embed URL in hidden inputs
+    const embedUrl = `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${videoId}`;
+    urlInput.value   = embedUrl;
+    bunnyInput.value = videoId;
+    readyBadge.style.display = 'inline-block';
+    readyBadge.textContent = '⏳ جاري الترميز...';
+
+    // Step 3: Poll for ready status
+    const poll = setInterval(async () => {
+      try {
+        const sr = await fetch(
+          `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+          { headers: { 'AccessKey': BUNNY_API_KEY } }
+        );
+        if(!sr.ok) return;
+        const info = await sr.json();
+        if(info.status === 3){
+          clearInterval(poll);
+          readyBadge.textContent = '✅ الفيديو جاهز للمشاهدة';
+          progressText.textContent = '✅ الفيديو جاهز!';
+          if(window.db){
+            window.db.collection('videos').doc(videoId).update({
+              status:'Ready', statusAr:'جاهز', statusCode:3, isReady:true,
+              playUrl: embedUrl,
+              thumbnailUrl: `https://${BUNNY_CDN_HOST}/${videoId}/thumbnail.jpg`,
+              readyAt: new Date().toISOString()
+            });
+          }
+        } else if(info.status === 4){
+          clearInterval(poll);
+          readyBadge.textContent = '❌ خطأ في الترميز';
+        }
+      } catch(e){ console.warn('poll error', e); }
+    }, 8000);
+
+    uploadBtn.disabled = false;
+
+  } catch(err){
+    progressText.textContent = '❌ ' + (err.message || 'حدث خطأ');
+    progressFill.style.width = '0%';
+    uploadBtn.disabled = false;
+    console.error('Segment upload error:', err);
+  }
 }
 
 function collectLessonSegments(){
   const rows = Array.from(document.querySelectorAll('#lessonSegments .lesson-segment-row'));
   return rows.map((row, index)=>{
-    const title = row.querySelector('.segment-title')?.value.trim() || `المقطع ${index + 1}`;
-    const videoUrl = row.querySelector('.segment-url')?.value.trim() || '';
-    const duration = row.querySelector('.segment-duration')?.value.trim() || '';
-    return {title, videoUrl, duration, position:index + 1};
-  }).filter(segment => segment.videoUrl);
+    const title        = row.querySelector('.segment-title')?.value.trim()     || `المقطع ${index + 1}`;
+    const videoUrl     = row.querySelector('.segment-url')?.value.trim()       || '';
+    const duration     = row.querySelector('.segment-duration')?.value.trim()  || '';
+    const bunnyVideoId = row.querySelector('.segment-bunny-id')?.value.trim()  || '';
+    const source       = bunnyVideoId ? 'bunny' : (videoUrl ? 'url' : '');
+    return {title, videoUrl, duration, bunnyVideoId, source, position: index + 1};
+  }).filter(segment => segment.videoUrl || segment.bunnyVideoId);
 }
 
 function readFileAsDataUrl(file){
@@ -1642,6 +1816,195 @@ async function readPdfInputAsDataUrl(){
   }
 }
 
+// ============================================================
+// ---- BUNNY.NET VIDEO UPLOAD ----
+// ============================================================
+const BUNNY_LIBRARY_ID = '666877';
+const BUNNY_API_KEY    = '6490a0ac-1a81-412e-bfeefab23057-4416-4207';
+const BUNNY_CDN_HOST   = 'vz-4688f24d-ab7.b-cdn.net';
+
+let _bunnyCurrentVideoId  = null;   // videoId بعد الإنشاء على Bunny
+let _bunnyStatusInterval  = null;   // interval لمتابعة الترميز
+
+// -- drag & drop helpers --
+function bunnyDragOver(e){ e.preventDefault(); document.getElementById('bunnyDropZone').classList.add('drag-over'); }
+function bunnyDragLeave(e){ document.getElementById('bunnyDropZone').classList.remove('drag-over'); }
+function bunnyDrop(e){
+  e.preventDefault();
+  document.getElementById('bunnyDropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('video/')) startBunnyUpload(file);
+}
+function bunnyFileSelected(input){
+  const file = input.files[0];
+  if(file) startBunnyUpload(file);
+}
+
+// -- Step 1: Create video in Bunny library --
+async function bunnyCreateVideo(title){
+  const res = await fetch(
+    `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos`,
+    {
+      method: 'POST',
+      headers: { 'AccessKey': BUNNY_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title })
+    }
+  );
+  if(!res.ok) throw new Error('فشل إنشاء الفيديو على Bunny: ' + res.status);
+  return await res.json();   // { guid, ... }
+}
+
+// -- Step 2: Upload video bytes to Bunny --
+async function bunnyUploadBytes(videoId, file){
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos/${videoId}`);
+    xhr.setRequestHeader('AccessKey', BUNNY_API_KEY);
+    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+
+    xhr.upload.onprogress = (e) => {
+      if(e.lengthComputable){
+        const pct = Math.round(e.loaded / e.total * 100);
+        setBunnyProgress(pct, `جاري الرفع... ${pct}%`);
+      }
+    };
+    xhr.onload = () => {
+      if(xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error('فشل رفع الفيديو: ' + xhr.status));
+    };
+    xhr.onerror = () => reject(new Error('خطأ في الشبكة أثناء رفع الفيديو'));
+    xhr.send(file);
+  });
+}
+
+// -- Step 3: Poll Bunny API for status --
+async function bunnyGetVideoStatus(videoId){
+  const res = await fetch(
+    `https://video.bunnycdn.com/library/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    { headers: { 'AccessKey': BUNNY_API_KEY } }
+  );
+  if(!res.ok) throw new Error('فشل جلب حالة الفيديو');
+  return await res.json();  // { status, guid, ... }
+}
+
+// -- UI helpers --
+function setBunnyProgress(pct, text){
+  document.getElementById('bunnyProgressWrap').style.display = 'block';
+  document.getElementById('bunnyProgressFill').style.width = pct + '%';
+  document.getElementById('bunnyProgressText').textContent = text;
+}
+function setBunnyStatusBadge(status){
+  // Bunny status codes: 0=Queued,1=Processing,2=Encoding,3=Ready,4=Error
+  const map = {
+    0: { cls: 'queued',   icon: '⏳', label: 'في الانتظار'     },
+    1: { cls: 'encoding', icon: '⚙️', label: 'جاري المعالجة'   },
+    2: { cls: 'encoding', icon: '🔄', label: 'جاري الترميز'    },
+    3: { cls: 'ready',    icon: '✅', label: 'جاهز للمشاهدة'   },
+    4: { cls: 'error',    icon: '❌', label: 'خطأ في الترميز'   },
+  };
+  const info = map[status] || { cls: 'queued', icon: '⏳', label: 'جاري التحضير' };
+  document.getElementById('bunnyStatusBadge').innerHTML =
+    `<span class="bunny-status-badge ${info.cls}">${info.icon} ${info.label}</span>`;
+}
+
+function showBunnyPreview(videoId){
+  const wrap = document.getElementById('bunnyPreviewWrap');
+  wrap.innerHTML = `
+    <div style="margin-top:14px">
+      <div style="font-size:12px;color:#888;margin-bottom:8px">معاينة الفيديو:</div>
+      <div class="bunny-video-preview">
+        <iframe src="https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${videoId}?autoplay=false" allowfullscreen></iframe>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:6px">Video ID: ${videoId}</div>
+    </div>`;
+}
+
+// -- Main upload flow --
+async function startBunnyUpload(file){
+  _bunnyCurrentVideoId = null;
+  clearInterval(_bunnyStatusInterval);
+  document.getElementById('bunnyPreviewWrap').innerHTML = '';
+  document.getElementById('bunnyUploadedVideoId').value = '';
+  document.getElementById('bunnyStatusBadge').innerHTML = '';
+  setBunnyProgress(0, 'جاري إنشاء الفيديو على Bunny.net...');
+
+  const saveLessonBtn = document.getElementById('saveLessonBtn');
+  if(saveLessonBtn) saveLessonBtn.disabled = true;
+
+  try {
+    // Step 1: create video slot
+    const videoName = file.name.replace(/\.[^.]+$/, '') || 'درس جديد';
+    const videoData = await bunnyCreateVideo(videoName);
+    const videoId   = videoData.guid;
+    _bunnyCurrentVideoId = videoId;
+    document.getElementById('bunnyUploadedVideoId').value = videoId;
+
+    setBunnyProgress(5, 'تم إنشاء الفيديو — جاري الرفع...');
+
+    // Register in Firebase so webhook can update it
+    if(window.db){
+      await window.db.collection('videos').doc(videoId).set({
+        bunnyVideoId:  videoId,
+        bunnyLibraryId: BUNNY_LIBRARY_ID,
+        title:         videoName,
+        status:        'Queued',
+        statusAr:      'في الانتظار',
+        statusCode:    0,
+        isReady:       false,
+        createdAt:     new Date().toISOString()
+      });
+    }
+
+    // Step 2: upload file
+    await bunnyUploadBytes(videoId, file);
+    setBunnyProgress(100, '✅ تم الرفع! جاري الترميز...');
+    setBunnyStatusBadge(1);
+
+    // Step 3: poll for encoding status every 8 seconds
+    _bunnyStatusInterval = setInterval(async () => {
+      try {
+        const info = await bunnyGetVideoStatus(videoId);
+        setBunnyStatusBadge(info.status);
+        if(info.status === 3){
+          clearInterval(_bunnyStatusInterval);
+          setBunnyProgress(100, '🎉 الفيديو جاهز للمشاهدة!');
+          showBunnyPreview(videoId);
+          // Update Firebase
+          if(window.db){
+            await window.db.collection('videos').doc(videoId).update({
+              status:     'Ready',
+              statusAr:   'جاهز',
+              statusCode: 3,
+              isReady:    true,
+              playUrl:    `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${videoId}`,
+              thumbnailUrl: `https://${BUNNY_CDN_HOST}/${videoId}/thumbnail.jpg`,
+              readyAt:    new Date().toISOString()
+            });
+          }
+          if(saveLessonBtn) saveLessonBtn.disabled = false;
+        } else if(info.status === 4){
+          clearInterval(_bunnyStatusInterval);
+          setBunnyProgress(100, '❌ خطأ في الترميز — حاول ترفع الفيديو تاني');
+          if(saveLessonBtn) saveLessonBtn.disabled = false;
+        }
+      } catch(e){ console.warn('Status poll error:', e); }
+    }, 8000);
+
+    if(saveLessonBtn) saveLessonBtn.disabled = false;
+
+  } catch(err){
+    console.error('Bunny upload error:', err);
+    setBunnyProgress(0, '❌ ' + (err.message || 'خطأ أثناء الرفع'));
+    setBunnyStatusBadge(4);
+    if(saveLessonBtn) saveLessonBtn.disabled = false;
+  }
+}
+
+// -- Build Bunny embed URL from videoId --
+function bunnyEmbedUrl(videoId){
+  return `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${videoId}`;
+}
+
 async function saveNewLesson(){
   const courseId = document.getElementById('alCourseId').value;
   const title = document.getElementById('alTitle').value.trim();
@@ -1656,22 +2019,61 @@ async function saveNewLesson(){
     alert('لا يوجد اختبار بهذا الـ ID. راجع صفحة الاختبارات واكتب ID صحيح.');
     return;
   }
-  if(!courseId||!title||(!segments.length && !pdfUrl && !pdfFileUrl && !quizId)){alert('من فضلك اختر الكورس واكتب عنوان الدرس وأضف محتوى واحد على الأقل: مقطع أو PDF أو اختبار');return;}
+
+  // Get Bunny video if uploaded
+  const bunnyVideoId = document.getElementById('bunnyUploadedVideoId').value.trim();
+  const bunnyVideoUrl = bunnyVideoId ? bunnyEmbedUrl(bunnyVideoId) : '';
+
+  // Build segments: Bunny segment first if uploaded
+  let allSegments = [];
+  if(bunnyVideoId){
+    allSegments.push({ title: title || 'الدرس', videoUrl: bunnyVideoUrl, bunnyVideoId, duration: '', position: 1, source: 'bunny' });
+    // add manual segments after
+    segments.forEach((s,i) => allSegments.push({...s, position: i+2}));
+  } else {
+    allSegments = segments;
+  }
+
+  const hasBunny = !!bunnyVideoId;
+  const hasContent = allSegments.length || pdfUrl || pdfFileUrl || quizId;
+
+  if(!courseId || !title || !hasContent){
+    alert('من فضلك اختر الكورس واكتب عنوان الدرس وأضف محتوى واحد على الأقل.');
+    return;
+  }
+
   const lesson = {
     title,
     description,
-    segments,
-    videoUrl: segments[0] ? segments[0].videoUrl : '',
+    segments: allSegments,
+    videoUrl: allSegments[0] ? allSegments[0].videoUrl : '',
+    bunnyVideoId: bunnyVideoId || null,
+    bunnyLibraryId: bunnyVideoId ? BUNNY_LIBRARY_ID : null,
     pdfUrl: pdfFileUrl || pdfUrl || '',
     pdfName: pdfFileUrl ? (document.getElementById('alPdfFile').files[0]?.name || 'ملزمة الدرس.pdf') : '',
     quizId,
     position: 0
   };
+
   const added = addLessonToCourse(parseInt(courseId,10), lesson);
-  if(!added){alert('حدث خطأ أثناء حفظ الدرس');return;}
+  if(!added){ alert('حدث خطأ أثناء حفظ الدرس'); return; }
+
+  // Link video to course in Firebase
+  if(window.db && bunnyVideoId){
+    try {
+      await window.db.collection('videos').doc(bunnyVideoId).update({
+        courseId: parseInt(courseId,10),
+        lessonTitle: title
+      });
+    } catch(e){ console.warn('Could not link video to course:', e); }
+  }
+
+  clearInterval(_bunnyStatusInterval);
+  _bunnyCurrentVideoId = null;
+
   closeModal('addLessonModal');
   renderCoursesAdmin();
-  showAlert('تم إضافة الدرس بنجاح');
+  showAlert(hasBunny ? 'تم إضافة الدرس مع الفيديو على Bunny.net ✅' : 'تم إضافة الدرس بنجاح ✅');
 }
 
 // ---- PAYMENTS (ADMIN) ----
