@@ -499,6 +499,9 @@ footer {
 .student-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(0,180,216,0.12); color:var(--primary); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700; margin-top:16px; }
 </style>
 <script src="assets/backend-sync.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -828,7 +831,7 @@ function getCurrentUser() {
   return JSON.parse(localStorage.getItem('alamin_current') || 'null');
 }
 
-function renderStudentPanel() {
+async function renderStudentPanel() {
   const user = getCurrentUser();
   const panel = document.getElementById('studentPanel');
   if (!user) {
@@ -845,10 +848,36 @@ function renderStudentPanel() {
     `;
   }
 
-  const courses = JSON.parse(localStorage.getItem('alamin_courses')||'[]');
-  const enrolledIds = Array.isArray(user.enrolledCourses) ? user.enrolledCourses : [];
-  const myCourses = courses.filter(c => enrolledIds.includes(c.id));
-  const lessonCount = myCourses.reduce((sum,c)=> sum + (c.lessons?c.lessons.length:0),0);
+  // جيب enrolledCourses الحديثة من Firebase
+  let enrolledIds = Array.isArray(user.enrolledCourses) ? user.enrolledCourses.map(String) : [];
+  if (window.db) {
+    try {
+      const snap = await window.db.collection('students').doc(String(user.id)).get();
+      if (snap.exists) {
+        const fresh = snap.data();
+        enrolledIds = (fresh.enrolledCourses || enrolledIds).map(String);
+        // حدّث localStorage
+        const updated = {...user, enrolledCourses: enrolledIds};
+        localStorage.setItem('alamin_current', JSON.stringify(updated));
+      }
+    } catch(e) { console.warn('Could not fetch student enrollments:', e); }
+  }
+
+  // جيب الكورسات
+  let courses = [];
+  if (window.db) {
+    try {
+      const doc = await window.db.collection('platform_data').doc('courses_list').get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (Array.isArray(data.items)) courses = data.items;
+      }
+    } catch(e) {}
+  }
+  if (!courses.length) courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
+
+  const myCourses = courses.filter(c => enrolledIds.includes(String(c.id)));
+  const lessonCount = myCourses.reduce((sum,c) => sum + (c.lessons ? c.lessons.length : 0), 0);
 
   const overview = document.getElementById('studentOverview');
   overview.innerHTML = `
@@ -896,20 +925,37 @@ function renderStudentPanel() {
   }
 }
 
-function renderCourses() {
-  const stored = localStorage.getItem('alamin_courses');
-  const courses = stored ? JSON.parse(stored) : defaultCourses;
-  if (!stored) localStorage.setItem('alamin_courses', JSON.stringify(defaultCourses));
+async function renderCourses() {
+  // حاول تجيب الكورسات من Firebase أولاً
+  let courses = [];
+  if (window.db) {
+    try {
+      const doc = await window.db.collection('platform_data').doc('courses_list').get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (Array.isArray(data.items) && data.items.length) {
+          courses = data.items;
+          localStorage.setItem('alamin_courses', JSON.stringify(courses));
+        }
+      }
+    } catch(e) { console.warn('Firebase courses load failed:', e); }
+  }
+  // fallback: localStorage أو الكورسات الافتراضية
+  if (!courses.length) {
+    const stored = localStorage.getItem('alamin_courses');
+    courses = stored ? JSON.parse(stored) : defaultCourses;
+    if (!stored) localStorage.setItem('alamin_courses', JSON.stringify(defaultCourses));
+  }
 
   const user = getCurrentUser();
-  const enrolledIds = user && Array.isArray(user.enrolledCourses) ? user.enrolledCourses : [];
+  const enrolledIds = user && Array.isArray(user.enrolledCourses) ? user.enrolledCourses.map(String) : [];
   const grid = document.getElementById('coursesGrid');
   if (!courses.length) {
     grid.innerHTML = '<div style="text-align:center;color:var(--text2);padding:60px;grid-column:1/-1">لا توجد كورسات حالياً</div>';
     return;
   }
   grid.innerHTML = courses.map(c => {
-    const isEnrolled = enrolledIds.includes(c.id);
+    const isEnrolled = enrolledIds.includes(String(c.id));
     const actionLabel = isEnrolled ? 'عرض المحتوى' : 'الدخول للكورس';
     const actionHandler = isEnrolled ? `window.location.href='lessons.html?course=${c.id}'` : `enrollCourse(${c.id})`;
     return `
@@ -1000,9 +1046,11 @@ window.addEventListener('scroll', () => {
 });
 
 // ---- INIT ----
-renderStudentPanel();
-renderCourses();
-observeFadeUp();
+(async () => {
+  await renderStudentPanel();
+  await renderCourses();
+  observeFadeUp();
+})();
 
 // Trigger hero animation immediately
 setTimeout(() => document.querySelector('.hero-text').classList.add('visible'), 100);
