@@ -1153,9 +1153,13 @@ function renderStudentsGradeSummary(users){
   }).join('');
 }
 async function refreshCenterStudentsForStudentsPage(){
-  const added = await syncCenterStudentsFromFirebase();
+  const result = await syncCenterStudentsFromFirebase();
   renderStudentsTable();
-  showAlert(added ? `تم استيراد ${added} طالب من السيستم.` : 'تم التحديث، لا يوجد طلاب جدد من السيستم.');
+  if(result.error) {
+    showAlert('تعذر استيراد طلاب السيستم من Firebase. تأكد من الاتصال بالإنترنت.');
+  } else {
+    showAlert(result.added ? `تم استيراد ${result.added} طالب جديد من السيستم. إجمالي المستورد: ${result.imported}` : `تم التحديث. إجمالي طلاب السيستم المتاحين: ${result.imported}`);
+  }
 }
 function renderStudentsTable(filter=''){
   const users=getUsers();
@@ -1734,14 +1738,30 @@ function sameCourseStudentVoucher(voucher, courseId, studentId) {
 function saveVouchersData() {
   localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
 }
+function normalizeImportedStudentGrade(data) {
+  const raw = String(data.grade || data.offlineGrade || '');
+  const offline = String(data.offlineGrade || '');
+  const direct = { '301': '1', '302': '2', '303': '3', '203': 'prep3', '1': '1', '2': '2', '3': '3', 'prep3': 'prep3' };
+  return direct[raw] || direct[offline] || raw || 'all';
+}
+function isSystemStudentDoc(doc, data) {
+  const docId = String(doc.id || '');
+  const qrCode = String(data.qrCode || data.id || '');
+  return data.studentType === 'center' ||
+    !!data.offlineStudentId ||
+    !!data.offlineGrade ||
+    (!!qrCode && docId === qrCode && data.role === 'student');
+}
 async function syncCenterStudentsFromFirebase() {
   if (!window.db) return 0;
   try {
-    const snapshot = await window.db.collection('students').where('studentType', '==', 'center').get();
+    const snapshot = await window.db.collection('students').get();
     const users = getUsers();
     let added = 0;
+    let imported = 0;
     snapshot.forEach(doc => {
       const data = doc.data() || {};
+      if (!isSystemStudentDoc(doc, data)) return;
       const id = String(data.id || data.qrCode || doc.id);
       if (!id) return;
       const incoming = {
@@ -1749,7 +1769,7 @@ async function syncCenterStudentsFromFirebase() {
         id,
         qrCode: data.qrCode || id,
         name: data.name || 'طالب من السيستم',
-        grade: data.grade || 'all',
+        grade: normalizeImportedStudentGrade(data),
         studentType: 'center',
         role: 'student',
         enrolledCourses: data.enrolledCourses || []
@@ -1761,12 +1781,13 @@ async function syncCenterStudentsFromFirebase() {
         users.push(incoming);
         added++;
       }
+      imported++;
     });
     saveUsers(users);
-    return added;
+    return { added, imported };
   } catch (err) {
     console.warn('Could not sync center students', err);
-    return 0;
+    return { added: 0, imported: 0, error: err };
   }
 }
 async function initVouchersPage() {
