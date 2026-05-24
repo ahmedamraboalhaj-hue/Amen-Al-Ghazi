@@ -104,6 +104,10 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
 
 @media(max-width:900px) { .page-wrap{grid-template-columns:1fr;} .left-panel{display:none;} .right-panel{padding:32px 24px;} }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="assets/backend-sync.js"></script>
 </head>
 <body>
 <nav>
@@ -139,7 +143,7 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
 
       <div class="alert" id="alertBox"></div>
 
-      <div class="form-grp">
+      <div class="form-grp" id="phoneGroup">
         <label class="form-label">رقم الموبايل</label>
         <div class="input-wrap">
           <span class="input-ico">📱</span>
@@ -147,7 +151,7 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
         </div>
       </div>
 
-      <div class="form-grp">
+      <div class="form-grp" id="passGroup">
         <label class="form-label">كلمة المرور</label>
         <div class="input-wrap">
           <span class="input-ico">🔒</span>
@@ -155,6 +159,14 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
           <button class="eye-toggle" onclick="toggleEye()" id="eyeBtn">👁️</button>
         </div>
         <div class="forgot-row"><a href="#" class="forgot-link">نسيت كلمة المرور؟</a></div>
+      </div>
+
+      <div class="form-grp" id="codeGroup" style="display:none;">
+        <label class="form-label">كود الطالب</label>
+        <div class="input-wrap">
+          <span class="input-ico">🔑</span>
+          <input class="form-input" type="text" id="codeInp" placeholder="ادخل الكود الخاص بك">
+        </div>
       </div>
 
       <div class="remember-row">
@@ -168,6 +180,7 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
       </button>
 
       <div class="divider">أو</div>
+      <div class="register-row" id="toggleLoginMode" style="cursor:pointer; color:var(--primary); font-weight:800; text-align:center; margin-bottom:10px;" onclick="toggleLoginMode()">لدي كود من السنتر؟ اضغط هنا</div>
       <div class="register-row">مش عندك حساب؟ <a href="register.html">اعمل حساب جديد!</a></div>
 
       <div class="admin-hint">
@@ -208,13 +221,53 @@ function setLoading(v){
   document.getElementById('loginBtn').disabled=v;
 }
 
-function doLogin(){
-  const phone=document.getElementById('phoneInp').value.trim();
-  const pass=document.getElementById('passInp').value;
-  if(!phone||!pass){showAlert('❌ من فضلك ادخل رقم الموبايل وكلمة المرور','error');return;}
+let loginMode = 'phone';
+function toggleLoginMode() {
+  if (loginMode === 'phone') {
+    loginMode = 'code';
+    document.getElementById('phoneGroup').style.display = 'none';
+    document.getElementById('passGroup').style.display = 'none';
+    document.getElementById('codeGroup').style.display = 'block';
+    document.getElementById('toggleLoginMode').textContent = 'العودة لتسجيل الدخول برقم الموبايل';
+  } else {
+    loginMode = 'phone';
+    document.getElementById('phoneGroup').style.display = 'block';
+    document.getElementById('passGroup').style.display = 'block';
+    document.getElementById('codeGroup').style.display = 'none';
+    document.getElementById('toggleLoginMode').textContent = 'لدي كود من السنتر؟ اضغط هنا';
+  }
+}
 
-  setLoading(true);
-  setTimeout(()=>{
+async function doLogin(){
+  if (loginMode === 'code') {
+    const code = document.getElementById('codeInp').value.trim();
+    if(!code){showAlert('❌ من فضلك ادخل الكود الخاص بك','error');return;}
+    setLoading(true);
+    try {
+      const docRef = db.collection('students').doc(code);
+      const docSnap = await docRef.get();
+      if(docSnap.exists) {
+        const user = docSnap.data();
+        user.id = code;
+        user.role = 'student';
+        localStorage.setItem('alamin_current',JSON.stringify(user));
+        showAlert('✅ أهلاً بيك يا '+ (user.name || 'طالب') +'! جاري التوجيه...','success');
+        setTimeout(()=>window.location.href='dashboard.html',1000);
+      } else {
+        showAlert('❌ الكود غير صحيح أو غير مسجل!','error');
+        setLoading(false);
+      }
+    } catch(err) {
+       console.error(err);
+       showAlert('❌ حدث خطأ في الاتصال بقاعدة البيانات','error');
+       setLoading(false);
+    }
+  } else {
+    const phone=document.getElementById('phoneInp').value.trim();
+    const pass=document.getElementById('passInp').value;
+    if(!phone||!pass){showAlert('❌ من فضلك ادخل رقم الموبايل وكلمة المرور','error');return;}
+
+    setLoading(true);
     // Admin login
     if(phone==='01000000000'&&pass==='admin123'){
       localStorage.setItem('alamin_current',JSON.stringify({id:0,name:'الأستاذ الأمين',phone:'01000000000',role:'admin'}));
@@ -222,24 +275,38 @@ function doLogin(){
       setTimeout(()=>window.location.href='dashboard.html',1000);
       return;
     }
-    // Student login
-    const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
-    const user=users.find(u=>u.phone===phone&&u.password===pass);
-    if(user){
-      user.lastLogin=new Date().toLocaleDateString('ar-EG');
-      user.role='student';
-      // Update last login in storage
-      const idx=users.findIndex(u=>u.id===user.id);
-      users[idx]=user;
-      localStorage.setItem('alamin_users',JSON.stringify(users));
-      localStorage.setItem('alamin_current',JSON.stringify(user));
-      showAlert('✅ أهلاً بيك يا '+user.firstName+'! جاري التوجيه...','success');
-      setTimeout(()=>window.location.href='dashboard.html',1000);
-    } else {
-      showAlert('❌ رقم الموبايل أو كلمة المرور غلط!','error');
-      setLoading(false);
+    
+    // Check Firebase for phone + pass
+    try {
+      const snapshot = await db.collection('students').where('phone', '==', phone).where('password', '==', pass).get();
+      if (!snapshot.empty) {
+        const userDoc = snapshot.docs[0];
+        const user = userDoc.data();
+        user.id = userDoc.id;
+        user.role = 'student';
+        localStorage.setItem('alamin_current',JSON.stringify(user));
+        showAlert('✅ أهلاً بيك يا '+(user.name || user.firstName || 'طالب')+'! جاري التوجيه...','success');
+        setTimeout(()=>window.location.href='dashboard.html',1000);
+      } else {
+        // Fallback to local storage users
+        const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
+        const user=users.find(u=>u.phone===phone&&u.password===pass);
+        if(user){
+          user.role='student';
+          localStorage.setItem('alamin_current',JSON.stringify(user));
+          showAlert('✅ أهلاً بيك يا '+user.firstName+'! جاري التوجيه...','success');
+          setTimeout(()=>window.location.href='dashboard.html',1000);
+        } else {
+          showAlert('❌ رقم الموبايل أو كلمة المرور غلط!','error');
+          setLoading(false);
+        }
+      }
+    } catch (err) {
+        console.error(err);
+        showAlert('❌ حدث خطأ في الاتصال بقاعدة البيانات','error');
+        setLoading(false);
     }
-  },800);
+  }
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 </script>

@@ -1,816 +1,2135 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الطالب | مستر أمين الغازي</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@200;400;500;700;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ai_assistant.css">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        body {
-            background: #0a0a0f;
-            color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            min-height: 100vh
-        }
-
-        .dash-topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 30px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(20px)
-        }
-
-        .back-home-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: color 0.2s
-        }
-
-        .back-home-btn:hover {
-            color: #fff
-        }
-
-        .topbar-user {
-            display: flex;
-            align-items: center;
-            gap: 12px
-        }
-
-        .user-name-top {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 600
-        }
-
-        .logout-btn-top {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-            padding: 7px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s
-        }
-
-        .logout-btn-top:hover {
-            background: rgba(239, 68, 68, 0.2)
-        }
-
-        .dash-wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px
-        }
-
-        .student-page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 28px;
-            gap: 20px;
-            flex-wrap: wrap
-        }
-
-        .grade-title-block h1 {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: #fff;
-            line-height: 1.2
-        }
-
-        .student-stamp {
-            background: transparent;
-            border: 2.5px solid rgba(139, 92, 246, 0.6);
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px;
-            position: relative;
-            transform: rotate(-15deg);
-            flex-shrink: 0
-        }
-
-        .student-stamp::before {
-            content: '';
-            position: absolute;
-            inset: 4px;
-            border: 1.5px dashed rgba(139, 92, 246, 0.35);
-            border-radius: 50%
-        }
-
-        .stamp-name {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.3
-        }
-
-        .stamp-phone {
-            font-size: 0.68rem;
-            font-weight: 700;
-            color: rgba(139, 92, 246, 0.9);
-            direction: ltr;
-            margin-top: 3px
-        }
-
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 200px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 10px 16px;
-            color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s
-        }
-
-        .search-box::placeholder {
-            color: rgba(255, 255, 255, 0.35)
-        }
-
-        .search-box:focus {
-            border-color: rgba(139, 92, 246, 0.6)
-        }
-
-        .branch-filters {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap
-        }
-
-        .branch-btn {
-            padding: 8px 18px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Tajawal', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        .branch-btn:hover {
-            border-color: rgba(139, 92, 246, 0.5);
-            color: #fff
-        }
-
-        .branch-btn.active {
-            background: #7c3aed;
-            border-color: #7c3aed;
-            color: #fff
-        }
-
-        .dash-tabs {
-            display: flex;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 30px;
-            overflow-x: auto
-        }
-
-        .dash-tab-btn {
-            padding: 12px 22px;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.45);
-            font-family: 'Tajawal', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 2.5px solid transparent;
-            margin-bottom: -1px;
-            transition: all 0.2s;
-            white-space: nowrap
-        }
-
-        .dash-tab-btn:hover {
-            color: rgba(255, 255, 255, 0.75)
-        }
-
-        .dash-tab-btn.active {
-            color: #fff;
-            border-bottom-color: #7c3aed
-        }
-
-        .tab-panel {
-            display: none
-        }
-
-        .tab-panel.active {
-            display: block
-        }
-
-        .lessons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px
-        }
-
-        .lesson-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s
-        }
-
-        .lesson-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(139, 92, 246, 0.4);
-            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.2)
-        }
-
-        .lesson-thumb {
-            position: relative;
-            height: 170px;
-            background: #111;
-            overflow: hidden
-        }
-
-        .lesson-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8
-        }
-
-        .play-btn-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center
-        }
-
-        .play-circle {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
-            transition: transform 0.2s
-        }
-
-        .lesson-card:hover .play-circle {
-            transform: scale(1.1)
-        }
-
-        .lock-overlay-card {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            backdrop-filter: blur(3px)
-        }
-
-        .lock-overlay-card i {
-            font-size: 1.8rem;
-            color: rgba(255, 255, 255, 0.7)
-        }
-
-        .lock-overlay-card span {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 700
-        }
-
-        .lesson-info {
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center
-        }
-
-        .lesson-teacher-name {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.85)
-        }
-
-        .lesson-date {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.35)
-        }
-
-        .month-header {
-            grid-column: 1/-1;
-            background: rgba(124, 58, 237, 0.1);
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 4px
-        }
-
-        .branch-label {
-            grid-column: 1/-1;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 40px;
-            color: rgba(255, 255, 255, 0.3)
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block
-        }
-
-        .empty-state p {
-            font-size: 1.1rem
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(8px)
-        }
-
-        .modal-overlay.active {
-            display: flex
-        }
-
-        .modal-box {
-            background: #13131a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 720px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto
-        }
-
-        .auth-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 500;
-            align-items: center;
-            justify-content: center;
-            padding: 20px
-        }
-
-        .auth-overlay.open {
-            display: flex
-        }
-
-        .auth-box {
-            background: #13131a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 460px;
-            width: 100%
-        }
-
-        .auth-box h2 {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 8px;
-            text-align: center
-        }
-
-        .auth-box p.sub {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 30px;
-            font-size: 0.9rem
-        }
-
-        .form-field {
-            margin-bottom: 16px
-        }
-
-        .form-field label {
-            display: block;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 6px;
-            font-weight: 600
-        }
-
-        .form-field input,
-        .form-field select {
-            width: 100%;
-            padding: 11px 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s
-        }
-
-        .form-field input:focus,
-        .form-field select:focus {
-            border-color: rgba(124, 58, 237, 0.7)
-        }
-
-        .form-field select option {
-            background: #1a1a2e
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #7c3aed, #5b21b6);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s
-        }
-
-        .btn-submit:hover {
-            opacity: 0.9
-        }
-
-        @media(max-width:768px) {
-            .dash-wrapper {
-                padding: 20px 16px
-            }
-
-            .student-page-header {
-                flex-direction: column-reverse
-            }
-
-            .grade-title-block h1 {
-                font-size: 1.6rem
-            }
-
-            .student-stamp {
-                width: 90px;
-                height: 90px
-            }
-
-            .stamp-name {
-                font-size: 0.65rem
-            }
-
-            .lessons-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 14px
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم - الأمين في اللغة العربية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00b4d8;--primary-dark:#0077b6;--accent:#f5a623;--accent2:#ff6b9d;
+  --success:#2ed573;--danger:#ff4757;--warning:#ffa502;
+  --bg:#f0f7ff;--sidebar-bg:#0f172a;--card-bg:#fff;--text:#1a1a2e;
+  --border:#e3f4f9;--sidebar-text:#94a3b8;--sidebar-active:#fff;
+}
+[data-theme="dark"]{
+  --bg:#0a0e1a;--card-bg:#111827;--text:#e2e8f0;--border:#1e293b;
+  --sidebar-bg:#020617;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--sidebar-bg);height:100vh;position:fixed;top:0;right:0;overflow-y:auto;z-index:50;display:flex;flex-direction:column;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;}
+.sidebar-logo-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;font-weight:900;flex-shrink:0;}
+.sidebar-logo-text{color:white;font-weight:900;font-size:16px;font-family:'Tajawal',sans-serif;}
+.sidebar-logo-sub{color:var(--sidebar-text);font-size:11px;}
+
+.sidebar-section{padding:20px 12px 8px;font-size:11px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:10px;cursor:pointer;color:var(--sidebar-text);font-size:14px;font-weight:600;transition:all .2s;text-decoration:none;}
+.nav-item:hover{background:rgba(255,255,255,.07);color:white;}
+.nav-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 14px rgba(0,180,216,.3);}
+.nav-item .icon{font-size:18px;width:22px;text-align:center;}
+.nav-badge{margin-right:auto;background:var(--accent2);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;}
+
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,.07);}
+.admin-info{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);}
+.admin-avatar{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#f7b731);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;font-weight:900;}
+.admin-name{color:white;font-size:13px;font-weight:700;}
+.admin-role{color:var(--sidebar-text);font-size:11px;}
+
+/* MAIN */
+.main{margin-right:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--card-bg);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:40;}
+.topbar-title{font-size:22px;font-weight:800;font-family:'Tajawal',sans-serif;}
+.topbar-actions{display:flex;align-items:center;gap:14px;}
+.topbar-actions button{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:14px;font-family:'Cairo',sans-serif;color:var(--text);transition:all .2s;}
+.topbar-actions button:hover{border-color:var(--primary);color:var(--primary);}
+.theme-toggle{background:#f0f9ff;border:2px solid var(--primary);border-radius:30px;padding:6px 12px;cursor:pointer;font-size:14px;}
+[data-theme="dark"] .theme-toggle{background:#1e293b;}
+
+.content{padding:28px 32px;flex:1;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* STATS CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px;}
+.stat-card{background:var(--card-bg);border-radius:18px;padding:22px;border:1px solid var(--border);display:flex;align-items:center;gap:16px;box-shadow:0 4px 16px rgba(0,0,0,.04);transition:transform .2s;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.stat-label{font-size:13px;color:#888;margin-bottom:4px;}
+.stat-val{font-size:30px;font-weight:900;font-family:'Tajawal',sans-serif;}
+.stat-change{font-size:12px;color:var(--success);margin-top:4px;}
+
+/* TABLE */
+.table-card{background:var(--card-bg);border-radius:18px;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.04);overflow:hidden;margin-bottom:24px;}
+.table-header{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-header h3{font-size:18px;font-weight:800;}
+.table-search{display:flex;align-items:center;gap:10px;}
+.table-search input{padding:9px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;width:220px;}
+.table-search input:focus{border-color:var(--primary);}
+.btn-add{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;padding:9px 18px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;font-size:14px;cursor:pointer;}
+
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bg);padding:13px 20px;text-align:right;font-size:13px;color:#888;font-weight:700;border-bottom:2px solid var(--border);}
+td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,180,216,.03);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.badge.active{background:#e8fff3;color:#27ae60;}
+.badge.inactive{background:#fff0f3;color:#c0392b;}
+.badge.grade1{background:#e8f4ff;color:var(--primary-dark);}
+.badge.grade2{background:#fff8e8;color:#e67e22;}
+.badge.grade3{background:#fce8ff;color:#8e44ad;}
+.action-btns{display:flex;gap:6px;}
+.btn-view{background:#e8f4ff;color:var(--primary);border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;font-weight:600;}
+.btn-delete{background:#fff0f3;color:var(--danger);border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;font-weight:600;}
+.avatar-cell{display:flex;align-items:center;gap:10px;}
+.avatar-sm{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0;}
+
+/* COURSES PAGE */
+.courses-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.course-admin-card{background:var(--card-bg);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.course-admin-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.course-admin-body{padding:16px;}
+.course-admin-title{font-size:15px;font-weight:800;margin-bottom:8px;}
+.course-admin-meta{font-size:12px;color:#888;margin-bottom:12px;}
+.course-admin-footer{display:flex;gap:8px;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card-bg);border-radius:22px;padding:36px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:22px;font-weight:900;margin-bottom:24px;font-family:'Tajawal',sans-serif;}
+.modal-form .form-group{margin-bottom:16px;}
+.modal-form label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;}
+.modal-form input,.modal-form select,.modal-form textarea{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;}
+.modal-form input:focus,.modal-form select:focus{border-color:var(--primary);}
+.modal-actions{display:flex;gap:12px;margin-top:20px;}
+.btn-save{flex:1;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;padding:13px;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
+.btn-cancel{background:var(--bg);color:var(--text);border:2px solid var(--border);padding:13px 20px;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
+.lesson-segments{display:flex;flex-direction:column;gap:10px;}
+.lesson-segment-row{display:grid;grid-template-columns:1fr 1.4fr .7fr auto;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px;}
+.lesson-segment-row input{background:var(--card-bg);}
+.btn-mini{border:none;border-radius:9px;padding:9px 12px;font-family:'Cairo',sans-serif;font-weight:800;cursor:pointer;background:#e8f4ff;color:var(--primary);}
+.btn-mini.danger{background:#fff0f3;color:var(--danger);}
+.field-hint{font-size:12px;color:#888;margin-top:6px;line-height:1.7;}
+
+/* ANALYTICS */
+.analytics-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;}
+.chart-card{background:var(--card-bg);border-radius:18px;border:1px solid var(--border);padding:24px;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.chart-card h3{font-size:17px;font-weight:800;margin-bottom:20px;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:160px;}
+.bar{flex:1;background:linear-gradient(to top,var(--primary),rgba(0,180,216,.4));border-radius:8px 8px 0 0;position:relative;transition:all .3s;cursor:pointer;}
+.bar:hover{opacity:.8;}
+.bar-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;white-space:nowrap;}
+.bar-val{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--primary);}
+
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.donut-legend{display:flex;flex-direction:column;gap:8px;width:100%;}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:13px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;color:#aaa;}
+.empty-state .icon{font-size:64px;margin-bottom:16px;}
+.empty-state p{font-size:16px;}
+
+@media(max-width:1100px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.sidebar{width:200px;}.main{margin-right:200px;}.content{padding:16px;}}
+@media print {
+  * { box-shadow:none !important; text-shadow:none !important; color:#000 !important; background:transparent !important; }
+  html, body { background:#fff !important; color:#000 !important; overflow:visible !important; }
+  body { min-height:auto !important; }
+  .sidebar, .topbar, .sidebar-bottom, .admin-info, .nav-item, .theme-toggle, .btn-add, .table-search, .vc-tab, .modal-overlay, .modal, .topbar-actions, input, select, button, .badge, .action-btns { display:none !important; }
+  .main, .content, #page-vouchers, #vc-tab-print, #printPreviewInfo, #printArea { display:block !important; width:auto !important; margin:0 !important; padding:0 !important; }
+  #printArea { display:grid !important; grid-template-columns:repeat(2,minmax(220px,1fr)) !important; gap:12px !important; background:transparent !important; border:none !important; }
+  #printArea > div { break-inside:avoid !important; page-break-inside:avoid !important; }
+  .table-card { box-shadow:none !important; border:none !important; }
+  #printArea div[style] { background:transparent !important; }
+  #printPreviewInfo { display:block !important; color:#000 !important; font-size:12px !important; margin-bottom:12px !important; }
+}
+</style>
+<script src="assets/backend-sync.js"></script>
 </head>
-
 <body>
 
-    <!-- TOP BAR -->
-    <div class="dash-topbar">
-        <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
-        <div class="topbar-user" id="user-info-bar" style="display:none;">
-            <span class="user-name-top" id="display-name">...</span>
-            <button class="logout-btn-top" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">أ</div>
+    <div>
+      <div class="sidebar-logo-text">الأمين</div>
+      <div class="sidebar-logo-sub">لوحة التحكم</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section admin-only">الرئيسية</div>
+  <a class="nav-item active admin-only" onclick="showPage('overview')">
+    <span class="icon">📊</span> نظرة عامة
+  </a>
+  <a class="nav-item student-only" onclick="showPage('student-courses')" style="display:none">
+    <span class="icon">📚</span> كورساتي
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('analytics')">
+    <span class="icon">📈</span> التحليلات
+  </a>
+
+  <div class="sidebar-section admin-only">الإدارة</div>
+  <a class="nav-item admin-only" onclick="showPage('students')">
+    <span class="icon">👨‍🎓</span> الطلاب
+    <span class="nav-badge" id="studentsBadge">0</span>
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('courses')">
+    <span class="icon">📚</span> الكورسات
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('payments')">
+    <span class="icon">💳</span> المدفوعات
+    <span class="nav-badge" id="paymentsBadge" style="background:var(--warning)">0</span>
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('lectures')">
+    <span class="icon">🎬</span> المحاضرات
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('quizzes')">
+    <span class="icon">📝</span> الاختبارات
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('results')">
+    <span class="icon">📊</span> نتائج الاختبارات
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('views')">
+    <span class="icon">👁️</span> مشاهدات الدروس
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('vouchers')">
+    <span class="icon">🎟️</span> أكواد التفعيل
+  </a>
+
+  <div class="sidebar-section">الأدوات</div>
+  <a class="nav-item" onclick="showPage('messages')">
+    <span class="icon">💬</span> الرسائل
+  </a>
+  <a class="nav-item" onclick="window.location='tests.html'" style="cursor:pointer">
+    <span class="icon">📝</span> الاختبارات
+  </a>
+  <a class="nav-item" onclick="window.location='certificates.html'" style="cursor:pointer">
+    <span class="icon">🏆</span> الشهادات
+  </a>
+  <a class="nav-item" onclick="window.location='profile.html'" style="cursor:pointer">
+    <span class="icon">👤</span> ملفي الشخصي
+  </a>
+  <a class="nav-item" onclick="window.location='explore.html'" style="cursor:pointer">
+    <span class="icon">🔍</span> استكشاف الدورات
+  </a>
+  <a class="nav-item" onclick="showPage('settings')">
+    <span class="icon">⚙️</span> الإعدادات
+  </a>
+
+  <div class="sidebar-bottom">
+    <div class="admin-info">
+      <div class="admin-avatar">أ</div>
+      <div>
+        <div class="admin-name">الأستاذ الأمين</div>
+        <div class="admin-role">مدير المنصة</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">نظرة عامة 📊</div>
+    <div class="topbar-actions">
+      <button onclick="window.open('index.html','_blank')">🌐 الموقع</button>
+      <button class="theme-toggle" onclick="toggleTheme()">☀️ 🌙</button>
+      <button onclick="window.location='login.html'">🚪 خروج</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8f4ff">👨‍🎓</div>
+          <div>
+            <div class="stat-label">إجمالي الطلاب</div>
+            <div class="stat-val" id="statTotal">0</div>
+            <div class="stat-change">+٥٪ هذا الشهر</div>
+          </div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8fff3">✅</div>
+          <div>
+            <div class="stat-label">الطلاب النشطين</div>
+            <div class="stat-val" id="statActive">0</div>
+            <div class="stat-change">+٨٪ هذا الأسبوع</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fff8e8">📚</div>
+          <div>
+            <div class="stat-label">الكورسات المتاحة</div>
+            <div class="stat-val" id="statCourses">0</div>
+            <div class="stat-change">عدد الكورسات المعروضة</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fce8ff">🆕</div>
+          <div>
+            <div class="stat-label">تسجيل اليوم</div>
+            <div class="stat-val" id="statToday">0</div>
+            <div class="stat-change">طالب جديد اليوم</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent students -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>آخر الطلاب المسجّلين 👨‍🎓</h3>
+          <button class="btn-add" onclick="showPage('students')">عرض الكل</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>الطالب</th>
+              <th>رقم الموبايل</th>
+              <th>الصف</th>
+              <th>تاريخ التسجيل</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="recentStudentsBody">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد طلاب مسجلين بعد</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
-    <div class="dash-wrapper" id="dashboard-main" style="display:none;">
-        <div class="student-page-header">
-            <div class="grade-title-block">
-                <h1 id="display-grade">...</h1>
-            </div>
-            <div class="student-stamp">
-                <span class="stamp-name" id="stamp-name-text">...</span>
-                <span class="stamp-phone" id="stamp-phone-text">...</span>
-            </div>
+    <!-- STUDENTS PAGE -->
+    <div class="page" id="page-students">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>جميع الطلاب المسجّلين 👨‍🎓</h3>
+          <div class="table-search">
+            <input type="text" id="searchStudents" placeholder="ابحث عن طالب..." oninput="filterStudents()">
+            <button class="btn-add" onclick="openAddStudentModal()">➕ إضافة طالب</button>
+          </div>
         </div>
-        <div class="filter-bar">
-            <input type="text" class="search-box" id="lesson-search" placeholder="ابحث عن محاضرة..."
-                oninput="filterBySearch(this.value)">
-            <div class="branch-filters" id="branch-filter-container"></div>
-        </div>
-        <div class="dash-tabs">
-            <button class="dash-tab-btn active" onclick="switchTab('lectures',this)">الدروس المرئية</button>
-            <button class="dash-tab-btn" onclick="switchTab('packages',this)">الباقات التعليمية</button>
-            <button class="dash-tab-btn" onclick="switchTab('quizzes',this)">الاختبارات</button>
-            <button class="dash-tab-btn" onclick="switchTab('files',this)">المذكرات والملفات</button>
-        </div>
-        <div class="tab-panel active" id="tab-lectures">
-            <div class="lessons-grid" id="lectures-grid"></div>
-        </div>
-        <div class="tab-panel" id="tab-packages">
-            <div id="packages-grid" class="lessons-grid">
-                <div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i>
-                    <p>لا توجد باقات متاحة حالياً</p>
-                </div>
-            </div>
-        </div>
-        <div class="tab-panel" id="tab-quizzes">
-            <div id="quizzes-grid" class="lessons-grid"></div>
-        </div>
-        <div class="tab-panel" id="tab-files">
-            <div id="files-grid" class="lessons-grid"></div>
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الطالب</th>
+              <th>رقم الموبايل</th>
+              <th>الصف</th>
+              <th>نوع الطالب</th>
+              <th>تاريخ التسجيل</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody">
+            <tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد طلاب مسجلين بعد</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- AUTH MODAL -->
-    <div class="auth-overlay open" id="auth-modal">
-        <div class="auth-box">
-            <h2>&#127891; تسجيل الدخول</h2>
-            <p class="sub">أدخل بياناتك للوصول إلى المحاضرات</p>
-            <form id="registration-form">
-                <div class="form-field"><label>الاسم الكامل</label><input type="text" id="student-name"
-                        placeholder="مثال: أحمد محمد علي" required></div>
-                <div class="form-field"><label>رقم هاتفك</label><input type="tel" id="student-phone"
-                        placeholder="01xxxxxxxxx" required></div>
-                <div class="form-field"><label>رقم هاتف ولي الأمر</label><input type="tel" id="parent-phone"
-                        placeholder="01xxxxxxxxx"></div>
-                <div class="form-field">
-                    <label>المرحلة الدراسية</label>
-                    <select id="student-stage" onchange="updateYears()" required>
-                        <option value="">اختر المرحلة</option>
-                        <option value="preparatory">إعدادي</option>
-                        <option value="secondary">ثانوي</option>
-                    </select>
-                </div>
-                <div class="form-field">
-                    <label>السنة الدراسية</label>
-                    <select id="student-year" onchange="updateGroups()" required>
-                        <option value="">اختر السنة</option>
-                    </select>
-                </div>
-                <div class="form-field">
-                    <label>المجموعة / المركز</label>
-                    <select id="student-group" required>
-                        <option value="">اختر المجموعة</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-submit">دخول المنصة <i class="fas fa-arrow-left"></i></button>
-            </form>
-        </div>
+    <!-- COURSES PAGE -->
+    <div class="page" id="page-courses">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:900">إدارة الكورسات 📚</h2>
+        <button class="btn-add" onclick="openAddCourseModal()">➕ إضافة كورس</button>
+      </div>
+      <div class="courses-admin-grid" id="coursesAdminGrid">
+        <!-- Auto-rendered -->
+      </div>
     </div>
 
-    <!-- QUIZ MODAL -->
-    <div class="modal-overlay" id="quiz-modal">
-        <div class="modal-box">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
-                <h2 style="color:#f59e0b;font-family:'Amiri',serif;font-size:1.6rem;">اختبار إلكتروني</h2>
-                <button onclick="closeQuiz()"
-                    style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;"><i
-                        class="fas fa-times"></i></button>
+    <!-- ANALYTICS PAGE -->
+    <div class="page" id="page-analytics">
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <h3>تسجيلات الطلاب - آخر ٧ أيام</h3>
+          <div class="bar-chart" id="barChart">
+            <!-- bars rendered by JS -->
+          </div>
+          <div style="margin-top:34px;display:flex;gap:16px;font-size:13px;color:#888;flex-wrap:wrap">
+            <span>الإجمالي: <strong id="chartTotal" style="color:var(--primary)">٠</strong> طالب</span>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>توزيع الصفوف الدراسية</h3>
+          <div class="donut-wrap">
+            <svg width="140" height="140" viewBox="0 0 140 140" id="donutSVG">
+              <circle cx="70" cy="70" r="50" fill="none" stroke="#e3f4f9" stroke-width="22"/>
+              <circle cx="70" cy="70" r="50" fill="none" stroke="var(--primary)" stroke-width="22" stroke-dasharray="0 314" id="seg1" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+              <circle cx="70" cy="70" r="50" fill="none" stroke="var(--accent)" stroke-width="22" stroke-dasharray="0 314" id="seg2" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+              <circle cx="70" cy="70" r="50" fill="none" stroke="var(--accent2)" stroke-width="22" stroke-dasharray="0 314" id="seg3" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+            </svg>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS PAGE -->
+    <div class="page" id="page-payments">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>المدفوعات المعلقة 💳</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>الطالب</th>
+              <th>الموبايل</th>
+              <th>الكورس</th>
+              <th>المبلغ</th>
+              <th>التاريخ</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTableBody">
+            <tr><td colspan="6"><div class="empty-state"><div class="icon">💳</div><p>لا توجد مدفوعات معلقة</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STUDENT COURSES PAGE -->
+    <div class="page student-only" id="page-student-courses">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:20px">كورساتي المشترك بها 🎓</h3>
+      <div class="courses-admin-grid" id="myCoursesGrid">
+      </div>
+      <h3 style="font-size:20px;font-weight:900;margin:40px 0 20px">الكورسات المتاحة لصفك 🚀</h3>
+      <div class="courses-admin-grid" id="availableCoursesGrid">
+      </div>
+    </div>
+
+    <!-- MESSAGES PAGE -->
+    <div class="page" id="page-messages">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>الرسائل والإشعارات 💬</h3>
+        </div>
+        <div id="messagesContent" style="padding:24px;color:#444;min-height:220px;"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="table-card" style="padding:32px;max-width:600px;">
+        <h3 style="font-size:20px;font-weight:900;margin-bottom:24px">⚙️ إعدادات المنصة</h3>
+        <div class="modal-form">
+              <div class="form-group">
+            <label>اسم المنصة</label>
+            <input type="text" id="settingPlatformName" placeholder="اسم المنصة">
+          </div>
+          <div class="form-group">
+            <label>اسم المدرس</label>
+            <input type="text" id="settingTeacherName" placeholder="اسم المدرس">
+          </div>
+          <div class="form-group">
+            <label>رقم واتساب للتواصل</label>
+            <input type="text" id="settingContactPhone" placeholder="+20xxxxxxxxxx">
+          </div>
+          <button class="btn-save" onclick="saveSettings()">حفظ الإعدادات</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECTURES PAGE -->
+    <div class="page" id="page-lectures">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:900">إدارة المحاضرات 🎬</h2>
+        <button class="btn-add" onclick="openAddLectureModal()">➕ إضافة محاضرة</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>المحاضرة</th>
+              <th>الصف</th>
+              <th>الفرع</th>
+              <th>تاريخ النشر</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="lecturesTableBody">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">🎬</div><p>لا توجد محاضرات مضافة</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QUIZZES PAGE -->
+    <div class="page" id="page-quizzes">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:900">إنشاء وإدارة الاختبارات 📝</h2>
+        <button class="btn-add" onclick="openAddQuizModal()">➕ إنشاء اختبار</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>الاختبار</th>
+              <th>الصف</th>
+              <th>عدد الأسئلة</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="quizzesTableBody">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">📝</div><p>لا يوجد اختبارات مضافة</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div class="page" id="page-results">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>نتائج الاختبارات 📊</h3>
+          <div class="table-search">
+            <input type="text" id="searchResults" placeholder="ابحث باسم الطالب..." oninput="filterResults()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>الطالب</th>
+              <th>الاختبار</th>
+              <th>الدرجة</th>
+              <th>النسبة</th>
+              <th>التاريخ</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">📊</div><p>لا توجد نتائج بعد</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEWS PAGE -->
+    <div class="page" id="page-views">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>مشاهدات الدروس 👁️</h3>
+          <div class="table-search">
+            <input type="text" id="searchViews" placeholder="ابحث باسم الدرس..." oninput="filterViews()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>الطالب</th>
+              <th>اسم الدرس</th>
+              <th>الصف</th>
+              <th>وقت المشاهدة</th>
+            </tr>
+          </thead>
+          <tbody id="viewsTableBody">
+            <tr><td colspan="4"><div class="empty-state"><div class="icon">👁️</div><p>لا توجد مشاهدات بعد</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VOUCHERS PAGE -->
+    <div class="page" id="page-vouchers">
+
+      <!-- Stats row -->
+      <div class="stats-row" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8fff3">🎟️</div>
+          <div><div class="stat-label">إجمالي الأكواد</div><div class="stat-val" id="vcTotal">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8f4ff">✅</div>
+          <div><div class="stat-label">غير مستخدمة</div><div class="stat-val" id="vcUnused">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fce8ff">🔓</div>
+          <div><div class="stat-label">مستخدمة</div><div class="stat-val" id="vcUsed">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fff8e8">📆</div>
+          <div><div class="stat-label">أكواد هذا الشهر</div><div class="stat-val" id="vcThisMonth">0</div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0">
+        <button class="vc-tab active" onclick="switchVcTab('generate')" id="tab-generate" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid var(--primary);color:var(--primary);font-weight:800;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">🔧 توليد أكواد</button>
+        <button class="vc-tab" onclick="switchVcTab('list')" id="tab-list" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-weight:700;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">📋 قائمة الأكواد</button>
+        <button class="vc-tab" onclick="switchVcTab('print')" id="tab-print" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-weight:700;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">🖨️ طباعة الأكواد</button>
+        <button class="vc-tab" onclick="switchVcTab('verify')" id="tab-verify" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-weight:700;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">🔍 التحقق من كود</button>
+      </div>
+
+      <!-- GENERATE TAB -->
+      <div id="vc-tab-generate" class="vc-pane">
+        <div class="table-card" style="padding:28px">
+          <h3 style="font-size:19px;font-weight:900;margin-bottom:24px">🔧 توليد أكواد تفعيل جديدة</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px">
+            <div class="modal-form">
+              <div class="form-group">
+                <label>اسم الشهر / الفترة</label>
+                <input type="text" id="vcMonth" placeholder="مثال: شهر نوفمبر 2026" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+              </div>
             </div>
-            <div id="quiz-question-container"></div>
+            <div class="modal-form">
+              <div class="form-group">
+                <label>الصف الدراسي</label>
+                <select id="vcGrade" onchange="populateVoucherStudents();toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                  <option value="all">كل الصفوف</option>
+                  <option value="1">الصف الأول الثانوي</option>
+                  <option value="2">الصف الثاني الثانوي</option>
+                  <option value="3">الصف الثالث الثانوي</option>
+                  <option value="prep3">الثالث الإعدادي</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-form">
+              <div class="form-group">
+                <label>الكورس (اختياري)</label>
+                <select id="vcCourseId" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                  <option value="">غير مرتبط بكورس</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px">
+            <div class="modal-form">
+              <div class="form-group">
+                <label>طريقة توليد الأكواد</label>
+                <select id="vcGenType" onchange="toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                  <option value="count">عدد محدد من الأكواد</option>
+                  <option value="students">على عدد طلاب صف معين</option>
+                  <option value="list">قائمة طلاب مختارة</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-form">
+              <div class="form-group">
+                <label>نوع الطالب</label>
+                <select id="vcStudentType" onchange="populateVoucherStudents();toggleGenType()" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                  <option value="all">كل الطلاب</option>
+                  <option value="center">طلاب السنتر</option>
+                  <option value="outside">طلاب خارج السنتر</option>
+                </select>
+              </div>
+            </div>
+            <div id="vcCountWrap" class="modal-form">
+              <div class="form-group">
+                <label>عدد الأكواد المراد توليدها</label>
+                <input type="number" id="vcCount" value="10" min="1" max="500" style="padding:12px 14px;border:2px solid var(--border);border-radius:10px;width:100%;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+              </div>
+            </div>
+          </div>
+
+          <!-- Student list selector (shown when type=list) -->
+          <div id="vcStudentListWrap" style="display:none;margin-bottom:20px">
+            <label style="display:block;font-weight:700;font-size:14px;margin-bottom:8px">اختر الطلاب من القائمة</label>
+            <div style="border:2px solid var(--border);border-radius:12px;max-height:240px;overflow-y:auto;padding:12px" id="vcStudentCheckList"></div>
+            <div style="margin-top:10px;display:flex;gap:10px">
+              <button onclick="selectAllStudents(true)" style="padding:7px 14px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;font-family:'Cairo',sans-serif">تحديد الكل</button>
+              <button onclick="selectAllStudents(false)" style="padding:7px 14px;background:var(--bg);border:2px solid var(--border);border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;font-family:'Cairo',sans-serif">إلغاء الكل</button>
+              <span id="vcSelectedCount" style="margin-top:8px;font-size:13px;color:var(--text2)">0 طالب مختار</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <button onclick="generateVouchers()" style="padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,119,182,.3)">🎟️ توليد الأكواد الآن</button>
+            <button onclick="gotoPrintFromGenerate()" style="padding:13px 24px;background:var(--bg);border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;color:var(--text)">🖨️ اذهب للطباعة</button>
+          </div>
+
+          <!-- Preview of last generated -->
+          <div id="vcPreview" style="display:none;margin-top:24px;padding:18px;background:var(--bg);border-radius:12px;border:1px solid var(--border)">
+            <div style="font-weight:800;font-size:15px;margin-bottom:14px">🆕 الأكواد المولّدة للتو:</div>
+            <div id="vcPreviewGrid" style="display:flex;flex-wrap:wrap;gap:10px"></div>
+          </div>
         </div>
+      </div>
+
+      <!-- LIST TAB -->
+      <div id="vc-tab-list" class="vc-pane" style="display:none">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>📋 جميع أكواد التفعيل</h3>
+            <div class="table-search" style="gap:8px">
+              <input type="text" id="vcSearch" placeholder="بحث بالكود أو الشهر..." oninput="renderVouchersTable()" style="padding:9px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;width:200px">
+              <select id="vcFilterStatus" onchange="renderVouchersTable()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="">كل الحالات</option>
+                <option value="unused">غير مستخدمة</option>
+                <option value="used">مستخدمة</option>
+              </select>
+              <select id="vcFilterGrade" onchange="renderVouchersTable()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="">كل الصفوف</option>
+                <option value="1">أول ثانوي</option>
+                <option value="2">تاني ثانوي</option>
+                <option value="3">تالت ثانوي</option>
+                <option value="all">كل الصفوف</option>
+              </select>
+              <select id="vcFilterType" onchange="renderVouchersTable()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="all">كل الطلاب</option>
+                <option value="center">طلاب السنتر</option>
+                <option value="outside">خارج السنتر</option>
+              </select>
+              <button onclick="deleteAllUsed()" style="padding:9px 14px;background:#fff0f3;color:#c0392b;border:1px solid #ffd0d8;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;cursor:pointer">🗑️ حذف المستخدمة</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الكود</th>
+                <th>الشهر / الفترة</th>
+                <th>الصف</th>
+                <th>الكورس</th>
+                <th>مرتبط بطالب</th>
+                <th>تاريخ التوليد</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="vouchersTableBody">
+              <tr><td colspan="9"><div class="empty-state"><div class="icon">🎟️</div><p>لا توجد أكواد مولدة</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PRINT TAB -->
+      <div id="vc-tab-print" class="vc-pane" style="display:none">
+        <div class="table-card" style="padding:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+            <h3 style="font-size:19px;font-weight:900">🖨️ طباعة أكواد التفعيل</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <select id="printGrade" onchange="renderPrintPreview()" style="padding:9px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="">كل الصفوف</option>
+                <option value="1">أول ثانوي</option>
+                <option value="2">تاني ثانوي</option>
+                <option value="3">تالت ثانوي</option>
+                <option value="all">كل الصفوف</option>
+              </select>
+              <select id="printCourse" onchange="renderPrintPreview()" style="padding:9px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="">كل الكورسات</option>
+              </select>
+              <select id="printStudentType" onchange="renderPrintPreview()" style="padding:9px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="all">كل الطلاب</option>
+                <option value="center">طلاب السنتر</option>
+                <option value="outside">خارج السنتر</option>
+              </select>
+              <select id="printMonth" onchange="renderPrintPreview()" style="padding:9px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="">كل الشهور</option>
+              </select>
+              <select id="printStatus" onchange="renderPrintPreview()" style="padding:9px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
+                <option value="unused">غير مستخدمة فقط</option>
+                <option value="">الكل</option>
+              </select>
+              <button onclick="doPrint()" style="padding:10px 22px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer">🖨️ طباعة الآن</button>
+            </div>
+          </div>
+          <div id="printPreviewInfo" style="font-size:14px;color:var(--text2);margin-bottom:16px"></div>
+          <!-- Print preview area -->
+          <div id="printArea" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px;background:white;border-radius:12px;border:2px dashed var(--border)">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VERIFY TAB -->
+      <div id="vc-tab-verify" class="vc-pane" style="display:none">
+        <div class="table-card" style="padding:32px;max-width:560px">
+          <h3 style="font-size:19px;font-weight:900;margin-bottom:24px">🔍 التحقق من صحة كود تفعيل</h3>
+          <div style="margin-bottom:16px">
+            <label style="display:block;font-weight:700;font-size:14px;margin-bottom:8px">أدخل الكود</label>
+            <div style="display:flex;gap:10px">
+              <input type="text" id="verifyCodeInput" placeholder="أدخل الكود هنا" style="flex:1;padding:13px 16px;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:15px;background:var(--bg);color:var(--text);outline:none;font-weight:700;letter-spacing:2px;text-transform:uppercase">
+              <button onclick="verifyCode()" style="padding:13px 24px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer">تحقق</button>
+            </div>
+          </div>
+          <div id="verifyResult" style="display:none;padding:18px;border-radius:12px;margin-top:8px"></div>
+        </div>
+      </div>
+
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="script.js"></script>
-    <script src="ai_assistant.js"></script>
-    <script>
-        function switchTab(tabName, btn) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-            btn.classList.add('active');
-        }
+  </div><!-- /content -->
+</div><!-- /main -->
 
-        let activeBranch = 'الكل';
-        let searchQuery = '';
+<!-- STUDENT DETAIL MODAL -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal">
+    <h3 id="modalTitle">تفاصيل الطالب 👨‍🎓</h3>
+    <div id="modalContent"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('studentModal')">إغلاق</button>
+    </div>
+  </div>
+</div>
 
-        function buildBranchFilters(branches) {
-            const c = document.getElementById('branch-filter-container');
-            if (!c) return;
-            c.innerHTML = ['الكل', ...branches].map(b =>
-                `<button class="branch-btn ${b === activeBranch ? 'active' : ''}" onclick="selectBranch('${b}',this)">${b}</button>`
-            ).join('');
-        }
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="addStudentModal">
+  <div class="modal">
+    <h3>إضافة طالب جديد ➕</h3>
+    <div class="modal-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>الاسم الأول</label><input type="text" id="asFN"></div>
+        <div class="form-group"><label>الاسم الأخير</label><input type="text" id="asLN"></div>
+      </div>
+      <div class="form-group"><label>رقم الموبايل</label><input type="tel" id="asPH" placeholder="01xxxxxxxxx"></div>
+      <div class="form-group">
+        <label>الصف الدراسي</label>
+        <select id="asGR">
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>نوع الطالب</label>
+        <select id="asType">
+          <option value="center">طالب سنتر</option>
+          <option value="outside">خارج السنتر</option>
+        </select>
+      </div>
+      <div class="form-group"><label>كلمة المرور</label><input type="password" id="asPW" value="123456"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveNewStudent()">إضافة الطالب ✅</button>
+      <button class="btn-cancel" onclick="closeModal('addStudentModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-        function selectBranch(branch, btn) {
-            activeBranch = branch;
-            document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderStudentContent();
-        }
+<!-- ADD COURSE MODAL -->
+<div class="modal-overlay" id="addCourseModal">
+  <div class="modal">
+    <h3>إضافة كورس جديد 📚</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>اسم الكورس</label><input type="text" id="acTitle"></div>
+      <div class="form-group"><label>وصف الكورس</label><textarea id="acDesc" rows="3" style="resize:vertical"></textarea></div>
+      <div class="form-group">
+        <label>الصف المستهدف</label>
+        <select id="acGrade">
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+          <option value="all">جميع الصفوف</option>
+        </select>
+      </div>
+      <input type="hidden" id="acId">
+      <div class="form-group">
+        <label>نوع الكورس</label>
+        <select id="acType"><option value="free">مجاني</option><option value="paid">مدفوع</option></select>
+      </div>
+      <div class="form-group"><label>سعر الكورس (ج.م)</label><input type="number" id="acPrice" min="0" placeholder="مثال: 150"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" id="acSaveButton" onclick="saveNewCourse()">إضافة الكورس ✅</button>
+      <button class="btn-cancel" onclick="closeModal('addCourseModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-        function filterBySearch(val) {
-            searchQuery = val.trim().toLowerCase();
-            renderStudentContent();
-        }
+<!-- ADD LESSON MODAL -->
+<div class="modal-overlay" id="addLessonModal">
+  <div class="modal">
+    <h3>إضافة درس جديد 🎬</h3>
+    <div class="modal-form">
+      <div class="form-group">
+        <label>اختر الكورس</label>
+        <select id="alCourseId"></select>
+      </div>
+      <div class="form-group"><label>عنوان الدرس</label><input type="text" id="alTitle"></div>
+      <div class="form-group"><label>وصف الدرس (اختياري)</label><textarea id="alDescription" rows="3" style="resize:vertical" placeholder="اكتب وصف مختصر للدرس"></textarea></div>
+      <div class="form-group">
+        <label>مقاطع الدرس</label>
+        <div class="lesson-segments" id="lessonSegments"></div>
+        <button type="button" class="btn-mini" onclick="addLessonSegmentField()">➕ إضافة مقطع آخر</button>
+        <div class="field-hint">اكتب عنوان كل مقطع ورابط الفيديو والمدة لو حابب. مثال: هكتب الكود على إيه - 07:50.</div>
+      </div>
+      <div class="form-group">
+        <label>ملزمة PDF (اختياري)</label>
+        <input type="text" id="alPdf" placeholder="رابط PDF خارجي https://...">
+        <input type="file" id="alPdfFile" accept="application/pdf" style="margin-top:10px">
+        <div class="field-hint">يمكنك وضع رابط PDF أو رفع ملف PDF من جهازك. الرفع هنا بيتخزن داخل المتصفح.</div>
+      </div>
+      <div class="form-group">
+        <label>اختبار الدرس (اختياري)</label>
+        <input type="number" id="alQuizId" list="lessonQuizOptions" placeholder="اكتب ID الاختبار">
+        <datalist id="lessonQuizOptions"></datalist>
+        <div class="field-hint">هتلاقي ID كل اختبار ظاهر في صفحة الاختبارات. اكتب الـ ID هنا لربط الاختبار بالدرس.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveNewLesson()">حفظ الدرس ✅</button>
+      <button class="btn-cancel" onclick="closeModal('addLessonModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-        window.renderStudentContent = function () {
-            const student = JSON.parse(localStorage.getItem('student_session'));
-            if (!student) return;
-            const unlocked = JSON.parse(localStorage.getItem('unlocked_lessons') || '[]');
-            const grid = document.getElementById('lectures-grid');
-            if (!grid) return;
+<!-- ADD LECTURE MODAL -->
+<div class="modal-overlay" id="addLectureModal">
+  <div class="modal">
+    <h3>إضافة محاضرة جديدة 🎬</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>عنوان المحاضرة</label><input type="text" id="alTitle" placeholder="مثال: شرح المبتدأ والخبر"></div>
+      <div class="form-group">
+        <label>الصف الدراسي</label>
+        <select id="alGrade">
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+        </select>
+      </div>
+      <div class="form-group"><label>رابط اليوتيوب</label><input type="text" id="alUrl" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="form-group">
+        <label>الفرع</label>
+        <select id="alBranch">
+          <option value="نحو">نحو</option>
+          <option value="بلاغة">بلاغة</option>
+          <option value="أدب">أدب</option>
+          <option value="قراءة">قراءة</option>
+          <option value="نصوص">نصوص</option>
+          <option value="عام">عام</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveNewLecture()">نشر المحاضرة ✅</button>
+      <button class="btn-cancel" onclick="closeModal('addLectureModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-            let lessons = appData.lessons.filter(l => l.grade === student.grade);
-            console.log('Lessons for grade [' + student.grade + ']:', lessons.length);
+<!-- ADD QUIZ MODAL -->
+<div class="modal-overlay" id="addQuizModal">
+  <div class="modal">
+    <h3>إنشاء اختبار جديد 📝</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>عنوان الاختبار</label><input type="text" id="aqTitle" placeholder="اختبار شهر أكتوبر"></div>
+      <div class="form-group">
+        <label>الصف الدراسي</label>
+        <select id="aqGrade">
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+        </select>
+      </div>
+      <div class="form-group"><label>عدد الأسئلة</label><input type="number" id="aqCount" value="10" min="1"></div>
+      <div class="form-group">
+        <label>مدة الاختبار (بالدقائق)</label>
+        <input type="number" id="aqTime" value="30" min="5">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveNewQuiz()">حفظ ونشر الاختبار ✅</button>
+      <button class="btn-cancel" onclick="closeModal('addQuizModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-            if (activeBranch !== 'الكل') lessons = lessons.filter(l => l.branch === activeBranch);
-            if (searchQuery) lessons = lessons.filter(l => l.title && l.title.toLowerCase().includes(searchQuery));
+<script>
+// ---- STATE ----
+const currentUser = JSON.parse(localStorage.getItem('alamin_current'));
+if(!currentUser) {
+  window.location.href = 'login.html';
+}
 
-            const allBranches = [...new Set(appData.lessons.filter(l => l.grade === student.grade).map(l => l.branch).filter(Boolean))];
-            buildBranchFilters(allBranches);
+let courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
+if(!courses.length) {
+  courses = [
+    {id:1,title:'المراجعة النهائية الصف الأول الثانوي',desc:'المراجعة النهائية لطلاب أولى تانوي',grade:'1',type:'free',emoji:'📖',color:'linear-gradient(135deg,#1a1a2e,#0077b6)',created:'٩ مايو ٢٠٢٦',lessons:[]},
+    {id:2,title:'المراجعة النهائية الصف الثاني الثانوي',desc:'مراجعة ليالي الامتحان لطلاب تانية تانوي',grade:'2',type:'free',emoji:'🌿',color:'linear-gradient(135deg,#1b4332,#2d6a4f)',created:'٩ مايو ٢٠٢٦',lessons:[]},
+    {id:3,title:'مراجعة التربية الدينية الصف الثالث',desc:'ملفات مراجعة التربية الدينية',grade:'3',type:'free',emoji:'🔥',color:'linear-gradient(135deg,#3d0000,#c00000)',created:'٨ مايو ٢٠٢٦',lessons:[]},
+  ];
+  localStorage.setItem('alamin_courses', JSON.stringify(courses));
+}
 
-            if (lessons.length === 0) {
-                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-video-slash"></i><p>لا توجد محاضرات متاحة لصفك حالياً</p></div>';
-                return;
-            }
+// ---- NAVIGATION ----
+const pageTitles = {
+  overview:'نظرة عامة 📊', students:'الطلاب 👨‍🎓',
+  courses:'الكورسات 📚', analytics:'التحليلات 📈',
+  messages:'الرسائل 💬', settings:'الإعدادات ⚙️',
+  payments:'المدفوعات 💳', 'student-courses':'كورساتي 🎓',
+  lectures:'المحاضرات 🎬', quizzes:'الاختبارات 📝',
+  results:'نتائج الاختبارات 📊', views:'مشاهدات الدروس 👁️',
+  vouchers:'أكواد التفعيل 🎟️'
+};
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pageEl = document.getElementById('page-'+id);
+  if(pageEl) pageEl.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[id] || 'الأمين';
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  if(id==='students') renderStudentsTable();
+  if(id==='courses') renderCoursesAdmin();
+  if(id==='analytics') renderAnalytics();
+  if(id==='overview') renderOverview();
+  if(id==='payments') renderPaymentsTable();
+  if(id==='student-courses') renderStudentCourses();
+  if(id==='messages') renderMessages();
+  if(id==='settings') loadPlatformSettings();
+  if(id==='lectures') renderLecturesTable();
+  if(id==='quizzes') renderQuizzesTable();
+  if(id==='results') renderResultsTable();
+  if(id==='views') renderViewsTable();
+  if(id==='vouchers') initVouchersPage();
+}
 
-            const m2n = { all: 'محتوى عام', '9': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر', '1': 'يناير', '2': 'فبراير', '3': 'مارس', '4': 'أبريل', '5': 'مايو' };
-            const grouped = {};
-            lessons.forEach(l => {
-                const m = l.month || 'all', b = l.branch || 'عام';
-                if (!grouped[m]) grouped[m] = {};
-                if (!grouped[m][b]) grouped[m][b] = [];
-                grouped[m][b].push(l);
-            });
+// ---- DATA ----
+function getUsers(){return JSON.parse(localStorage.getItem('alamin_users')||'[]');}
+function saveUsers(u){localStorage.setItem('alamin_users',JSON.stringify(u));}
 
-            const sortedM = Object.keys(grouped).sort((a, b) => {
-                if (a === 'all') return -1; if (b === 'all') return 1;
-                return parseInt(b) - parseInt(a);
-            });
+function gradeLabel(g){
+  const m={'1':'الأول الثانوي','2':'الثاني الثانوي','3':'الثالث الثانوي','prep3':'الثالث الإعدادي','all':'كل الصفوف'};
+  return m[g]||g;
+}
+function gradeClass(g){return{1:'grade1',2:'grade2',3:'grade3','prep3':'grade3'}[g]||'grade1';}
+function studentTypeLabel(type){return{'center':'طلاب السنتر','outside':'خارج السنتر','all':'كل الطلاب'}[type]||'غير محدد';}
+function getStudentType(user){return user.studentType||'outside';}
+function filterUsersByGradeAndType(users, grade, type){
+  return users.filter(u => (grade==='all'||u.grade===grade) && (type==='all'||getStudentType(u)===type));
+}
 
-            let html = '';
-            sortedM.forEach(m => {
-                html += '<div class="month-header">' + (m2n[m] || m) + '</div>';
-                Object.keys(grouped[m]).forEach(b => {
-                    if (activeBranch === 'الكل') html += '<div class="branch-label"><i class="fas fa-folder-open" style="color:#f59e0b;"></i> فرع: ' + b + '</div>';
-                    grouped[m][b].forEach(l => {
-                        const isExam = (l.branch && l.branch.includes('اختبار')) || (l.title && l.title.includes('اختبار'));
-                        const isUnlocked = unlocked.includes(l.id) || isExam;
-                        const vid = l.youtubeId || '';
-                        const thumb = vid ? 'https://img.youtube.com/vi/' + vid + '/mqdefault.jpg' : '';
-                        html += '<div class="lesson-card" id="card-' + l.id + '">' +
-                            '<div class="lesson-thumb">' +
-                            (thumb ? '<img src="' + thumb + '" alt="' + l.title + '" loading="lazy">' : '<div style="height:100%;background:rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;"><i class="fas fa-video" style="font-size:2rem;color:rgba(255,255,255,0.2);"></i></div>') +
-                            (isUnlocked
-                                ? '<div class="play-btn-overlay" onclick="watchVideo(\'' + l.id + '\',\'' + vid + '\')"><div class="play-circle"><i class="fas fa-play"></i></div></div>'
-                                : '<div class="lock-overlay-card" onclick="unlockLesson(\'' + l.id + '\')"><i class="fas fa-lock"></i><span>فتح المحاضرة</span></div>') +
-                            '</div>' +
-                            '<div class="lesson-info"><span class="lesson-teacher-name">' + l.title + '</span><span class="lesson-date">' + (l.date || '') + '</span></div>' +
-                            '</div>';
-                    });
-                });
-            });
-            grid.innerHTML = html;
-        };
+// ---- COURSE & LESSONS DATA MODEL ----
+/*
+ Course structure (stored in localStorage key 'alamin_courses'):
+ {
+   id: number,
+   title: string,
+   desc: string,
+   grade: string, // '1','2','3', etc
+   type: string, // 'free'|'paid'|...
+   thumbnail: string, // image URL or data URI
+   created: string,
+   lessons: [
+     {
+        id: number,
+        title: string,
+        description: string,
+        videoUrl: string, // legacy single-video url
+        segments: [{ id: number, title: string, videoUrl: string, duration: string, position: number }],
+        pdfUrl: string,   // url to PDF
+        quizId: number | null, // reference to quizzes collection
+        position: number   // ordering within course
+     }
+   ]
+ }
+*/
 
-        window.renderQuizzes = function () {
-            const student = JSON.parse(localStorage.getItem('student_session'));
-            if (!student) return;
-            const grid = document.getElementById('quizzes-grid');
-            if (!grid) return;
-            const gq = (appData.quizzes || []).filter(q => q.grade === student.grade);
-            const res = (appData.results || []).filter(r => r.studentPhone === student.phone);
-            if (!gq.length) {
-                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-clipboard-list"></i><p>لا توجد اختبارات حالياً</p></div>';
-                return;
-            }
-            grid.innerHTML = gq.map(q => {
-                const r = res.find(x => x.quizId === q.id);
-                return '<div class="lesson-card" style="padding:20px;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:15px;">' +
-                    '<div style="width:46px;height:46px;background:rgba(245,158,11,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#f59e0b;"><i class="fas fa-file-alt"></i></div>' +
-                    (r ? '<span style="background:rgba(16,185,129,0.1);color:#10b981;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:700;">' + r.percent + '% ✓</span>'
-                        : '<span style="background:rgba(245,158,11,0.1);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:0.78rem;">نشط</span>') +
-                    '</div>' +
-                    '<h3 style="font-size:1rem;color:#fff;margin-bottom:8px;">' + q.title + '</h3>' +
-                    '<p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + (q.questions ? q.questions.length : 0) + ' سؤال</p>' +
-                    (r ? '<button style="width:100%;padding:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:10px;cursor:default;font-family:Tajawal,sans-serif;">تم الحل</button>'
-                        : '<button onclick="openQuiz(\'' + q.id + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:#fff;border-radius:10px;cursor:pointer;font-family:Tajawal,sans-serif;font-weight:700;">ابدأ الاختبار</button>') +
-                    '</div>';
-            }).join('');
-        };
+function getCourses(){
+  return JSON.parse(localStorage.getItem('alamin_courses')||'[]');
+}
+function saveCourses(c){
+  localStorage.setItem('alamin_courses', JSON.stringify(c));
+  courses = c; // update runtime variable
+}
+function getCourseById(id){
+  const cs = getCourses();
+  return cs.find(c=>c.id==id);
+}
+function addCourse(course){
+  const cs = getCourses();
+  course.id = Date.now();
+  course.lessons = course.lessons||[];
+  cs.push(course);
+  saveCourses(cs);
+  return course;
+}
+function addLessonToCourse(courseId, lesson){
+  const cs = getCourses();
+  const idx = cs.findIndex(c=>c.id==courseId);
+  if(idx===-1) return null;
+  if(!Array.isArray(cs[idx].lessons)) cs[idx].lessons = [];
+  lesson.id = Date.now();
+  lesson.position = (cs[idx].lessons.length?cs[idx].lessons[cs[idx].lessons.length-1].position+1:1);
+  lesson.segments = Array.isArray(lesson.segments) ? lesson.segments.map((segment, index)=>({
+    id: segment.id || (lesson.id + index + 1),
+    title: segment.title || `المقطع ${index + 1}`,
+    videoUrl: segment.videoUrl || '',
+    duration: segment.duration || '',
+    position: index + 1
+  })) : [];
+  lesson.videoUrl = lesson.videoUrl || (lesson.segments[0] ? lesson.segments[0].videoUrl : '');
+  cs[idx].lessons.push(lesson);
+  saveCourses(cs);
+  return lesson;
+}
+function updateLesson(courseId, lessonId, updates){
+  const cs = getCourses();
+  const c = cs.find(x=>x.id==courseId);
+  if(!c) return false;
+  const l = c.lessons.find(x=>x.id==lessonId);
+  if(!l) return false;
+  Object.assign(l, updates);
+  saveCourses(cs);
+  return true;
+}
 
-        function setupStudentUI(student) {
-            ['display-name', 'stamp-name-text'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = student.name; });
-            const ge = document.getElementById('display-grade'); if (ge) ge.textContent = getGradeName(student.grade);
-            const pe = document.getElementById('stamp-phone-text'); if (pe) pe.textContent = student.phone;
-            const ib = document.getElementById('user-info-bar'); if (ib) ib.style.display = 'flex';
-            const dm = document.getElementById('dashboard-main'); if (dm) dm.style.display = 'block';
-            const am = document.getElementById('auth-modal'); if (am) am.classList.remove('open');
-        }
 
-        window.initDashboard = async function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const gradeParam = urlParams.get('grade');
+// ---- OVERVIEW ----
+function renderOverview(){
+  const users=getUsers();
+  document.getElementById('statTotal').textContent=users.length;
+  document.getElementById('statActive').textContent=users.filter(u=>u.status==='active').length;
+  document.getElementById('statCourses').textContent=courses.length;
+  document.getElementById('studentsBadge').textContent=users.length;
+  const today=new Date().toLocaleDateString('ar-EG');
+  document.getElementById('statToday').textContent=users.filter(u=>u.joinDate===today).length;
+  // Recent 5
+  const tbody=document.getElementById('recentStudentsBody');
+  if(!users.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد طلاب مسجلين بعد</p></div></td></tr>';return;}
+  tbody.innerHTML=users.slice(-5).reverse().map(u=>`
+    <tr>
+      <td><div class="avatar-cell"><div class="avatar-sm">${u.name?u.name[0]:'؟'}</div>${u.name}</div></td>
+      <td>${u.phone||u.email||'-'}</td>
+      <td><span class="badge ${gradeClass(u.grade)}">${gradeLabel(u.grade)}</span></td>
+      <td>${u.joinDate||'-'}</td>
+      <td><span class="badge active">نشط ✅</span></td>
+    </tr>`).join('');
+}
 
-            const student = JSON.parse(localStorage.getItem('student_session'));
-            if (!student) {
-                const m = document.getElementById('auth-modal');
-                if (m) {
-                    m.classList.add('open');
-                    // Pre-fill grade if in URL
-                    if (gradeParam) {
-                        const stageField = document.getElementById('student-stage');
-                        const yearField = document.getElementById('student-year');
-                        if (stageField && yearField) {
-                            stageField.value = gradeParam.includes('prep') ? 'preparatory' : 'secondary';
-                            updateYears();
-                            yearField.value = gradeParam;
-                            updateGroups();
-                        }
-                    }
-                }
-                return;
-            }
-            setupStudentUI(student);
-            const grid = document.getElementById('lectures-grid');
-            if (grid) grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i><p>جاري تحميل المحاضرات...</p></div>';
-            await loadInitialData();
-            renderStudentContent();
-            renderQuizzes();
-        };
+// ---- STUDENTS TABLE ----
+function renderStudentsTable(filter=''){
+  const users=getUsers();
+  const tbody=document.getElementById('studentsTableBody');
+  document.getElementById('studentsBadge').textContent=users.length;
+  let filtered=users.filter(u=>!filter||(u.name&&u.name.includes(filter))||(u.phone&&u.phone.includes(filter))||(u.email&&u.email.includes(filter)));
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد نتائج</p></div></td></tr>';return;}
+  tbody.innerHTML=filtered.map((u,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><div class="avatar-cell"><div class="avatar-sm">${u.name?u.name[0]:'؟'}</div>${u.name}</div></td>
+      <td>${u.phone||u.email||'-'}</td>
+      <td><span class="badge ${gradeClass(u.grade)}">${gradeLabel(u.grade)}</span></td>
+      <td>${studentTypeLabel(getStudentType(u))}</td>
+      <td>${u.joinDate||'-'}</td>
+      <td><span class="badge active">نشط ✅</span></td>
+      <td><div class="action-btns">
+        <button class="btn-view" onclick="viewStudent(${u.id})">عرض</button>
+        <button class="btn-delete" onclick="deleteStudent(${u.id})">حذف</button>
+      </div></td>
+    </tr>`).join('');
+}
+function filterStudents(){renderStudentsTable(document.getElementById('searchStudents').value.trim());}
 
-        window.closeQuiz = function () {
-            const m = document.getElementById('quiz-modal');
-            if (m) m.classList.remove('active');
-        };
+function viewStudent(id){
+  const u=getUsers().find(u=>u.id===id);
+  if(!u) return;
+  document.getElementById('modalTitle').textContent='تفاصيل الطالب: '+u.name;
+  const enrolled = u.enrolledCourses || [];
+  const availableCourses = getCourses().filter(c => !enrolled.includes(c.id));
+  const courseList = enrolled.length ? enrolled.map(id => {
+    const course = getCourseById(id);
+    return course ? `<div style="margin-bottom:4px">• ${course.title} (${gradeLabel(course.grade)})</div>` : '';
+  }).join('') : '<div>لا توجد كورسات مفعلة</div>';
+  const courseOptions = availableCourses.length ? availableCourses.map(c => `<option value="${c.id}">${c.title} - ${gradeLabel(c.grade)}</option>`).join('') : '<option value="">لا توجد كورسات جديدة</option>';
 
-        window.logout = function () {
-            localStorage.removeItem('student_session');
-            localStorage.removeItem('unlocked_lessons');
-            window.location.href = 'index.html';
-        };
+  document.getElementById('modalContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div><strong>الاسم الكامل:</strong><br>${u.name}</div>
+      <div><strong>رقم الموبايل:</strong><br>${u.phone||u.email||'-'}</div>
+      <div><strong>الصف الدراسي:</strong><br>${gradeLabel(u.grade)}</div>
+      <div><strong>نوع الطالب:</strong><br>${studentTypeLabel(getStudentType(u))}</div>
+      <div><strong>تاريخ التسجيل:</strong><br>${u.joinDate||'-'}</div>
+      <div><strong>آخر دخول:</strong><br>${u.lastLogin||'-'}</div>
+      <div><strong>الحالة:</strong><br><span class="badge active">نشط ✅</span></div>
+      <div><strong>عدد الكورسات المفعلة:</strong><br>${enrolled.length} كورسات</div>
+    </div>
+    <div style="margin-bottom:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:14px">
+      <div style="font-weight:700;margin-bottom:10px">الكورسات المفعلة حالياً:</div>
+      ${courseList}
+    </div>
+    <div style="margin-bottom:8px;font-weight:700">منح وصول لكورس جديد:</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select id="grantCourseSelect" style="flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:12px;background:var(--bg);font-family:'Cairo',sans-serif">
+        ${courseOptions}
+      </select>
+      <button class="btn-save" onclick="grantCourseToStudent(${u.id})" style="padding:10px 18px;">منح وصول</button>
+    </div>
+  `;
+  document.getElementById('studentModal').classList.add('open');
+}
+function grantCourseToStudent(userId){
+  const select = document.getElementById('grantCourseSelect');
+  if(!select || !select.value){ alert('اختر كورس للتفعيل'); return; }
+  const courseId = parseInt(select.value,10);
+  const users = getUsers();
+  const idx = users.findIndex(u=>u.id===userId);
+  if(idx === -1){ alert('الطالب غير موجود'); return; }
+  if(!users[idx].enrolledCourses) users[idx].enrolledCourses = [];
+  if(users[idx].enrolledCourses.includes(courseId)){ alert('هذا الطالب لديه وصول بالفعل'); return; }
+  users[idx].enrolledCourses.push(courseId);
+  saveUsers(users);
+  alert('تم تفعيل الوصول للكورس للطالب بنجاح ✅');
+  viewStudent(userId);
+}
+function deleteStudent(id){
+  if(!confirm('هل أنت متأكد من حذف هذا الطالب؟')) return;
+  let users=getUsers().filter(u=>u.id!==id);
+  saveUsers(users);
+  renderStudentsTable();
+  renderOverview();
+}
 
-        document.addEventListener('DOMContentLoaded', () => { initDashboard(); });
-    </script>
+// ---- COURSES ----
+function renderCoursesAdmin(){
+  const grid=document.getElementById('coursesAdminGrid');
+  grid.innerHTML=courses.map(c=>`
+    <div class="course-admin-card">
+        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
+        <div class="course-admin-body">
+          <div class="course-admin-title">${c.title}</div>
+          <div class="course-admin-meta">${c.desc||''}<br>الصف: ${gradeLabel(c.grade)} | عدد الدروس: ${(c.lessons||[]).length} | ${c.type==='free'?'مجاني 🆓':`مدفوع 💰 ${c.price || 'سعر غير محدد'} ج.م`}</div>
+        <div class="course-admin-footer">
+          <button class="btn-view" onclick="openEditCourse(${c.id})">تعديل</button>
+          <button class="btn-view" onclick="openAddLessonModal(${c.id})">➕ إضافة درس</button>
+          <button class="btn-view" onclick="window.location='lessons.html?course=${c.id}'">عرض</button>
+          <button class="btn-delete" onclick="deleteCourse(${c.id})">حذف</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function deleteCourse(id){
+  if(!confirm('حذف هذا الكورس؟')) return;
+  courses=courses.filter(c=>c.id!==id);
+  localStorage.setItem('alamin_courses',JSON.stringify(courses));
+  renderCoursesAdmin();
+}
+
+function openEditCourse(id){
+  const c = getCourseById(id);
+  if(!c){ alert('الكورس غير موجود'); return; }
+  document.getElementById('acId').value = c.id;
+  document.getElementById('acTitle').value = c.title || '';
+  document.getElementById('acDesc').value = c.desc || '';
+  document.getElementById('acGrade').value = c.grade || '';
+  document.getElementById('acType').value = c.type || 'free';
+  document.getElementById('acPrice').value = c.price != null ? c.price : '';
+  document.getElementById('acSaveButton').textContent = 'حفظ التعديلات ✅';
+  document.getElementById('addCourseModal').classList.add('open');
+}
+
+// ---- ADD STUDENT ----
+function openAddStudentModal(){document.getElementById('addStudentModal').classList.add('open');}
+function saveNewStudent(){
+  const fn=document.getElementById('asFN').value.trim();
+  const ln=document.getElementById('asLN').value.trim();
+  const ph=document.getElementById('asPH').value.trim();
+  const gr=document.getElementById('asGR').value;
+  const type=document.getElementById('asType').value;
+  const pw=document.getElementById('asPW').value;
+  if(!fn||!ln||!ph||!gr||!type){alert('من فضلك اكمل البيانات');return;}
+  const users=getUsers();
+  users.push({id:Date.now(),firstName:fn,lastName:ln,name:fn+' '+ln,phone:ph,grade:gr,studentType:type,password:pw,joinDate:new Date().toLocaleDateString('ar-EG'),status:'active',enrolledCourses:[]});
+  saveUsers(users);
+  closeModal('addStudentModal');
+  renderStudentsTable();
+  renderOverview();
+}
+
+// ---- ADD COURSE ----
+function openAddCourseModal(){
+  document.getElementById('acId').value='';
+  document.getElementById('acTitle').value='';
+  document.getElementById('acDesc').value='';
+  document.getElementById('acGrade').value='1';
+  document.getElementById('acType').value='free';
+  document.getElementById('acPrice').value='';
+  document.getElementById('acSaveButton').textContent = 'إضافة الكورس ✅';
+  document.getElementById('addCourseModal').classList.add('open');
+}
+function saveNewCourse(){
+  const courseId = document.getElementById('acId').value.trim();
+  const title=document.getElementById('acTitle').value.trim();
+  const desc=document.getElementById('acDesc').value.trim();
+  const grade=document.getElementById('acGrade').value;
+  const type=document.getElementById('acType').value;
+  const price = parseFloat(document.getElementById('acPrice').value) || 0;
+  if(!title){alert('ادخل اسم الكورس');return;}
+  const emojis=['📖','🌿','🔥','⭐','🎯','💡','🚀','📝'];
+  const colors=['linear-gradient(135deg,#1a1a2e,#0077b6)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
+  if(courseId){
+    const idx = courses.findIndex(c=>c.id===parseInt(courseId,10));
+    if(idx !== -1){
+      courses[idx] = {
+        ...courses[idx],
+        title,
+        desc,
+        grade,
+        type,
+        price,
+      };
+      localStorage.setItem('alamin_courses',JSON.stringify(courses));
+      closeModal('addCourseModal');
+      renderCoursesAdmin();
+      showAlert('تم حفظ تعديل الكورس بنجاح');
+      return;
+    }
+  }
+  courses.push({id:Date.now(),title,desc,grade,type,price,emoji:emojis[Math.floor(Math.random()*emojis.length)],color:colors[Math.floor(Math.random()*colors.length)],created:new Date().toLocaleDateString('ar-EG'),lessons:[]});
+  localStorage.setItem('alamin_courses',JSON.stringify(courses));
+  closeModal('addCourseModal');
+  renderCoursesAdmin();
+}
+
+// ---- ADD LESSON HELPERS ----
+function openAddLessonModal(courseId){
+  populateLessonCourseOptions();
+  populateLessonQuizOptions();
+  document.getElementById('alTitle').value = '';
+  document.getElementById('alDescription').value = '';
+  document.getElementById('alPdf').value = '';
+  document.getElementById('alPdfFile').value = '';
+  document.getElementById('alQuizId').value = '';
+  resetLessonSegments();
+  document.getElementById('addLessonModal').classList.add('open');
+  if(courseId){
+    setTimeout(()=>{ const sel=document.getElementById('alCourseId'); if(sel) sel.value = courseId; },50);
+  }
+}
+function populateLessonCourseOptions(){
+  const sel = document.getElementById('alCourseId');
+  if(!sel) return;
+  const cs = getCourses();
+  sel.innerHTML = cs.map(c=>`<option value="${c.id}">${c.title} - ${gradeLabel(c.grade)}</option>`).join('');
+}
+
+function populateLessonQuizOptions(){
+  const list = document.getElementById('lessonQuizOptions');
+  if(!list) return;
+  const quizzes = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
+  list.innerHTML = quizzes.map(q=>`<option value="${q.id}">${q.title} - ${gradeLabel(q.grade)}</option>`).join('');
+}
+
+function escapeHTML(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+
+function resetLessonSegments(){
+  const container = document.getElementById('lessonSegments');
+  if(!container) return;
+  container.innerHTML = '';
+  addLessonSegmentField('المقطع الأول', '', true);
+}
+
+function addLessonSegmentField(title='', videoUrl='', locked=false, duration=''){
+  const container = document.getElementById('lessonSegments');
+  if(!container) return;
+  const row = document.createElement('div');
+  row.className = 'lesson-segment-row';
+  row.innerHTML = `
+    <input type="text" class="segment-title" placeholder="عنوان المقطع" value="${escapeHTML(title)}">
+    <input type="text" class="segment-url" placeholder="رابط الفيديو" value="${escapeHTML(videoUrl)}">
+    <input type="text" class="segment-duration" placeholder="المدة 18:52" value="${escapeHTML(duration)}">
+    <button type="button" class="btn-mini danger" ${locked ? 'style="visibility:hidden"' : ''} onclick="this.closest('.lesson-segment-row').remove()">حذف</button>
+  `;
+  container.appendChild(row);
+}
+
+function collectLessonSegments(){
+  const rows = Array.from(document.querySelectorAll('#lessonSegments .lesson-segment-row'));
+  return rows.map((row, index)=>{
+    const title = row.querySelector('.segment-title')?.value.trim() || `المقطع ${index + 1}`;
+    const videoUrl = row.querySelector('.segment-url')?.value.trim() || '';
+    const duration = row.querySelector('.segment-duration')?.value.trim() || '';
+    return {title, videoUrl, duration, position:index + 1};
+  }).filter(segment => segment.videoUrl);
+}
+
+function readFileAsDataUrl(file){
+  return new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadFileToBackend(file){
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch('api/upload.php', {method:'POST', body:formData});
+  if(!response.ok) throw new Error('Upload failed');
+  const data = await response.json();
+  if(!data.ok || !data.url) throw new Error(data.error || 'Upload failed');
+  return data;
+}
+
+async function readPdfInputAsDataUrl(){
+  const fileInput = document.getElementById('alPdfFile');
+  const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+  if(!file) return '';
+  if(file.type && file.type !== 'application/pdf'){
+    alert('من فضلك ارفع ملف PDF فقط');
+    return null;
+  }
+  try {
+    const uploaded = await uploadFileToBackend(file);
+    return uploaded.url;
+  } catch (error) {
+    // Local file previews still work before PHP hosting is connected.
+    return await readFileAsDataUrl(file);
+  }
+}
+
+async function saveNewLesson(){
+  const courseId = document.getElementById('alCourseId').value;
+  const title = document.getElementById('alTitle').value.trim();
+  const description = document.getElementById('alDescription').value.trim();
+  const segments = collectLessonSegments();
+  const pdfUrl = document.getElementById('alPdf').value.trim();
+  const pdfFileUrl = await readPdfInputAsDataUrl();
+  if(pdfFileUrl === null) return;
+  const quizId = parseInt(document.getElementById('alQuizId').value,10) || null;
+  const quizzes = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
+  if(quizId && !quizzes.some(q=>String(q.id)===String(quizId))){
+    alert('لا يوجد اختبار بهذا الـ ID. راجع صفحة الاختبارات واكتب ID صحيح.');
+    return;
+  }
+  if(!courseId||!title||(!segments.length && !pdfUrl && !pdfFileUrl && !quizId)){alert('من فضلك اختر الكورس واكتب عنوان الدرس وأضف محتوى واحد على الأقل: مقطع أو PDF أو اختبار');return;}
+  const lesson = {
+    title,
+    description,
+    segments,
+    videoUrl: segments[0] ? segments[0].videoUrl : '',
+    pdfUrl: pdfFileUrl || pdfUrl || '',
+    pdfName: pdfFileUrl ? (document.getElementById('alPdfFile').files[0]?.name || 'ملزمة الدرس.pdf') : '',
+    quizId,
+    position: 0
+  };
+  const added = addLessonToCourse(parseInt(courseId,10), lesson);
+  if(!added){alert('حدث خطأ أثناء حفظ الدرس');return;}
+  closeModal('addLessonModal');
+  renderCoursesAdmin();
+  showAlert('تم إضافة الدرس بنجاح');
+}
+
+// ---- PAYMENTS (ADMIN) ----
+function renderPaymentsTable() {
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  const users = getUsers();
+  const pendingCount = pending.filter(p=>p.status==='pending').length;
+  const badge = document.getElementById('paymentsBadge');
+  if(badge) badge.textContent = pendingCount;
+  
+  const tbody = document.getElementById('paymentsTableBody');
+  if(!tbody) return;
+  const items = pending.filter(p=>p.status==='pending');
+  if(!items.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">💳</div><p>لا توجد مدفوعات معلقة</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(p => {
+    const u = users.find(x=>x.id===p.studentId);
+    const c = courses.find(x=>x.id===p.courseId);
+    return `
+    <tr>
+      <td>${u?u.name:'-'}</td>
+      <td>${p.senderPhone}</td>
+      <td>${c?c.title:'-'}</td>
+      <td>${p.amount} ج.م</td>
+      <td>${p.timestamp}</td>
+      <td>
+        <button class="btn-view" style="background:#e8fff3;color:#27ae60" onclick="verifyPayment(${p.transactionId})">تأكيد وتفعيل</button>
+      </td>
+    </tr>
+    `;
+  }).join('');
+}
+function verifyPayment(txId) {
+  if(!confirm('هل استلمت المبلغ فعلاً وسيتم تفعيل الكورس للطالب؟')) return;
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  const tx = pending.find(p=>p.transactionId===txId);
+  if(tx) {
+    tx.status = 'success';
+    localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+    const users = getUsers();
+    const uIdx = users.findIndex(u=>u.id===tx.studentId);
+    if(uIdx > -1) {
+      if(!users[uIdx].enrolledCourses) users[uIdx].enrolledCourses = [];
+      if(!users[uIdx].enrolledCourses.includes(tx.courseId)) {
+        users[uIdx].enrolledCourses.push(tx.courseId);
+        saveUsers(users);
+      }
+    }
+    renderPaymentsTable();
+    alert('تم تفعيل الكورس للطالب بنجاح! ✅');
+  }
+}
+
+// ---- STUDENT COURSES ----
+function renderStudentCourses() {
+  const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
+  if(!current || current.role !== 'student') return;
+  const users = getUsers();
+  const user = users.find(u=>u.id === current.id) || current;
+  const enrolledIds = user.enrolledCourses || [];
+  
+  const myGrid = document.getElementById('myCoursesGrid');
+  const myCourses = courses.filter(c=>enrolledIds.includes(c.id));
+  if(!myCourses.length) myGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لم تشترك في أي كورس بعد.</div>';
+  else {
+    myGrid.innerHTML = myCourses.map(c=>`
+      <div class="course-admin-card">
+        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
+        <div class="course-admin-body">
+          <div class="course-admin-title">${c.title}</div>
+          <div class="course-admin-meta">${c.desc||''}<br>أنت مشترك في هذا الكورس ✅</div>
+          <div class="course-admin-footer">
+            <button class="btn-view" style="width:100%;text-align:center" onclick="window.location='lessons.html?course=${c.id}'">الدخول للمحتوى 🚀</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const availGrid = document.getElementById('availableCoursesGrid');
+  const available = courses.filter(c=>(c.grade===user.grade || c.grade==='all') && !enrolledIds.includes(c.id));
+  if(!available.length) availGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لا توجد كورسات متاحة حالياً.</div>';
+  else {
+    availGrid.innerHTML = available.map(c=>`
+      <div class="course-admin-card">
+        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
+        <div class="course-admin-body">
+          <div class="course-admin-title">${c.title}</div>
+          <div class="course-admin-meta">${c.desc||''}<br>${c.type==='free'?'مجاني 🆓':`مدفوع 💰 ${c.price || 'سعر غير محدد'} ج.م`}</div>
+          <div class="course-admin-footer">
+            <button class="btn-add" style="width:100%;text-align:center" onclick="enrollCourse(${c.id})">${c.type==='free'?'اشترك الآن':'اطلب اشتراك'}</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function enrollCourse(courseId){
+  const active = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
+  const users=getUsers();
+  const userIndex=users.findIndex(u=>u.id===active.id);
+  if(userIndex===-1){showAlert('حدث خطأ في بيانات المستخدم.','error');return;}
+  const course=courses.find(c=>c.id===courseId);
+  if(!course){showAlert('الكورس غير موجود.','error');return;}
+  if(!users[userIndex].enrolledCourses) users[userIndex].enrolledCourses=[];
+  if(users[userIndex].enrolledCourses.includes(courseId)){
+    showAlert('أنت مشترك بالفعل في هذا الكورس.','error');
+    return;
+  }
+  users[userIndex].enrolledCourses.push(courseId);
+  saveUsers(users);
+  const updated = {...active, enrolledCourses: users[userIndex].enrolledCourses};
+  localStorage.setItem('alamin_current', JSON.stringify(updated));
+  showAlert('تم الاشتراك في الكورس بنجاح!');
+  renderStudentCourses();
+}
+
+// ---- LECTURES ----
+let lecturesData = JSON.parse(localStorage.getItem('alamin_lectures') || '[]');
+function openAddLectureModal() { document.getElementById('addLectureModal').classList.add('open'); }
+function saveNewLecture() {
+  const title = document.getElementById('alTitle').value.trim();
+  const grade = document.getElementById('alGrade').value;
+  const url = document.getElementById('alUrl').value.trim();
+  const branch = document.getElementById('alBranch').value;
+  if(!title || !url) { alert('برجاء استكمال البيانات'); return; }
+  lecturesData.push({ id: Date.now(), title, grade, url, branch, date: new Date().toLocaleDateString('ar-EG') });
+  localStorage.setItem('alamin_lectures', JSON.stringify(lecturesData));
+  closeModal('addLectureModal');
+  renderLecturesTable();
+}
+function renderLecturesTable() {
+  const tbody = document.getElementById('lecturesTableBody');
+  if(!lecturesData.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">🎬</div><p>لا توجد محاضرات مضافة</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = lecturesData.map(l => `
+    <tr>
+      <td>${l.title}</td>
+      <td><span class="badge ${gradeClass(l.grade)}">${gradeLabel(l.grade)}</span></td>
+      <td>${l.branch}</td>
+      <td>${l.date}</td>
+      <td>
+        <button class="btn-delete" onclick="deleteLecture(${l.id})">حذف</button>
+      </td>
+    </tr>
+  `).join('');
+}
+function deleteLecture(id) {
+  if(!confirm('هل أنت متأكد من الحذف؟')) return;
+  lecturesData = lecturesData.filter(l => l.id !== id);
+  localStorage.setItem('alamin_lectures', JSON.stringify(lecturesData));
+  renderLecturesTable();
+}
+
+// ---- QUIZZES ----
+let quizzesData = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
+function openAddQuizModal() { document.getElementById('addQuizModal').classList.add('open'); }
+function saveNewQuiz() {
+  const title = document.getElementById('aqTitle').value.trim();
+  const grade = document.getElementById('aqGrade').value;
+  const count = document.getElementById('aqCount').value;
+  const time = document.getElementById('aqTime').value;
+  if(!title) { alert('برجاء إدخال اسم الاختبار'); return; }
+  quizzesData.push({ id: Date.now(), title, grade, questionsCount: count, time, status: 'نشط' });
+  localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesData));
+  closeModal('addQuizModal');
+  renderQuizzesTable();
+}
+function renderQuizzesTable() {
+  const tbody = document.getElementById('quizzesTableBody');
+  if(!quizzesData.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📝</div><p>لا يوجد اختبارات مضافة</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = quizzesData.map(q => `
+    <tr>
+      <td><strong style="color:var(--primary)">#${q.id}</strong></td>
+      <td>${q.title}</td>
+      <td><span class="badge ${gradeClass(q.grade)}">${gradeLabel(q.grade)}</span></td>
+      <td>${q.questionsCount} أسئلة</td>
+      <td><span class="badge active">${q.status}</span></td>
+      <td>
+        <button class="btn-delete" onclick="deleteQuiz(${q.id})">حذف</button>
+      </td>
+    </tr>
+  `).join('');
+}
+function deleteQuiz(id) {
+  if(!confirm('هل أنت متأكد من الحذف؟')) return;
+  quizzesData = quizzesData.filter(q => q.id !== id);
+  localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesData));
+  renderQuizzesTable();
+}
+
+// ---- RESULTS & VIEWS ----
+function renderResultsTable() {
+  const tbody = document.getElementById('resultsTableBody');
+  const term = document.getElementById('searchResults')?.value || '';
+  // Fake data if none exists
+  const dummyResults = [
+    { student: 'أحمد محمود', test: 'اختبار النحو الأول', score: 18, percentage: '90%', date: '10/05/2026' },
+    { student: 'محمد علي', test: 'اختبار البلاغة', score: 15, percentage: '75%', date: '11/05/2026' }
+  ].filter(r => r.student.includes(term));
+
+  if(!dummyResults.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📊</div><p>لا توجد نتائج بعد</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = dummyResults.map(r => `
+    <tr>
+      <td><div class="avatar-cell"><div class="avatar-sm">${r.student[0]}</div>${r.student}</div></td>
+      <td>${r.test}</td>
+      <td>${r.score} / 20</td>
+      <td><span class="badge active">${r.percentage}</span></td>
+      <td>${r.date}</td>
+    </tr>
+  `).join('');
+}
+function filterResults() { renderResultsTable(); }
+
+function renderViewsTable() {
+  const tbody = document.getElementById('viewsTableBody');
+  const term = document.getElementById('searchViews')?.value || '';
+  // Fake data if none exists
+  const dummyViews = [
+    { student: 'سارة خالد', lesson: 'شرح المبتدأ والخبر', grade: '1', time: '10/05/2026 10:30 ص' },
+    { student: 'محمود سعد', lesson: 'نص الاستماع', grade: '2', time: '12/05/2026 08:15 م' }
+  ].filter(v => v.lesson.includes(term) || v.student.includes(term));
+
+  if(!dummyViews.length) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="icon">👁️</div><p>لا توجد مشاهدات بعد</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = dummyViews.map(v => `
+    <tr>
+      <td><div class="avatar-cell"><div class="avatar-sm">${v.student[0]}</div>${v.student}</div></td>
+      <td>${v.lesson}</td>
+      <td><span class="badge ${gradeClass(v.grade)}">${gradeLabel(v.grade)}</span></td>
+      <td>${v.time}</td>
+    </tr>
+  `).join('');
+}
+function filterViews() { renderViewsTable(); }
+
+// ---- VOUCHERS ----
+let vouchersData = JSON.parse(localStorage.getItem('alamin_vouchers') || '[]');
+function initVouchersPage() {
+  populateVoucherCourses();
+  populateVoucherStudents();
+  populatePrintCourseOptions();
+  populatePrintMonthOptions();
+  toggleGenType();
+  renderVouchersStats();
+  renderVouchersTable();
+  renderPrintPreview();
+}
+function switchVcTab(id) {
+  document.querySelectorAll('.vc-tab').forEach(btn => {
+    const active = btn.id === 'tab-' + id;
+    btn.classList.toggle('active', active);
+    btn.style.borderBottom = active ? '3px solid var(--primary)' : '3px solid transparent';
+    btn.style.color = active ? 'var(--primary)' : 'var(--text2)';
+    btn.style.fontWeight = active ? '800' : '700';
+  });
+  document.querySelectorAll('.vc-pane').forEach(p => p.style.display = 'none');
+  const selected = document.getElementById('vc-tab-' + id);
+  if(selected) selected.style.display = 'block';
+  if(id === 'list') renderVouchersTable();
+  if(id === 'print') renderPrintPreview();
+  if(id === 'verify') document.getElementById('verifyResult').style.display = 'none';
+}
+function gotoPrintFromGenerate() {
+  const grade = document.getElementById('vcGrade').value;
+  const courseId = document.getElementById('vcCourseId').value;
+  const studentType = document.getElementById('vcStudentType').value;
+  const month = document.getElementById('vcMonth').value.trim();
+  const printGrade = document.getElementById('printGrade');
+  const printCourse = document.getElementById('printCourse');
+  const printStudentType = document.getElementById('printStudentType');
+  const printMonth = document.getElementById('printMonth');
+  if(printGrade) printGrade.value = grade || 'all';
+  if(printCourse) printCourse.value = courseId || '';
+  if(printStudentType) printStudentType.value = studentType || 'all';
+  if(printMonth) {
+    if(month) {
+      if(!Array.from(printMonth.options).some(opt => opt.value === month)) {
+        printMonth.innerHTML += `<option value="${month}">${month}</option>`;
+      }
+      printMonth.value = month;
+    } else {
+      printMonth.value = '';
+    }
+  }
+  switchVcTab('print');
+  doPrint();
+}
+function toggleGenType() {
+  const type = document.getElementById('vcGenType').value;
+  const countWrap = document.getElementById('vcCountWrap');
+  const studentListWrap = document.getElementById('vcStudentListWrap');
+  const countLabel = document.querySelector('#vcCountWrap label');
+  const countInput = document.getElementById('vcCount');
+  if(type === 'list') {
+    countWrap.style.display = 'none';
+    studentListWrap.style.display = 'block';
+  } else if(type === 'students') {
+    countWrap.style.display = 'block';
+    studentListWrap.style.display = 'none';
+    countLabel.textContent = 'أكواد لكل طالب في الصف المحدد';
+    const grade = document.getElementById('vcGrade').value;
+    const typeFilter = document.getElementById('vcStudentType').value;
+    const count = filterUsersByGradeAndType(getUsers(), grade, typeFilter).length;
+    countInput.value = count || 0;
+    countInput.readOnly = true;
+  } else {
+    countWrap.style.display = 'block';
+    studentListWrap.style.display = 'none';
+    countLabel.textContent = 'عدد الأكواد المراد توليدها';
+    countInput.readOnly = false;
+  }
+}
+function selectAllStudents(selectAll) {
+  document.querySelectorAll('.vc-student-checkbox').forEach(cb => cb.checked = selectAll);
+  updateSelectedCount();
+}
+function updateSelectedCount() {
+  const count = document.querySelectorAll('.vc-student-checkbox:checked').length;
+  document.getElementById('vcSelectedCount').textContent = `${count} طالب مختار`;
+}
+function getSelectedStudentIds() {
+  return Array.from(document.querySelectorAll('.vc-student-checkbox:checked')).map(cb => cb.dataset.userid);
+}
+function populateVoucherCourses() {
+  const select = document.getElementById('vcCourseId');
+  if(!select) return;
+  select.innerHTML = '<option value="">غير مرتبط بكورس</option>' + courses.map(c => `<option value="${c.id}">${c.title} (${gradeLabel(c.grade)})</option>`).join('');
+}
+function populateVoucherStudents() {
+  const wrap = document.getElementById('vcStudentCheckList');
+  if(!wrap) return;
+  const grade = document.getElementById('vcGrade').value;
+  const typeFilter = document.getElementById('vcStudentType')?.value || 'all';
+  const users = filterUsersByGradeAndType(getUsers().filter(u => u.name), grade, typeFilter);
+  if(!users.length) {
+    wrap.innerHTML = '<p style="color:#888">لا يوجد طلاب متاحين.</p>';
+    return;
+  }
+  wrap.innerHTML = users.map(u => `
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" class="vc-student-checkbox" data-userid="${u.id}" onchange="updateSelectedCount()">
+      <span>${u.name} - <span style="color:#555">${gradeLabel(u.grade)} | ${studentTypeLabel(getStudentType(u))}</span></span>
+    </label>`).join('');
+  updateSelectedCount();
+}
+function populatePrintCourseOptions() {
+  const select = document.getElementById('printCourse');
+  if(!select) return;
+  select.innerHTML = '<option value="">كل الكورسات</option>' + courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+}
+function populatePrintMonthOptions() {
+  const printMonth = document.getElementById('printMonth');
+  if(!printMonth) return;
+  const months = [...new Set(vouchersData.map(v => v.month).filter(Boolean))];
+  printMonth.innerHTML = '<option value="">كل الشهور</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
+}
+function renderVouchersStats() {
+  const total = vouchersData.length;
+  const used = vouchersData.filter(v => v.status === 'مستخدم').length;
+  const unused = total - used;
+  const currentMonth = new Date().toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+  const thisMonthCount = vouchersData.filter(v => v.createdAt && new Date(v.createdAt).toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' }) === currentMonth).length;
+  document.getElementById('vcTotal').textContent = total;
+  document.getElementById('vcUsed').textContent = used;
+  document.getElementById('vcUnused').textContent = unused;
+  document.getElementById('vcThisMonth').textContent = thisMonthCount;
+}
+function generateUniqueCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code;
+  do {
+    code = Array.from({ length: 8 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+  } while (vouchersData.some(v => v.code === code));
+  return code;
+}
+function generateVouchers() {
+  const month = document.getElementById('vcMonth').value.trim() || 'غير محدد';
+  const grade = document.getElementById('vcGrade').value;
+  const courseId = document.getElementById('vcCourseId').value;
+  const course = courses.find(c => c.id.toString() === courseId);
+  const courseTitle = course ? course.title : 'غير مرتبط بكورس';
+  const genType = document.getElementById('vcGenType').value;
+  const countInput = parseInt(document.getElementById('vcCount').value, 10) || 0;
+  const selectedStudentIds = getSelectedStudentIds();
+  let batch = [];
+  if (genType === 'list') {
+    if (!selectedStudentIds.length) { alert('اختر طالب واحد على الأقل'); return; }
+    const users = getUsers();
+    batch = selectedStudentIds.map((studentId, i) => {
+      const user = users.find(u => u.id.toString() === studentId);
+      return {
+        id: Date.now() + i,
+        code: generateUniqueCode(),
+        month,
+        grade: user ? user.grade : grade,
+        courseId: course ? course.id : '',
+        courseTitle,
+        linkedStudentId: user ? user.id : '',
+        linkedStudentName: user ? user.name : 'غير مرتبط',
+        linkedStudentType: user ? getStudentType(user) : '',
+        date: new Date().toLocaleDateString('ar-EG'),
+        createdAt: new Date().toISOString(),
+        status: 'غير مستخدم'
+      };
+    });
+  } else if (genType === 'students') {
+    const typeFilter = document.getElementById('vcStudentType').value;
+    const users = filterUsersByGradeAndType(getUsers(), grade, typeFilter);
+    if (!users.length) { alert('لا يوجد طلاب متطابقين مع الفلتر'); return; }
+    batch = users.map((user, i) => ({
+      id: Date.now() + i,
+      code: generateUniqueCode(),
+      month,
+      grade: user.grade,
+      courseId: course ? course.id : '',
+      courseTitle,
+      linkedStudentId: user.id,
+      linkedStudentName: user.name,
+      linkedStudentType: getStudentType(user),
+      date: new Date().toLocaleDateString('ar-EG'),
+      createdAt: new Date().toISOString(),
+      status: 'غير مستخدم'
+    }));
+  } else {
+    if (countInput < 1) { alert('ادخل عدد صحيح من الأكواد'); return; }
+    for (let i = 0; i < countInput; i++) {
+      batch.push({
+        id: Date.now() + i,
+        code: generateUniqueCode(),
+        month,
+        grade,
+        courseId: course ? course.id : '',
+        courseTitle,
+        linkedStudentId: '',
+        linkedStudentName: 'غير مرتبط',
+        date: new Date().toLocaleDateString('ar-EG'),
+        createdAt: new Date().toISOString(),
+        status: 'غير مستخدم'
+      });
+    }
+  }
+  vouchersData = [...batch, ...vouchersData];
+  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
+  populatePrintMonthOptions();
+  renderVouchersStats();
+  renderVouchersTable();
+  renderPrintPreview();
+  if (batch.length) {
+    const preview = document.getElementById('vcPreview');
+    const grid = document.getElementById('vcPreviewGrid');
+    preview.style.display = 'block';
+    grid.innerHTML = batch.slice(0, 10).map(v => `
+      <span style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg);font-weight:700;font-family:'monospace'">${v.code}</span>
+    `).join('');
+  }
+  alert(`تم توليد ${batch.length} رمز تفعيل بنجاح!`);
+}
+function renderVouchersTable() {
+  const tbody = document.getElementById('vouchersTableBody');
+  const search = document.getElementById('vcSearch').value.trim().toUpperCase();
+  const statusFilter = document.getElementById('vcFilterStatus').value;
+  const gradeFilter = document.getElementById('vcFilterGrade').value;
+  let filtered = vouchersData.slice();
+  if (search) filtered = filtered.filter(v => v.code.includes(search) || (v.month && v.month.includes(search)) || (v.courseTitle && v.courseTitle.includes(search)) || (v.linkedStudentName && v.linkedStudentName.includes(search)));
+  if (statusFilter) filtered = filtered.filter(v => statusFilter === 'used' ? v.status === 'مستخدم' : v.status === 'غير مستخدم');
+  if (gradeFilter && gradeFilter !== 'all') filtered = filtered.filter(v => v.grade === gradeFilter);
+  const typeFilter = document.getElementById('vcFilterType')?.value || 'all';
+  if (typeFilter && typeFilter !== 'all') filtered = filtered.filter(v => v.linkedStudentType === typeFilter);
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="icon">🎟️</div><p>لا توجد أكواد مطابقة للبحث</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((v, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td style="font-family:monospace;font-size:16px;font-weight:bold;letter-spacing:2px">${v.code}</td>
+      <td>${v.month || 'غير محدد'}</td>
+      <td><span class="badge ${gradeClass(v.grade)}">${gradeLabel(v.grade)}</span></td>
+      <td>${v.courseTitle || '-'}</td>
+      <td>${v.linkedStudentType ? studentTypeLabel(v.linkedStudentType) : '-'}</td>
+      <td>${v.linkedStudentName || '-'}</td>
+      <td>${v.date}</td>
+      <td><span class="badge ${v.status === 'مستخدم' ? 'inactive' : 'active'}">${v.status}</span></td>
+      <td><div class="action-btns"><button class="btn-view" onclick="verifyCode('${v.code}')">عرض</button><button class="btn-delete" onclick="deleteVoucher(${v.id})">حذف</button></div></td>
+    </tr>`).join('');
+}
+function deleteVoucher(id) {
+  if(!confirm('هل أنت متأكد من حذف هذا الكود؟')) return;
+  vouchersData = vouchersData.filter(v => v.id !== id);
+  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
+  renderVouchersStats();
+  renderVouchersTable();
+  renderPrintPreview();
+}
+function deleteAllUsed() {
+  if(!confirm('هل تريد حذف جميع الأكواد المستخدمة نهائياً؟')) return;
+  vouchersData = vouchersData.filter(v => v.status !== 'مستخدم');
+  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
+  renderVouchersStats();
+  renderVouchersTable();
+  renderPrintPreview();
+  showAlert('تم حذف جميع الأكواد المستخدمة.');
+}
+function verifyCode(code = '') {
+  const input = code || document.getElementById('verifyCodeInput').value.trim().toUpperCase();
+  if(!input){alert('أدخل كود للتحقق');return;}
+  if(code) document.getElementById('verifyCodeInput').value = code;
+  const voucher = vouchersData.find(v => v.code === input);
+  const result = document.getElementById('verifyResult');
+  result.style.display = 'block';
+  if(!voucher) {
+    result.style.background = '#fff0f3';
+    result.style.color = '#c0392b';
+    result.innerHTML = `<strong>الكود غير صالح أو غير موجود.</strong>`;
+    return;
+  }
+  const activateButton = voucher.status === 'غير مستخدم' ? `<button onclick="activateVoucher('${voucher.code}')" style="margin-top:14px;padding:10px 18px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;cursor:pointer;font-weight:700">تفعيل الكود الآن</button>` : '';
+  result.style.background = voucher.status === 'غير مستخدم' ? '#e8fff3' : '#fff8e8';
+  result.style.color = '#0f5132';
+  result.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+      <div><strong>الكود:</strong> ${voucher.code}</div>
+      <div><strong>الشهر / الفترة:</strong> ${voucher.month || 'غير محدد'}</div>
+      <div><strong>الصف:</strong> ${gradeLabel(voucher.grade)}</div>
+      <div><strong>الكورس:</strong> ${voucher.courseTitle || '-'}</div>
+      <div><strong>نوع الطالب:</strong> ${voucher.linkedStudentType ? studentTypeLabel(voucher.linkedStudentType) : 'غير مرتبط'}</div>
+      <div><strong>مرتبط بطالب:</strong> ${voucher.linkedStudentName || '-'}</div>
+      <div><strong>تاريخ التوليد:</strong> ${voucher.date}</div>
+      <div><strong>الحالة:</strong> ${voucher.status}</div>
+      ${activateButton}
+    </div>`;
+}
+function activateVoucher(code) {
+  const voucher = vouchersData.find(v => v.code === code);
+  if(!voucher) return;
+  if(voucher.status === 'مستخدم') { alert('الكود مستخدم بالفعل'); return; }
+  if(!confirm('هل تريد تفعيل هذا الكود وتغييره إلى مستخدم؟')) return;
+  voucher.status = 'مستخدم';
+  voucher.usedAt = new Date().toLocaleDateString('ar-EG');
+  localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
+  renderVouchersStats();
+  renderVouchersTable();
+  verifyCode(code);
+  showAlert('تم تفعيل الكود بنجاح.');
+}
+function renderPrintPreview() {
+  const grade = document.getElementById('printGrade').value;
+  const courseId = document.getElementById('printCourse').value;
+  const studentType = document.getElementById('printStudentType').value;
+  const month = document.getElementById('printMonth').value;
+  const status = document.getElementById('printStatus').value;
+  let filtered = vouchersData.slice();
+  if(status) filtered = filtered.filter(v => status === 'unused' ? v.status === 'غير مستخدم' : true);
+  if(grade && grade !== 'all') filtered = filtered.filter(v => v.grade === grade);
+  if(courseId) filtered = filtered.filter(v => v.courseId && v.courseId.toString() === courseId);
+  if(studentType && studentType !== 'all') filtered = filtered.filter(v => v.linkedStudentType === studentType);
+  if(month) filtered = filtered.filter(v => v.month === month);
+  const preview = document.getElementById('printArea');
+  preview.innerHTML = filtered.length ? filtered.map(v => `
+    <div style="min-width:210px;padding:16px;border:1px dashed var(--border);border-radius:18px;background:#fff;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:13px;color:#888">الكود</div>
+      <div style="font-family:monospace;font-size:18px;font-weight:900;letter-spacing:2px">${v.code}</div>
+      ${v.linkedStudentName ? `<div style="font-size:13px"><strong>اسم الطالب:</strong> ${v.linkedStudentName}</div>` : ''}
+      <div style="font-size:13px"><strong>الصف:</strong> ${gradeLabel(v.grade)}</div>
+      <div style="font-size:13px"><strong>نوع الطالب:</strong> ${v.linkedStudentType ? studentTypeLabel(v.linkedStudentType) : 'غير مرتبط'}</div>
+      <div style="font-size:13px"><strong>الفترة:</strong> ${v.month || 'غير محدد'}</div>
+      <div style="font-size:13px"><strong>الكورس:</strong> ${v.courseTitle || 'غير مرتبط'}</div>
+      <div style="font-size:13px"><span class="badge ${v.status === 'مستخدم' ? 'inactive' : 'active'}">${v.status}</span></div>
+    </div>`).join('') : '<div style="grid-column:1/-1;color:#888;padding:24px;text-align:center">لا توجد أكواد للطباعة</div>';
+  const info = document.getElementById('printPreviewInfo');
+  const parts = [];
+  if(grade && grade !== 'all') parts.push(`الصف: ${gradeLabel(grade)}`);
+  if(courseId) {
+    const course = courses.find(c => c.id.toString() === courseId);
+    if(course) parts.push(`الكورس: ${course.title}`);
+  }
+  if(studentType && studentType !== 'all') parts.push(`نوع الطالب: ${studentTypeLabel(studentType)}`);
+  if(month) parts.push(`الفترة: ${month}`);
+  if(status) parts.push(status === 'unused' ? 'غير مستخدمة فقط' : 'الكل');
+  info.textContent = `عرض ${filtered.length} أكواد${parts.length ? ' - ' + parts.join(' | ') : ''}`;
+}
+function doPrint() {
+  window.print();
+}
+
+// ---- ANALYTICS ----
+function renderAnalytics(){
+  const users=getUsers();
+  // Bar chart - توزيع مبسط لآخر 7 أيام
+  const days=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+  const vals=[0,0,0,0,0,0,0];
+  users.forEach(()=>{vals[Math.floor(Math.random()*7)]++;});
+  const max=Math.max(...vals,1);
+  document.getElementById('barChart').innerHTML=vals.map((v,i)=>`
+    <div class="bar" style="height:${(v/max*100)||5}%" title="${v} طلاب">
+      <span class="bar-val">${v}</span>
+      <span class="bar-label">${days[i]}</span>
+    </div>`).join('');
+  document.getElementById('chartTotal').textContent=users.length;
+
+  // Donut - grade distribution
+  const g1=users.filter(u=>u.grade==='1').length;
+  const g2=users.filter(u=>u.grade==='2').length;
+  const g3=users.filter(u=>u.grade==='3').length;
+  const total=users.length||1;
+  const circ=2*Math.PI*50;
+  const p1=(g1/total)*circ, p2=(g2/total)*circ, p3=(g3/total)*circ;
+  document.getElementById('seg1').setAttribute('stroke-dasharray',`${p1} ${circ-p1}`);
+  document.getElementById('seg2').setAttribute('stroke-dasharray',`${p2} ${circ-p2}`);
+  document.getElementById('seg2').setAttribute('transform',`rotate(${-90+(g1/total)*360} 70 70)`);
+  document.getElementById('seg3').setAttribute('stroke-dasharray',`${p3} ${circ-p3}`);
+  document.getElementById('seg3').setAttribute('transform',`rotate(${-90+((g1+g2)/total)*360} 70 70)`);
+  document.getElementById('donutLegend').innerHTML=`
+    <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div>أول ثانوي (${g1})</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>تاني ثانوي (${g2})</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>تالت ثانوي (${g3})</div>`;
+}
+
+function renderMessages(){
+  const content=document.getElementById('messagesContent');
+  const messages=[
+    {title:'مرحباً بك في لوحة الأمين',text:'يمكنك الآن إدارة الطلاب والكورسات ومتابعة المدفوعات بسهولة.'},
+    {title:'تحديث جديد',text:'أضفنا صفحة الطلاب والكورسات لعرض كامل أكثر.'}
+  ];
+  content.innerHTML=messages.map(m=>`
+    <div style="border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;background:var(--card-bg);">
+      <strong style="display:block;margin-bottom:8px;color:var(--text);">${m.title}</strong>
+      <p style="margin:0;color:#555;line-height:1.7;">${m.text}</p>
+    </div>`).join('');
+}
+
+function showAlert(msg,type='success'){
+  const existing=document.getElementById('dashboardAlert');
+  if(existing) existing.remove();
+  const alert=document.createElement('div');
+  alert.id='dashboardAlert';
+  alert.textContent=msg;
+  alert.style.position='fixed';
+  alert.style.top='20px';
+  alert.style.left='20px';
+  alert.style.zIndex='300';
+  alert.style.padding='14px 20px';
+  alert.style.borderRadius='16px';
+  alert.style.background=type==='error'?'#ffefef':'#e8f9ef';
+  alert.style.color=type==='error'?'#c0392b':'#147b30';
+  alert.style.boxShadow='0 16px 40px rgba(0,0,0,0.12)';
+  document.body.append(alert);
+  setTimeout(()=>alert.remove(),3200);
+}
+
+function loadPlatformSettings(){
+  const settings=JSON.parse(localStorage.getItem('alamin_settings')||'{}');
+  document.getElementById('settingPlatformName').value=settings.platformName||'الأمين في اللغة العربية';
+  document.getElementById('settingTeacherName').value=settings.teacherName||'الأستاذ الأمين';
+  document.getElementById('settingContactPhone').value=settings.contactPhone||'+20xxxxxxxxxx';
+}
+
+function saveSettings(){
+  const settings={
+    platformName:document.getElementById('settingPlatformName').value.trim(),
+    teacherName:document.getElementById('settingTeacherName').value.trim(),
+    contactPhone:document.getElementById('settingContactPhone').value.trim()
+  };
+  localStorage.setItem('alamin_settings',JSON.stringify(settings));
+  showAlert('تم حفظ إعدادات المنصة بنجاح.');
+}
+
+
+// ---- MODALS ----
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ---- THEME ----
+function toggleTheme(){const h=document.documentElement;const next=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',next);localStorage.setItem('theme',next);}
+const saved=localStorage.getItem('theme');if(saved)document.documentElement.setAttribute('data-theme',saved);
+
+// ---- INIT ----
+loadPlatformSettings();
+if(currentUser && currentUser.role === 'student') {
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.student-only').forEach(el=>el.style.display='block');
+  document.querySelector('.admin-name').textContent = currentUser.name || currentUser.firstName;
+  document.querySelector('.admin-role').textContent = 'طالب';
+  const firstLetter = (currentUser.name || currentUser.firstName || 'أ')[0];
+  document.querySelector('.admin-avatar').textContent = firstLetter;
+  showPage('student-courses');
+} else {
+  document.querySelectorAll('.student-only').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');
+  if(currentUser) {
+    document.querySelector('.admin-name').textContent = currentUser.name || 'الأستاذ الأمين';
+    document.querySelector('.admin-role').textContent = 'مدير المنصة';
+  }
+  showPage('overview');
+  renderPaymentsTable();
+}
+
+</script>
 </body>
-
 </html>

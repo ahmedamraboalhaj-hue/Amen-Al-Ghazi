@@ -1,403 +1,1011 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستر أمين الغازي | منصة اللغة العربية التعليمية</title>
-    <meta name="description"
-        content="المنصة التعليمية الرسمية لمستر أمين الغازي مدرس اللغة العربية. تعلم اللغة العربية بأحدث الأساليب التعليمية المبتكرة.">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@200;400;600;800&family=Tajawal:wght@200;400;700&display=swap"
-        rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ai_assistant.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة الأمين - في اللغة العربية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #00b4d8;
+  --primary-dark: #0077b6;
+  --primary-light: #90e0ef;
+  --accent: #f5a623;
+  --accent2: #ff6b9d;
+  --success: #2ed573;
+  --white: #ffffff;
+  --bg: #f0f9ff;
+  --card: #ffffff;
+  --text: #0f172a;
+  --text2: #475569;
+  --border: #bde0fe;
+  --shadow: 0 8px 32px rgba(0,119,182,0.10);
+  --shadow-lg: 0 20px 60px rgba(0,119,182,0.16);
+  --radius: 18px;
+  --sidebar-w: 0px;
+}
+[data-theme="dark"] {
+  --bg: #060d1a;
+  --card: #0f1e30;
+  --text: #e2eaf4;
+  --text2: #8ba3c0;
+  --border: #1a3050;
+  --shadow: 0 8px 32px rgba(0,0,0,0.35);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); transition:background .3s,color .3s; overflow-x:hidden; }
 
-    <!-- SEO & Social Media Meta Tags (Open Graph) -->
-    <meta property="og:title" content="مستر أمين الغازي | مدرس اللغة العربية">
-    <meta property="og:description"
-        content="المنصة التعليمية الرسمية لمستر أمين الغازي. تعلم اللغة العربية بأحدث الأساليب وتفوق في الثانوية العامة.">
-    <meta property="og:image" content="teacher-photo.jpeg">
-    <meta property="og:url" content="https://siond-a6c34-2aadc.web.app">
-    <meta property="og:type" content="website">
+/* ===================== NAVBAR ===================== */
+.navbar {
+  position: sticky; top:0; z-index:200;
+  background: var(--card);
+  border-bottom: 2px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 0 48px;
+  height: 72px;
+  display: flex; align-items:center; justify-content:space-between;
+  transition: background .3s;
+}
+.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo-box {
+  width:50px; height:50px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; color:white; font-weight:900;
+  box-shadow: 0 4px 16px rgba(0,119,182,0.35);
+}
+.nav-logo-text { font-family:'Tajawal',sans-serif; }
+.nav-logo-text .main { display:block; font-size:20px; font-weight:900; color:var(--primary); }
+.nav-logo-text .sub { display:block; font-size:11px; color:var(--text2); margin-top:-3px; }
 
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="مستر أمين الغازي | مدرس اللغة العربية">
-    <meta name="twitter:description" content="المنصة التعليمية الرسمية لمستر أمين الغازي وتفوق في اللغة العربية.">
-    <meta name="twitter:image" content="teacher-photo.jpeg">
+.nav-links { display:flex; align-items:center; gap:6px; }
+.nav-link {
+  padding: 8px 16px; border-radius:10px;
+  text-decoration:none; color:var(--text2); font-size:15px; font-weight:600;
+  transition:all .2s;
+}
+.nav-link:hover { background:rgba(0,180,216,0.08); color:var(--primary); }
+.nav-link.active { color:var(--primary); background:rgba(0,180,216,0.1); }
+
+.nav-right { display:flex; align-items:center; gap:12px; }
+.theme-btn {
+  width:42px; height:42px; border-radius:12px;
+  background: var(--bg); border:2px solid var(--border);
+  cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.theme-btn:hover { border-color:var(--primary); }
+.btn-login {
+  padding:9px 20px; border-radius:11px;
+  color:var(--accent); font-weight:700; font-size:15px;
+  text-decoration:none; border:2px solid var(--accent);
+  transition:all .2s;
+}
+.btn-login:hover { background:var(--accent); color:white; }
+.btn-register {
+  padding:10px 22px; border-radius:12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color:white; font-weight:800; font-size:15px;
+  text-decoration:none; display:flex; align-items:center; gap:8px;
+  box-shadow: 0 4px 16px rgba(0,119,182,0.3);
+  transition:all .25s;
+}
+.btn-register:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,119,182,0.4); }
+
+/* ===================== HERO ===================== */
+.hero {
+  min-height: calc(100vh - 72px);
+  display:flex; align-items:center;
+  padding: 0 80px;
+  position:relative; overflow:hidden;
+}
+.hero-bg-circles {
+  position:absolute; inset:0; pointer-events:none; overflow:hidden;
+}
+.hero-bg-circles span {
+  position:absolute; border-radius:50%;
+  background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+}
+.hero-bg-circles span:nth-child(1) { width:600px;height:600px;top:-200px;left:-100px; }
+.hero-bg-circles span:nth-child(2) { width:400px;height:400px;bottom:-100px;right:100px;background:radial-gradient(circle,rgba(245,166,35,0.06) 0%,transparent 70%); }
+.hero-bg-circles span:nth-child(3) { width:300px;height:300px;top:40%;right:30%;background:radial-gradient(circle,rgba(0,180,216,0.05) 0%,transparent 70%); }
+
+.hero-text { flex:1; z-index:2; }
+.hero-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  background: rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.25);
+  color:var(--primary); font-size:14px; font-weight:700;
+  padding:8px 18px; border-radius:50px; margin-bottom:24px;
+}
+.hero-tag span { width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+
+.hero-title {
+  font-family:'Tajawal',sans-serif;
+  font-size:68px; font-weight:900; line-height:1.15;
+  margin-bottom:20px;
+}
+.hero-title .highlight {
+  color:var(--primary);
+  position:relative;
+}
+.hero-title .highlight::after {
+  content:'';
+  position:absolute; bottom:-4px; right:0; left:0; height:4px;
+  background:linear-gradient(90deg,var(--primary),var(--primary-light));
+  border-radius:4px;
+}
+.hero-subtitle {
+  font-size:20px; color:var(--text2); line-height:1.8;
+  margin-bottom:40px; max-width:520px;
+}
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
+.hero-btn-primary {
+  padding:16px 36px; border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white; font-weight:800; font-size:17px; text-decoration:none;
+  box-shadow:0 8px 28px rgba(0,119,182,0.35);
+  display:inline-flex; align-items:center; gap:10px;
+  transition:all .25s;
+}
+.hero-btn-primary:hover { transform:translateY(-3px); box-shadow:0 14px 36px rgba(0,119,182,0.45); }
+.hero-btn-secondary {
+  padding:16px 36px; border-radius:14px;
+  background:transparent; color:var(--primary);
+  font-weight:800; font-size:17px; text-decoration:none;
+  border:2px solid var(--primary);
+  display:inline-flex; align-items:center; gap:10px;
+  transition:all .25s;
+}
+.hero-btn-secondary:hover { background:rgba(0,180,216,0.08); }
+
+.hero-stats { display:flex; gap:32px; margin-top:48px; flex-wrap:wrap; }
+.hero-stat .num {
+  font-family:'Tajawal',sans-serif; font-size:32px; font-weight:900; color:var(--primary);
+}
+.hero-stat .lbl { font-size:13px; color:var(--text2); margin-top:2px; }
+
+/* HERO IMAGE SIDE */
+.hero-visual { flex:1; display:flex; justify-content:center; align-items:center; position:relative; z-index:2; }
+.hero-blob-wrap { position:relative; width:460px; height:460px; }
+.hero-blob {
+  width:100%; height:100%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, #023e8a 100%);
+  border-radius: 62% 38% 54% 46% / 56% 44% 56% 44%;
+  animation: blobMorph 7s ease-in-out infinite;
+  display:flex; align-items:flex-end; justify-content:center;
+  overflow:hidden; position:relative;
+}
+@keyframes blobMorph {
+  0%,100% { border-radius: 62% 38% 54% 46% / 56% 44% 56% 44%; }
+  33%      { border-radius: 44% 56% 40% 60% / 60% 44% 56% 40%; }
+  66%      { border-radius: 54% 46% 62% 38% / 44% 60% 40% 56%; }
+}
+.hero-person { font-size:180px; line-height:1; margin-bottom:-20px; filter:drop-shadow(0 8px 24px rgba(0,0,0,0.3)); }
+.hero-float {
+  position:absolute;
+  background:var(--card); border-radius:14px;
+  padding:12px 16px; box-shadow:0 8px 28px rgba(0,0,0,0.12);
+  display:flex; align-items:center; gap:10px;
+  animation:floatY 4s ease-in-out infinite;
+  border:1px solid var(--border);
+}
+[data-theme="dark"] .hero-float { box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+.hero-float:nth-child(2) { top:40px; right:-20px; animation-delay:0s; }
+.hero-float:nth-child(3) { bottom:80px; left:-30px; animation-delay:1.5s; }
+.hero-float:nth-child(4) { top:160px; left:-40px; animation-delay:3s; }
+@keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+.float-icon { font-size:28px; }
+.float-text .t { font-size:13px; font-weight:800; color:var(--text); }
+.float-text .s { font-size:11px; color:var(--text2); }
+
+/* Deco dots */
+.hero-deco { position:absolute; }
+.hero-deco.d1 { top:60px; left:10%; width:12px; height:12px; background:var(--accent); border-radius:50%; animation:floatY 3s infinite; }
+.hero-deco.d2 { bottom:120px; right:5%; width:8px; height:8px; background:var(--primary-light); border-radius:50%; animation:floatY 4s infinite 1s; }
+.hero-deco.d3 { top:40%; left:5%; width:20px; height:20px; border:3px solid var(--primary); border-radius:50%; animation:floatY 5s infinite 2s; }
+
+/* ===================== STATS BAR ===================== */
+.stats-bar {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #00d4ff 100%);
+  padding: 48px 80px;
+  display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:24px;
+  position:relative; overflow:hidden;
+}
+.stats-bar::before {
+  content:''; position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.stat-item { text-align:center; color:white; position:relative; z-index:1; }
+.stat-item .num { font-family:'Tajawal',sans-serif; font-size:52px; font-weight:900; line-height:1; }
+.stat-item .lbl { font-size:16px; opacity:.85; margin-top:6px; }
+.stat-sep { width:1px; height:60px; background:rgba(255,255,255,0.2); }
+
+/* ===================== SECTIONS ===================== */
+.section { padding:80px 80px; }
+.section-head { text-align:center; margin-bottom:52px; }
+.section-head .tag {
+  display:inline-block; background:rgba(0,180,216,0.1);
+  color:var(--primary); font-size:13px; font-weight:700;
+  padding:6px 18px; border-radius:50px; margin-bottom:14px;
+  border:1px solid rgba(0,180,216,0.2);
+}
+.section-head h2 { font-family:'Tajawal',sans-serif; font-size:42px; font-weight:900; line-height:1.2; }
+.section-head h2 span { color:var(--primary); }
+.section-head p { font-size:17px; color:var(--text2); margin-top:12px; max-width:540px; margin-right:auto; margin-left:auto; }
+
+/* ===================== COURSES GRID ===================== */
+.courses-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:28px;
+}
+.course-card {
+  background:var(--card); border-radius:22px;
+  border:1px solid var(--border); overflow:visible;
+  box-shadow:var(--shadow); transition:all .3s;
+  position:relative; margin-top:18px;
+}
+.course-card:hover { transform:translateY(-8px); box-shadow:var(--shadow-lg); border-color:var(--primary); }
+
+.teacher-chip {
+  position:absolute; top:-15px; right:50%; transform:translateX(50%);
+  background:var(--card); border:2px solid var(--border);
+  color:var(--text); font-size:13px; font-weight:800;
+  padding:6px 20px; border-radius:50px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08); white-space:nowrap; z-index:5;
+}
+
+.course-thumb {
+  width:100%; height:210px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:72px; position:relative;
+  border-radius:20px 20px 0 0;
+  overflow:hidden;
+}
+.course-thumb::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:60px;
+  background:linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+}
+.course-badge-pin {
+  position:absolute; top:14px; left:14px; z-index:3;
+  background:linear-gradient(135deg,#ff6b9d,#ff4757);
+  color:white; font-size:11px; font-weight:800;
+  padding:5px 14px; border-radius:50px;
+  box-shadow:0 4px 12px rgba(255,75,87,0.4);
+}
+.free-pin {
+  position:absolute; top:14px; right:14px; z-index:3;
+  background:linear-gradient(135deg,#2ed573,#17c45a);
+  color:white; font-size:11px; font-weight:800;
+  padding:5px 14px; border-radius:50px;
+  box-shadow:0 4px 12px rgba(46,213,115,0.4);
+}
+
+.course-body { padding:22px 20px 20px; }
+.course-grade-tag {
+  display:inline-block;
+  background:linear-gradient(135deg,var(--accent),#f7b731);
+  color:white; font-size:12px; font-weight:700;
+  padding:5px 14px; border-radius:8px; margin-bottom:14px;
+}
+.course-title { font-size:19px; font-weight:900; margin-bottom:10px; line-height:1.4; }
+.course-desc { font-size:14px; color:var(--text2); line-height:1.8; margin-bottom:18px; }
+.course-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.btn-enter {
+  background:transparent; color:var(--primary);
+  border:2px solid var(--primary); border-radius:10px;
+  font-family:'Cairo',sans-serif; font-weight:700; font-size:14px;
+  padding:9px 20px; cursor:pointer; transition:all .2s;
+}
+.btn-enter:hover { background:var(--primary); color:white; }
+.btn-free-enroll {
+  background:linear-gradient(135deg,var(--accent2),#ff4757);
+  color:white; border:none; border-radius:10px;
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:14px;
+  padding:9px 20px; cursor:pointer; transition:all .2s;
+  box-shadow:0 4px 14px rgba(255,107,157,0.3);
+}
+.btn-free-enroll:hover { opacity:.88; transform:translateY(-1px); }
+.course-meta {
+  margin-top:14px; padding-top:14px;
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:4px;
+}
+.course-meta span { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:6px; }
+
+/* ===================== FEATURES ===================== */
+.features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.feature-card {
+  background:var(--card); border-radius:20px;
+  padding:32px 24px; border:1px solid var(--border);
+  box-shadow:var(--shadow); text-align:center;
+  transition:all .3s;
+}
+.feature-card:hover { transform:translateY(-6px); border-color:var(--primary); }
+.feature-icon {
+  width:72px; height:72px; border-radius:20px; margin:0 auto 20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:32px;
+}
+.feature-title { font-size:18px; font-weight:800; margin-bottom:10px; }
+.feature-desc { font-size:14px; color:var(--text2); line-height:1.8; }
+
+/* ===================== TESTIMONIALS ===================== */
+.testimonials-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.testi-card {
+  background:var(--card); border-radius:20px;
+  padding:28px 24px; border:1px solid var(--border);
+  box-shadow:var(--shadow); transition:all .3s;
+}
+.testi-card:hover { border-color:var(--primary); transform:translateY(-4px); }
+.testi-stars { color:#f5a623; font-size:18px; margin-bottom:14px; letter-spacing:2px; }
+.testi-text { font-size:15px; line-height:1.8; color:var(--text2); margin-bottom:18px; }
+.testi-author { display:flex; align-items:center; gap:12px; }
+.testi-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  display:flex; align-items:center; justify-content:center;
+  color:white; font-weight:900; font-size:18px; flex-shrink:0;
+}
+.testi-name { font-size:15px; font-weight:800; }
+.testi-grade { font-size:12px; color:var(--text2); }
+
+/* ===================== CTA SECTION ===================== */
+.cta-section {
+  margin:0 80px 80px;
+  background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 50%,#00d4ff 100%);
+  border-radius:28px; padding:72px 80px;
+  text-align:center; position:relative; overflow:hidden;
+}
+.cta-section::before {
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:300px; height:300px; border-radius:50%;
+  background:rgba(255,255,255,0.06);
+}
+.cta-section::after {
+  content:''; position:absolute; bottom:-60px; left:-60px;
+  width:240px; height:240px; border-radius:50%;
+  background:rgba(255,255,255,0.05);
+}
+.cta-title { font-family:'Tajawal',sans-serif; font-size:48px; font-weight:900; color:white; margin-bottom:16px; position:relative; z-index:1; }
+.cta-sub { font-size:18px; color:rgba(255,255,255,0.82); margin-bottom:36px; position:relative; z-index:1; }
+.cta-btns { display:flex; gap:16px; justify-content:center; position:relative; z-index:1; }
+.cta-btn-white {
+  padding:16px 40px; border-radius:14px;
+  background:white; color:var(--primary-dark);
+  font-weight:900; font-size:17px; text-decoration:none;
+  box-shadow:0 8px 24px rgba(0,0,0,0.15);
+  transition:all .25s; display:inline-flex; align-items:center; gap:8px;
+}
+.cta-btn-white:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(0,0,0,0.2); }
+.cta-btn-outline {
+  padding:16px 40px; border-radius:14px;
+  background:transparent; color:white;
+  font-weight:800; font-size:17px; text-decoration:none;
+  border:2px solid rgba(255,255,255,0.6);
+  transition:all .25s;
+}
+.cta-btn-outline:hover { background:rgba(255,255,255,0.1); border-color:white; }
+
+/* ===================== FOOTER ===================== */
+footer {
+  background:var(--card); border-top:2px solid var(--border);
+  padding:56px 80px 32px;
+}
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:48px; }
+.footer-brand .logo-wrap { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.footer-logo-box {
+  width:46px; height:46px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:white; font-weight:900;
+}
+.footer-logo-name { font-family:'Tajawal',sans-serif; font-size:20px; font-weight:900; color:var(--primary); }
+.footer-logo-sub { font-size:11px; color:var(--text2); }
+.footer-desc { font-size:14px; color:var(--text2); line-height:1.8; margin-bottom:20px; }
+.footer-social { display:flex; gap:10px; }
+.social-btn {
+  width:38px; height:38px; border-radius:10px;
+  background:var(--bg); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; cursor:pointer; transition:all .2s; text-decoration:none;
+}
+.social-btn:hover { background:var(--primary); border-color:var(--primary); transform:translateY(-2px); }
+.footer-col h4 { font-size:16px; font-weight:800; margin-bottom:18px; }
+.footer-col ul { list-style:none; }
+.footer-col ul li { margin-bottom:10px; }
+.footer-col ul li a { text-decoration:none; color:var(--text2); font-size:14px; transition:color .2s; }
+.footer-col ul li a:hover { color:var(--primary); }
+.footer-bottom {
+  padding-top:24px; border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:13px; color:var(--text2);
+}
+.footer-bottom .brand { color:var(--primary); font-weight:700; }
+
+/* WHATSAPP */
+.wa-btn {
+  position:fixed; bottom:28px; right:28px; z-index:999;
+  width:58px; height:58px; border-radius:50%; border:none;
+  background:linear-gradient(135deg,#25d366,#1faf5c);
+  box-shadow:0 6px 24px rgba(37,211,102,0.45);
+  cursor:pointer; font-size:28px;
+  display:flex; align-items:center; justify-content:center;
+  text-decoration:none; transition:all .2s;
+  animation:waPulse 3s infinite;
+}
+@keyframes waPulse {
+  0%,100%{box-shadow:0 6px 24px rgba(37,211,102,0.45)}
+  50%{box-shadow:0 6px 36px rgba(37,211,102,0.7)}
+}
+.wa-btn:hover { transform:scale(1.1); }
+
+/* SCROLL TO TOP */
+.scroll-top {
+  position:fixed; bottom:96px; right:28px; z-index:998;
+  width:46px; height:46px; border-radius:12px; border:none;
+  background:var(--primary); color:white; font-size:18px;
+  cursor:pointer; box-shadow:0 4px 16px rgba(0,180,216,0.35);
+  display:none; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.scroll-top.show { display:flex; }
+.scroll-top:hover { background:var(--primary-dark); }
+
+/* NOTIFICATION */
+.notif-bar {
+  background:linear-gradient(90deg,var(--primary-dark),var(--primary));
+  padding:10px 24px; text-align:center;
+  color:white; font-size:14px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.notif-close { background:none; border:none; color:white; cursor:pointer; font-size:18px; margin-right:auto; }
+
+/* RESPONSIVE */
+@media (max-width:1100px) {
+  .courses-grid, .features-grid, .testimonials-grid, .student-overview { grid-template-columns:1fr 1fr; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:768px) {
+  .navbar { padding:0 20px; }
+  .nav-links { display:none; }
+  .hero { flex-direction:column-reverse; padding:40px 24px; text-align:center; min-height:auto; padding-top:60px; }
+  .hero-title { font-size:42px; }
+  .hero-stats { justify-content:center; }
+  .hero-btns { justify-content:center; }
+  .hero-visual { margin-bottom:32px; }
+  .hero-blob-wrap { width:300px; height:300px; }
+  .section { padding:48px 24px; }
+  .courses-grid, .features-grid, .testimonials-grid, .student-overview { grid-template-columns:1fr; }
+  .stats-bar { padding:32px 24px; }
+  .cta-section { margin:0 16px 48px; padding:48px 24px; }
+  .cta-title { font-size:32px; }
+  .footer-grid { grid-template-columns:1fr; }
+  footer { padding:40px 24px 24px; }
+}
+
+/* ANIMATIONS */
+.fade-up { opacity:0; transform:translateY(30px); transition:all .6s; }
+.fade-up.visible { opacity:1; transform:translateY(0); }
+
+.student-overview { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:40px; }
+.student-card { background:var(--card); border:1px solid var(--border); border-radius:22px; padding:26px 24px; box-shadow:var(--shadow); }
+.student-card .num { font-size:38px; font-weight:900; color:var(--primary); }
+.student-card .lbl { font-size:16px; font-weight:800; color:var(--text); margin-top:12px; }
+.student-card .sub { margin-top:14px; font-size:14px; color:var(--text2); line-height:1.8; }
+.student-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(0,180,216,0.12); color:var(--primary); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700; margin-top:16px; }
+</style>
+<script src="assets/backend-sync.js"></script>
 </head>
-
 <body>
-    <!-- Premium Splash Screen -->
-    <div id="splash-screen" class="splash-screen">
-        <div class="splash-bg">
-            <div class="particle p1"></div>
-            <div class="particle p2"></div>
-            <div class="particle p3"></div>
-            <div class="particle p4"></div>
+
+<!-- Notification bar -->
+<div class="notif-bar" id="notifBar">
+  <span>🎉 المراجعة النهائية متاحة الآن! سجّل وادخل الكورسات المجانية</span>
+  <button class="notif-close" onclick="document.getElementById('notifBar').style.display='none'">✕</button>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-box">أ</div>
+    <div class="nav-logo-text">
+      <span class="main">الأمين</span>
+      <span class="sub">في اللغة العربية</span>
+    </div>
+  </a>
+
+  <div class="nav-links">
+    <a href="#" class="nav-link active">الرئيسية</a>
+    <a href="explore.html" class="nav-link">استكشاف الدورات</a>
+    <a href="#courses" class="nav-link">الكورسات</a>
+    <a href="tests.html" class="nav-link">الاختبارات 📝</a>
+    <a href="certificates.html" class="nav-link">الشهادات 🏆</a>
+    <a href="#features" class="nav-link">المميزات</a>
+    <a href="#testimonials" class="nav-link">آراء الطلاب</a>
+    <a href="#contact" class="nav-link">تواصل معنا</a>
+  </div>
+
+  <div class="nav-right" id="navRight">
+    <button class="theme-btn" onclick="toggleTheme()" title="تغيير الثيم">🌙</button>
+    <a href="login.html" class="btn-login">سجّل دخولك</a>
+    <a href="register.html" class="btn-register">➕ اعمل حساب!</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circles">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="hero-text fade-up">
+    <div class="hero-tag">
+      <span></span>
+      منصة تعليمية متكاملة للغة العربية
+    </div>
+    <h1 class="hero-title">
+      منصة <span class="highlight">الأمين</span><br>
+      في اللغة العربية
+    </h1>
+    <p class="hero-subtitle">
+      منصة متكاملة بها كل ما يحتاجه الطالب ليتفوق في اللغة العربية — فيديوهات، ملفات، مراجعات، وكل حاجة قبل الامتحان 📚
+    </p>
+    <div class="hero-btns">
+      <a href="register.html" class="hero-btn-primary">🚀 ابدأ مجاناً</a>
+      <a href="#courses" class="hero-btn-secondary">📖 استعرض الكورسات</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">+٥٠٠٠</div><div class="lbl">طالب مسجّل</div></div>
+      <div class="hero-stat"><div class="num">+٥٠</div><div class="lbl">كورس متاح</div></div>
+      <div class="hero-stat"><div class="num">٩٨٪</div><div class="lbl">نسبة رضا الطلاب</div></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-blob-wrap">
+      <div class="hero-blob">
+        <div class="hero-person">👨‍🏫</div>
+      </div>
+      <div class="hero-float">
+        <div class="float-icon">🎓</div>
+        <div class="float-text"><div class="t">تفوق مضمون</div><div class="s">مع الأستاذ الأمين</div></div>
+      </div>
+      <div class="hero-float">
+        <div class="float-icon">📚</div>
+        <div class="float-text"><div class="t">+٥٠ كورس</div><div class="s">لغة عربية وتربية</div></div>
+      </div>
+      <div class="hero-float">
+        <div class="float-icon">✅</div>
+        <div class="float-text"><div class="t">كورسات مجانية</div><div class="s">للمراجعة النهائية</div></div>
+      </div>
+    </div>
+    <div class="hero-deco d1"></div>
+    <div class="hero-deco d2"></div>
+    <div class="hero-deco d3"></div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="num">+٥٠٠٠</div><div class="lbl">طالب مسجّل</div></div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><div class="num">+٥٠</div><div class="lbl">كورس متاح</div></div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><div class="num">٩٨٪</div><div class="lbl">نسبة رضا الطلاب</div></div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><div class="num">+٢٠٠</div><div class="lbl">ساعة محتوى</div></div>
+  <div class="stat-sep"></div>
+  <div class="stat-item"><div class="num">٣</div><div class="lbl">صفوف دراسية</div></div>
+</div>
+
+<section id="studentPanel" class="section" style="display:none;">
+  <div class="section-head fade-up">
+    <div class="tag">🎓 لوحة المحتوى</div>
+    <h2>هذه صفحتك الخاصة <span>بالمحتوى</span></h2>
+    <p>هنا تشوف كل الكورسات اللي انت مشترك فيها، وتدخل على المحتوى بتاعك مباشرة بدون دوشة.</p>
+  </div>
+  <div id="studentOverview" class="student-overview fade-up"></div>
+  <div class="section-head fade-up" style="margin-top:10px;">
+    <div class="tag">📚 كورساتي</div>
+    <h2>الكورسات اللي انت موجود فيها</h2>
+    <p>اضغط على أي كورس عشان تدخل المحتوى وتشوف الدروس والملفات.</p>
+  </div>
+  <div class="courses-grid" id="myCoursesGrid"></div>
+</section>
+
+<!-- COURSES SECTION -->
+<section id="courses" class="section">
+  <div class="section-head fade-up">
+    <div class="tag">📚 الكورسات</div>
+    <h2>الاشتراك الشهري <span>للمدرس</span></h2>
+    <p>كورسات مميزة مع الأستاذ الأمين في اللغة العربية — مراجعات نهائية وملفات شاملة</p>
+  </div>
+
+  <div class="courses-grid" id="coursesGrid">
+    <!-- Rendered by JS -->
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section id="features" class="section" style="background:var(--card); border-top:2px solid var(--border); border-bottom:2px solid var(--border);">
+  <div class="section-head fade-up">
+    <div class="tag">⭐ المميزات</div>
+    <h2>ليه منصة <span>الأمين</span>؟</h2>
+    <p>كل اللي بيميّزنا عن غيرنا في خدمة طلاب اللغة العربية</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card fade-up" style="--d:0s">
+      <div class="feature-icon" style="background:rgba(0,180,216,0.1)">🎥</div>
+      <div class="feature-title">فيديوهات عالية الجودة</div>
+      <div class="feature-desc">شرح احترافي ومبسّط لكل المنهج، متاح في أي وقت ومن أي مكان</div>
+    </div>
+    <div class="feature-card fade-up" style="--d:.1s">
+      <div class="feature-icon" style="background:rgba(245,166,35,0.1)">📄</div>
+      <div class="feature-title">ملفات مراجعة شاملة</div>
+      <div class="feature-desc">ملفات PDF منظّمة لكل وحدة، تنزّلها وتذاكر منها بسهولة</div>
+    </div>
+    <div class="feature-card fade-up" style="--d:.2s">
+      <div class="feature-icon" style="background:rgba(46,213,115,0.1)">🆓</div>
+      <div class="feature-title">كورسات مجانية</div>
+      <div class="feature-desc">مراجعات نهائية مجانية للكل — مش محتاج تدفع عشان تتفوق</div>
+    </div>
+    <div class="feature-card fade-up" style="--d:.3s">
+      <div class="feature-icon" style="background:rgba(255,107,157,0.1)">📱</div>
+      <div class="feature-title">يشتغل على كل أجهزة</div>
+      <div class="feature-desc">سواء موبايل أو تابلت أو لاب توب — المنصة شغّالة على كل حاجة</div>
+    </div>
+    <div class="feature-card fade-up" style="--d:.4s">
+      <div class="feature-icon" style="background:rgba(0,180,216,0.1)">🎯</div>
+      <div class="feature-title">محتوى مركّز للامتحانات</div>
+      <div class="feature-desc">كل الكورسات متصممة خصيصاً لامتحانات الثانوية العامة</div>
+    </div>
+    <div class="feature-card fade-up" style="--d:.5s">
+      <div class="feature-icon" style="background:rgba(245,166,35,0.1)">💬</div>
+      <div class="feature-title">دعم وتواصل مستمر</div>
+      <div class="feature-desc">أي سؤال أو استفسار — فريق الأستاذ الأمين موجود دايماً</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="section">
+  <div class="section-head fade-up">
+    <div class="tag">💬 آراء الطلاب</div>
+    <h2>بيقولوا إيه عننا <span>الطلاب</span>؟</h2>
+    <p>آراء حقيقية من طلاب المنصة بعد تجربتهم</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testi-card fade-up">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"أحسن منصة جربتها في حياتي، الشرح مبسّط جداً والملفات منظّمة. نجحت في اللغة العربية بسبب الأستاذ الأمين!"</div>
+      <div class="testi-author">
+        <div class="testi-avatar">أ</div>
+        <div><div class="testi-name">أحمد محمد</div><div class="testi-grade">الصف الأول الثانوي</div></div>
+      </div>
+    </div>
+    <div class="testi-card fade-up">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"الكورسات المجانية دي مش هتلاقيها في أي حتة تانية. شكراً جزيلاً للأستاذ الأمين على المجهود الرهيب ده!"</div>
+      <div class="testi-author">
+        <div class="testi-avatar">ف</div>
+        <div><div class="testi-name">فاطمة خالد</div><div class="testi-grade">الصف الثاني الثانوي</div></div>
+      </div>
+    </div>
+    <div class="testi-card fade-up">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"من أول ما سجّلت في المنصة وأنا مبسوط جداً. المراجعات النهائية ساعدتني قوي في الامتحانات، ربنا يبارك في الأستاذ."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">م</div>
+        <div><div class="testi-name">محمد عمر</div><div class="testi-grade">الصف الثالث الثانوي</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section fade-up">
+  <div class="cta-title">ابدأ رحلتك للتفوق دلوقتي! 🚀</div>
+  <div class="cta-sub">اشترك مجاناً وادخل الكورسات ومراجعات الامتحانات — مش محتاج تدفع حاجة</div>
+  <div class="cta-btns">
+    <a href="register.html" class="cta-btn-white">🎓 سجّل حسابك مجاناً</a>
+    <a href="login.html" class="cta-btn-outline">دخول للحساب</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-wrap">
+        <div class="footer-logo-box">أ</div>
+        <div>
+          <div class="footer-logo-name">الأمين</div>
+          <div class="footer-logo-sub">في اللغة العربية</div>
         </div>
-        <div class="splash-content">
-            <div class="splash-logo-container">
-                <h1 class="splash-text">امين الغازي</h1>
-                <h2 class="splash-subtext">في اللغة العربية</h2>
-            </div>
-            <div class="splash-loader">
-                <div class="loader-line"></div>
-            </div>
-        </div>
+      </div>
+      <p class="footer-desc">منصة تعليمية متكاملة لطلاب اللغة العربية في الثانوية العامة — مراجعات، ملفات، وكل حاجة قبل الامتحان</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn">📘</a>
+        <a href="#" class="social-btn">📸</a>
+        <a href="#" class="social-btn">▶️</a>
+        <a href="#" class="social-btn">💬</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>المنصة</h4>
+      <ul>
+        <li><a href="#">الكورسات</a></li>
+        <li><a href="#">المراجعات</a></li>
+        <li><a href="#">الملفات</a></li>
+        <li><a href="#">الفيديوهات</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>الصفوف</h4>
+      <ul>
+        <li><a href="#">أول ثانوي</a></li>
+        <li><a href="#">تاني ثانوي</a></li>
+        <li><a href="#">تالت ثانوي</a></li>
+        <li><a href="#">تالتة إعدادي</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>تواصل معنا</h4>
+      <ul>
+        <li><a href="#">واتساب</a></li>
+        <li><a href="#">فيسبوك</a></li>
+        <li><a href="#">يوتيوب</a></li>
+        <li><a href dashboard.html">لوحة التحكم</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© ٢٠٢٦ منصة <span class="brand">الأمين</span> في اللغة العربية — جميع الحقوق محفوظة</span>
+    <span>صُنع بـ ❤️ لطلاب مصر</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-btn" title="تواصل على واتساب">💬</a>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆</button>
+
+<!-- VODAFONE CASH MODAL -->
+<div class="vf-modal-overlay" id="vfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div class="vf-modal" style="background:var(--card);border-radius:24px;padding:32px;width:100%;max-width:420px;border:1px solid var(--border);position:relative;">
+    <button onclick="closeVfModal()" style="position:absolute;top:16px;left:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text2)">&times;</button>
+    
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:72px;height:72px;background:#e60000;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:white;font-size:32px;font-weight:900;">V</div>
+      <h3 style="font-size:22px;font-weight:900;font-family:'Tajawal'">فودافون كاش</h3>
+      <p style="color:var(--text2);font-size:14px;margin-top:8px;" id="vfModalDesc">برجاء تحويل مبلغ الكورس إلى الرقم: <br><strong style="color:var(--text);font-size:18px;">010XXXXXXXX</strong></p>
     </div>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container navbar-content">
-            <div class="logo">
-                <span class="logo-text">مستر أمين الغازي</span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home" class="active">الرئيسية</a></li>
-                <li><a href="#about">عن المستر</a></li>
-                <li><a href="#courses">الدورات</a></li>
-                <li><a href="#contact">تواصل معنا</a></li>
-                <li class="nav-actions-mobile"><a href="dashboard.html" class="btn btn-primary">دخول الطلاب</a></li>
-            </ul>
-            <div class="nav-actions">
-                <a href="dashboard.html" class="btn btn-primary">دخول الطلاب</a>
-            </div>
-            <div class="menu-toggle" id="mobile-menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container hero-container">
-            <div class="hero-content">
-                <h2 class="hero-subtitle">اللغة العربية بأسلوب عصري</h2>
-                <h1 class="hero-title">ارتقِ بمستواك في لغة الضاد مع <span>مستر أمين الغازي</span></h1>
-                <p class="hero-description">خبير اللغة العربية للمرحلتين الإعدادية والثانوية وصاحب البصمة التعليمية
-                    الفريدة. نأخذك في رحلة ممتعة لاستكشاف أسرار النحو، روائع البلاغة، وعظمة الأدب العربي بأحدث التقنيات
-                    التعليمية العالمية التي تضمن لك الدرجة النهائية.</p>
-                <div class="hero-btns">
-                    <a href="#courses" class="btn btn-primary btn-lg">استعرض الدورات</a>
-                    <a href="#about" class="btn btn-outline btn-lg">اعرف المزيد</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">+10K</span>
-                        <span class="stat-label">طالب</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">+15</span>
-                        <span class="stat-label">سنة خبرة</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">98%</span>
-                        <span class="stat-label">نسبة النجاح</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-image-container">
-                <div class="hero-image-bg"></div>
-                <img src="WhatsApp Image 2026-02-20 at 2.11.21 PM.jpeg" alt="مستر أمين الغازي" class="hero-image">
-                <div class="floating-card card-1">
-                    <i class="fas fa-book-open"></i>
-                    <span>شرح مبسط</span>
-                </div>
-                <div class="floating-card card-2">
-                    <i class="fas fa-pencil-alt"></i>
-                    <span>متابعة دورية</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services / Features Section -->
-    <section class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>لماذا تختار منصة مستر أمين الغازي؟</h2>
-                <p>نقدم تجربة تعليمية فريدة تدمج بين التميز الأكاديمي والتقنيات الحديثة</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-magic"></i></div>
-                    <h3>فلسفة تعليمية مبتكرة</h3>
-                    <p>لا نعتمد على الحفظ التلقين، بل نركز على الفهم العميق وربط قواعد اللغة بالواقع والذوق الأدبي
-                        الرفيع.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-video"></i></div>
-                    <h3>محاضرات تفاعلية HD</h3>
-                    <p>شرح فيديو بجودة 4K يغطي كافة جوانب المنهج بطريقة قصصية ممتعة تجذب الانتباه وتثبت المعلومة.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-file-signature"></i></div>
-                    <h3>مذكرات "امين الغازي" الذهبية</h3>
-                    <p>أقوى المراجع التعليمية المنظمة والملونة التي تشمل خرائط ذهنية وجداول مقارنة لتلخيص المنهج
-                        بالكامل.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                    <h3>تقييم بالذكاء الاصطناعي</h3>
-                    <p>اختبارات ذكية تحلل نقاط قوتك وضعفك وتقدم لك تقارير دورية لتحسين مستواك الدراسي باستمرار.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-users-cog"></i></div>
-                    <h3>دعم أكاديمي متواصل</h3>
-                    <p>فريق من المتخصصين متاح للرد على أي سؤال نحوي أو أدبي في أي وقت لضمان عدم توقف رحلتك التعليمية.
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-medal"></i></div>
-                    <h3>برنامج أوائل الجمهورية</h3>
-                    <p>خطة خاصة وشاملة لتهيئة الطلاب المتفوقين للمنافسة على مراكز الجمهورية عبر تدريبات مكثفة وغير
-                        مسبوقة.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Courses Section -->
-    <section id="courses" class="courses">
-        <div class="container">
-            <div class="section-header">
-                <h2>استكشف مسارك التعليمي</h2>
-                <p>اختر صفك الدراسي وابدأ رحلة التفوق مع "أمين الغازي"</p>
-            </div>
-
-            <!-- Preparatory Stage -->
-            <h3
-                style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary); padding-right: 15px;">
-                المرحلة الإعدادية</h3>
-            <div class="courses-grid" style="margin-bottom: 60px;">
-                <!-- 1 Prep -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-calligraphy-design_23-2148815132.jpg"
-                            alt="الصف الأول الإعدادي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الأول الإعدادي</h3>
-                        <p>تأسيس شامل في قواعد النحو والنصوص الأدبية المقررة.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=1prep" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 2 Prep -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-calligraphy-design_23-2148815132.jpg"
-                            alt="الصف الثاني الإعدادي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الثاني الإعدادي</h3>
-                        <p>شرح مبسط وأقوى التدريبات على منهج اللغة العربية.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=2prep" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 3 Prep -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-calligraphy-design_23-2148815132.jpg"
-                            alt="الصف الثالث الإعدادي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الثالث الإعدادي</h3>
-                        <p>المراجعات النهائية والتدريب على نماذج الامتحانات.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=3prep" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Secondary Stage -->
-            <h3
-                style="color: var(--secondary); font-family: 'Amiri', serif; font-size: 2rem; margin-bottom: 30px; border-right: 4px solid var(--secondary); padding-right: 15px;">
-                المرحلة الثانوية</h3>
-            <div class="courses-grid">
-                <!-- 1 Sec -->
-                <div class="course-card">
-                    <div class="course-badge">جديد</div>
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-alphabet-concept-illustration_114360-9852.jpg"
-                            alt="الصف الأول الثانوي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الأول الثانوي</h3>
-                        <p>البداية القوية في مرحلة التأسيس للمرحلة الثانوية.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=1sec" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 2 Sec -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-alphabet-concept-illustration_114360-9852.jpg"
-                            alt="الصف الثاني الثانوي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الثاني الثانوي</h3>
-                        <p>تعمق في فنون البلاغة وقواعد النحو المتقدمة.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=2sec" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- 3 Sec -->
-                <div class="course-card">
-                    <div class="course-badge">هام جداً</div>
-                    <div class="course-image">
-                        <img src="https://img.freepik.com/free-vector/arabic-alphabet-concept-illustration_114360-9852.jpg"
-                            alt="الصف الثالث الثانوي">
-                    </div>
-                    <div class="course-body">
-                        <h3>الصف الثالث الثانوي</h3>
-                        <p>المنهج المتكامل للثانوية العامة والوصول للدرجة النهائية.</p>
-                        <div class="course-footer">
-                            <a href="dashboard.html?grade=3sec" class="btn btn-secondary w-100">استعرض الدروس</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container cta-container">
-            <div class="cta-content">
-                <h2>جاهز للتفوق في اللغة العربية؟</h2>
-                <p>انضم الآن لمئات الطلاب المتفوقين واحجز مقعدك في أقرب مجموعة</p>
-                <a href="dashboard.html" class="btn btn-white btn-lg">دخول الطلاب</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <div class="section-header">
-                <h2>تواصل معنا</h2>
-                <p>نحن هنا للرد على استفساراتك ومساعدتك في رحلتك التعليمية</p>
-            </div>
-            <div class="contact-wrapper">
-                <div class="contact-info-cards">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fab fa-whatsapp"></i></div>
-                        <h3>واتساب واتصال</h3>
-                        <p dir="ltr">01159865466</p>
-                        <a href="https://wa.me/201159865466" class="info-link">تحدث معنا الآن</a>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
-                        <h3>اتصال هاتفي</h3>
-                        <p dir="ltr">01044663094</p>
-                        <a href="tel:01044663094" class="info-link">اتصل بنا</a>
-                    </div>
-                </div>
-
-                <div class="form-container">
-                    <form id="contactForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="name">الاسم بالكامل</label>
-                                <input type="text" id="name" placeholder="أدخل اسمك هنا" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">رقم الهاتف</label>
-                                <input type="tel" id="phone" placeholder="أدخل رقم هاتفك" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">الرسالة</label>
-                            <textarea id="message" rows="4" placeholder="كيف يمكننا مساعدتك؟" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fab fa-whatsapp"></i> إرسال عبر الواتساب
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container footer-grid">
-            <div class="footer-about">
-                <h3>مستر أمين الغازي</h3>
-                <p>الرائد في تدريس اللغة العربية للمرحلتين الإعدادية والثانوية. نسعى جاهدين لبناء جيل من المثقفين
-                    الذين يفتخرون بلغتهم العربية ويتقنونها كأداة للتفكير والإبداع، لا مجرد مادة للدراسة.</p>
-                <div class="social-links">
-                    <a href="https://www.facebook.com/share/1HDg2585Pj/"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://wa.me/201159865466"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <h4>روابط سريعة</h4>
-                <ul>
-                    <li><a href="#home">الرئيسية</a></li>
-                    <li><a href="#about">عن المستر</a></li>
-                    <li><a href="#courses">الدورات</a></li>
-                    <li><a href="#contact">تواصل معنا</a></li>
-                </ul>
-            </div>
-            <div class="footer-contact">
-                <h4>بيانات التواصل</h4>
-                <p><i class="fas fa-phone-alt"></i> 01159865466</p>
-                <p><i class="fas fa-phone-alt"></i> 01044663094</p>
-                <p><i class="fab fa-whatsapp"></i> 01159865466</p>
-                <p><i class="fas fa-map-marker-alt"></i> القاهرة، مصر</p>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-                <p>جميع الحقوق محفوظة © 2026 مستر أمين الغازي | تم التطوير بواسطة Antigravity</p>
-            <a href="admin.html" class="footer-admin-link">لوحة التحكم</a>
-        </div>
-    </footer>
-
-    <!-- Intro Video Modal with Shield -->
-    <div id="intro-modal" class="modal">
-        <div class="modal-content glass" style="max-width: 800px; padding: 0; overflow: hidden;">
-            <span class="close-modal" onclick="closeIntroVideo()"
-                style="position: absolute; top: 10px; left: 10px; z-index: 200; color: white;">&times;</span>
-            <div class="video-preview-wrapper" id="intro-video-wrapper">
-                <div id="intro-player"></div>
-                <div class="video-overlay-shield total-shield" onclick="togglePlayPause('intro')"
-                    ondblclick="toggleFullscreen('intro-video-wrapper')">
-                    <div class="play-overlay">
-                        <i class="fas fa-play"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <input type="hidden" id="vfCourseId">
+    
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:14px;font-weight:700;margin-bottom:8px;">رقم المحفظة اللي حولت منها</label>
+      <input type="tel" id="vfPhone" placeholder="010XXXXXXXX" style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:'Cairo';font-size:15px;outline:none;">
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="display:block;font-size:14px;font-weight:700;margin-bottom:8px;">المبلغ المحول</label>
+      <input type="number" id="vfAmount" placeholder="مثال: 150" style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:'Cairo';font-size:15px;outline:none;">
     </div>
 
+    <button onclick="submitVfPayment()" style="width:100%;padding:16px;background:#e60000;color:white;border:none;border-radius:14px;font-family:'Cairo';font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 6px 20px rgba(230,0,0,0.3);transition:all .2s;">تأكيد التحويل</button>
+  </div>
+</div>
 
-    <!-- Firebase & Scripts -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="script.js"></script>
-    <script src="ai_assistant.js"></script>
+<script>
+// ---- THEME ----
+function toggleTheme() {
+  const h = document.documentElement;
+  const dark = h.getAttribute('data-theme') === 'dark';
+  h.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.querySelector('.theme-btn').textContent = dark ? '🌙' : '☀️';
+  localStorage.setItem('alamin_theme', dark ? 'light' : 'dark');
+}
+const savedTheme = localStorage.getItem('alamin_theme');
+if (savedTheme) {
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.querySelector('.theme-btn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+}
+
+// ---- COURSES DATA ----
+const defaultCourses = [
+  { id:1, title:'المراجعة النهائية الصف الأول الثانوي', desc:'المراجعة النهائية لطلاب أولى تانوي 💚 هنا هيتنزلك كل الملفات والفيديوهات وكل حاجة خاصة بمراجعة ليالي الامتحان بشكل سهل ومنظم 😊', grade:'1', type:'free', emoji:'📖', bg:'linear-gradient(135deg,#0d3b6e,#1565c0,#1976d2)', created:'٩ مايو ٢٠٢٦', updated:'١٦ مايو ٢٠٢٦' },
+  { id:2, title:'المراجعة النهائية الصف الثاني الثانوي', desc:'مراجعة ليالي الامتحان لطلاب تانية تانوي ❤️ هنا هيتنزلك كل الملفات والفيديوهات عشان تراجع وتلقّ المنهج بشكل سهل ومنظم', grade:'2', type:'free', emoji:'🌿', bg:'linear-gradient(135deg,#1b4332,#2d6a4f,#40916c)', created:'٩ مايو ٢٠٢٦', updated:'١٦ مايو ٢٠٢٦' },
+  { id:3, title:'كورس مراجعة التربية الدينية', desc:'هنا هيتنزلك كل ملفات مراجعة التربية الدينية بشكل منظم وسهل للطلاب 🤍', grade:'3', type:'free', emoji:'🔥', bg:'linear-gradient(135deg,#4a0404,#8b0000,#c62828)', created:'٨ مايو ٢٠٢٦', updated:'٩ مايو ٢٠٢٦' },
+];
+
+function getGradeLabel(g) {
+  return {1:'اللغة العربية - الأستاذ الأمين - الصف الأول الثانوي', 2:'اللغة العربية - الأستاذ الأمين - الصف الثاني الثانوي', 3:'اللغة العربية - الأستاذ الأمين - الصف الثالث الثانوي', all:'جميع الصفوف'}[g] || '';
+}
+
+function getCurrentUser() {
+  return JSON.parse(localStorage.getItem('alamin_current') || 'null');
+}
+
+function renderStudentPanel() {
+  const user = getCurrentUser();
+  const panel = document.getElementById('studentPanel');
+  if (!user) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+  const nav = document.getElementById('navRight');
+  if (nav) {
+    nav.innerHTML = `
+      <button class="theme-btn" onclick="toggleTheme()" title="تغيير الثيم">🌙</button>
+      <a href="profile.html" class="btn-login">${user.name || user.firstName || 'حسابي'}</a>
+      <button class="btn-register" onclick="logout()">🚪 خروج</button>
+    `;
+  }
+
+  const courses = JSON.parse(localStorage.getItem('alamin_courses')||'[]');
+  const enrolledIds = Array.isArray(user.enrolledCourses) ? user.enrolledCourses : [];
+  const myCourses = courses.filter(c => enrolledIds.includes(c.id));
+  const lessonCount = myCourses.reduce((sum,c)=> sum + (c.lessons?c.lessons.length:0),0);
+
+  const overview = document.getElementById('studentOverview');
+  overview.innerHTML = `
+    <div class="student-card">
+      <div class="num">${user.name || user.firstName || 'طالب'}</div>
+      <div class="lbl">مرحبا بك في صفحتك الشخصية</div>
+      <div class="sub">هنا تشوف الكورسات اللي اشتركت فيها وتدخل المحتوى الخاص بيك مباشرة.</div>
+    </div>
+    <div class="student-card">
+      <div class="num">${myCourses.length}</div>
+      <div class="lbl">كورسات مشتركة</div>
+      <div class="sub">عدد الكورسات اللي أنت مشترك فيها حالياً.</div>
+    </div>
+    <div class="student-card">
+      <div class="num">${lessonCount}</div>
+      <div class="lbl">درس متاح</div>
+      <div class="sub">عدد الدروس الموجودة داخل الكورسات اللي انت مسجل فيها.</div>
+    </div>
+  `;
+
+  const myGrid = document.getElementById('myCoursesGrid');
+  if (!myCourses.length) {
+    myGrid.innerHTML = '<div style="grid-column:1/-1;color:var(--text2);padding:30px;text-align:center;border:1px dashed var(--border);border-radius:22px;background:rgba(0,180,216,0.06)">مش مشترك في أي كورس حتى الآن. اختار كورس من الأسفل وابدأ المشاهدة.</div>';
+  } else {
+    myGrid.innerHTML = myCourses.map(c => `
+      <div class="course-card fade-up">
+        <div class="teacher-chip">${c.type==='free'?'مجاني':'مدفوع'}</div>
+        <div class="course-thumb" style="background:${c.bg || c.color || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
+          ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:60px;z-index:2">${c.emoji||'📚'}</span>`}
+        </div>
+        <div class="course-body">
+          <div class="course-grade-tag">${getGradeLabel(c.grade)}</div>
+          <div class="course-title">${c.title}</div>
+          <div class="course-desc">${c.desc || 'ادخل الكورس عشان تشوف الدروس والملفات.'}</div>
+          <div class="course-actions">
+            <button class="btn-enter" onclick="window.location.href='lessons.html?course=${c.id}'">عرض المحتوى</button>
+          </div>
+          <div class="course-meta">
+            <span>عدد الدروس: ${c.lessons?c.lessons.length:0}</span>
+            <span>${c.type==='free' ? '🆓 مجاني' : `💰 ${c.price || 'غير محدد'} ج.م`}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderCourses() {
+  const stored = localStorage.getItem('alamin_courses');
+  const courses = stored ? JSON.parse(stored) : defaultCourses;
+  if (!stored) localStorage.setItem('alamin_courses', JSON.stringify(defaultCourses));
+
+  const user = getCurrentUser();
+  const enrolledIds = user && Array.isArray(user.enrolledCourses) ? user.enrolledCourses : [];
+  const grid = document.getElementById('coursesGrid');
+  if (!courses.length) {
+    grid.innerHTML = '<div style="text-align:center;color:var(--text2);padding:60px;grid-column:1/-1">لا توجد كورسات حالياً</div>';
+    return;
+  }
+  grid.innerHTML = courses.map(c => {
+    const isEnrolled = enrolledIds.includes(c.id);
+    const actionLabel = isEnrolled ? 'عرض المحتوى' : 'الدخول للكورس';
+    const actionHandler = isEnrolled ? `window.location.href='lessons.html?course=${c.id}'` : `enrollCourse(${c.id})`;
+    return `
+    <div class="course-card fade-up">
+      <div class="teacher-chip">الأستاذ الأمين</div>
+      <div class="course-thumb" style="background:${c.bg || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
+        ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:80px;z-index:2">${c.emoji || '📚'}</span>`}
+        <div class="course-badge-pin">كورس مثبّت</div>
+        ${c.type === 'free' ? '<div class="free-pin">🆓 مجاني</div>' : ''}
+      </div>
+      <div class="course-body">
+        <div class="course-grade-tag">${getGradeLabel(c.grade)}</div>
+        <div class="course-title">${c.title}</div>
+        <div class="course-desc">${c.desc}</div>
+        <div class="course-actions">
+          <button class="btn-enter" onclick="${actionHandler}">${actionLabel}</button>
+        </div>
+        <div class="course-meta">
+          <span>📅 آخر تحديث: ${c.updated || c.created}</span>
+          <span>${c.type==='free'?'🆓 مجاني':'💰 سعر الكورس: '+(c.price || 'غير محدد')+' ج.م'}</span>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+  observeFadeUp();
+}
+
+function enrollCourse(id) {
+  const user = JSON.parse(localStorage.getItem('alamin_current') || 'null');
+  if (!user) {
+    if (confirm('لازم تسجّل دخولك الأول! هتروح لصفحة التسجيل؟')) window.location.href = 'register.html';
+    return;
+  }
+  const stored = JSON.parse(localStorage.getItem('alamin_courses')||'[]');
+  const course = stored.find(c=>c.id===id);
+  if(!course) return;
+
+  window.location.href = 'lessons.html?course=' + id;
+}
+
+function logout() {
+  localStorage.removeItem('alamin_current');
+  window.location.reload();
+}
+
+function closeVfModal() {
+  document.getElementById('vfModal').style.display = 'none';
+}
+
+function submitVfPayment() {
+  const phone = document.getElementById('vfPhone').value.trim();
+  const amount = document.getElementById('vfAmount').value.trim();
+  const cId = parseInt(document.getElementById('vfCourseId').value);
+  if(!phone || !amount) {
+    alert('برجاء إدخال رقم المحفظة والمبلغ!');
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem('alamin_current'));
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  pending.push({
+    transactionId: Date.now(),
+    studentId: user.id,
+    courseId: cId,
+    senderPhone: phone,
+    amount: amount,
+    timestamp: new Date().toLocaleString('ar-EG'),
+    status: 'pending'
+  });
+  localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+  closeVfModal();
+  alert('تم تسجيل طلبك! سيتم مراجعة التحويل وتفعيل الكورس قريباً. ⏳');
+}
+
+// ---- SCROLL ANIMATIONS ----
+function observeFadeUp() {
+  const els = document.querySelectorAll('.fade-up');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ---- SCROLL TOP ----
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  if (window.scrollY > 400) btn.classList.add('show');
+  else btn.classList.remove('show');
+});
+
+// ---- INIT ----
+renderStudentPanel();
+renderCourses();
+observeFadeUp();
+
+// Trigger hero animation immediately
+setTimeout(() => document.querySelector('.hero-text').classList.add('visible'), 100);
+</script>
 </body>
-
-</body>
-
 </html>

@@ -55,6 +55,10 @@
 
   @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="assets/backend-sync.js"></script>
 </head>
 <body>
 <nav>
@@ -115,12 +119,22 @@
     </div>
 
     <div class="form-group">
+      <label>نوع الطالب</label>
+      <div class="input-wrap">
+        <span class="input-icon">🏫</span>
+        <select id="studentType">
+          <option value="center">طالب سنتر</option>
+          <option value="outside">خارج السنتر</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
       <label>كلمة المرور</label>
       <div class="input-wrap">
         <span class="input-icon">🔒</span>
-        <input type="password" id="password" placeholder="كلمة مرور قوية" oninput="checkStrength(this.value)">
+        <input type="password" id="password" placeholder="8 حروف أو أرقام على الأقل">
       </div>
-      <div class="pass-strength"><div class="pass-strength-bar" id="strengthBar"></div></div>
     </div>
 
     <div class="form-group">
@@ -147,45 +161,65 @@
   function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');localStorage.setItem('theme',h.getAttribute('data-theme'));}
   const saved=localStorage.getItem('theme');if(saved)document.documentElement.setAttribute('data-theme',saved);
 
-  function checkStrength(v){
-    const bar=document.getElementById('strengthBar');
-    let score=0;
-    if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
-    const colors=['#e74c3c','#e67e22','#f1c40f','#2ecc71'];
-    bar.style.width=(score*25)+'%';bar.style.background=colors[score-1]||'#eee';
-  }
+  // Password strength check removed per request
 
   function showAlert(msg,type){const a=document.getElementById('alert');a.textContent=msg;a.className='alert '+type;a.style.display='block';setTimeout(()=>a.style.display='none',4000);}
 
-  function doRegister(){
+  async function doRegister(){
     const fn=document.getElementById('firstName').value.trim();
     const ln=document.getElementById('lastName').value.trim();
     const ph=document.getElementById('phone').value.trim();
     const gr=document.getElementById('grade').value;
+    const studentType=document.getElementById('studentType').value;
     const pw=document.getElementById('password').value;
     const cp=document.getElementById('confirmPass').value;
     const tc=document.getElementById('terms').checked;
 
-    if(!fn||!ln||!ph||!gr||!pw||!cp){showAlert('من فضلك اكمل كل البيانات!','error');return;}
+    if(!fn||!ln||!ph||!gr||!pw||!cp||!studentType){showAlert('من فضلك اكمل كل البيانات!','error');return;}
     if(pw!==cp){showAlert('كلمتا المرور مش متطابقتين!','error');return;}
-    if(pw.length<6){showAlert('كلمة المرور لازم تكون 6 أحرف على الأقل!','error');return;}
+    if(pw.length<8){showAlert('كلمة المرور لازم تكون 8 أحرف أو أرقام على الأقل!','error');return;}
     if(!tc){showAlert('لازم توافق على الشروط والأحكام!','error');return;}
 
-    const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
-    if(users.find(u=>u.phone===ph)){showAlert('رقم الموبايل ده مسجّل بالفعل!','error');return;}
+    try {
+      // Check if phone already exists in Firebase
+      const snapshot = await db.collection('students').where('phone', '==', ph).get();
+      if(!snapshot.empty){showAlert('رقم الموبايل ده مسجّل بالفعل!','error');return;}
+      
+      const btn = document.querySelector('.btn-submit');
+      btn.disabled = true;
+      btn.textContent = 'جاري الإنشاء...';
 
-    const newUser={
-      id:Date.now(),firstName:fn,lastName:ln,name:fn+' '+ln,
-      phone:ph,grade:gr,password:pw,
-      joinDate:new Date().toLocaleDateString('ar-EG'),
-      lastLogin:new Date().toLocaleDateString('ar-EG'),
-      enrolledCourses:[],status:'active',role:'student'
-    };
-    users.push(newUser);
-    localStorage.setItem('alamin_users',JSON.stringify(users));
-    localStorage.setItem('alamin_current',JSON.stringify(newUser));
-    showAlert('تم إنشاء الحساب بنجاح! يللا نتعلم 🎉','success');
-    setTimeout(()=>window.location='dashboard.html',1500);
+      const baseTime = Date.now().toString().slice(-8);
+      const randNum = Math.floor(Math.random() * 900 + 100).toString();
+      const uniqueCode = '2' + baseTime + randNum;
+
+      const newUser={
+        firstName:fn,lastName:ln,name:fn+' '+ln,
+        phone:ph,grade:gr,studentType:studentType,password:pw,
+        joinDate:new Date().toLocaleDateString('ar-EG'),
+        lastLogin:new Date().toLocaleDateString('ar-EG'),
+        enrolledCourses:[],status:'active',role:'student',
+        qrCode: uniqueCode
+      };
+
+      // Save to Firebase
+      const docRef = await db.collection('students').add(newUser);
+      newUser.id = docRef.id;
+
+      // Also save locally for fallback
+      const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
+      users.push(newUser);
+      localStorage.setItem('alamin_users',JSON.stringify(users));
+      localStorage.setItem('alamin_current',JSON.stringify(newUser));
+      
+      showAlert('تم إنشاء الحساب بنجاح! يللا نتعلم 🎉','success');
+      setTimeout(()=>window.location='dashboard.html',1500);
+    } catch (err) {
+      console.error(err);
+      showAlert('❌ حدث خطأ أثناء الاتصال بقاعدة البيانات','error');
+      document.querySelector('.btn-submit').disabled = false;
+      document.querySelector('.btn-submit').textContent = 'إنشاء الحساب 🚀';
+    }
   }
 </script>
 </body>

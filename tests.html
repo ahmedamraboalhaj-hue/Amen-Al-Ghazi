@@ -71,6 +71,7 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 @media(max-width:768px){ .tests-grid{ grid-template-columns:1fr; } .quiz-content{ padding:24px; } }
 </style>
+<script src="assets/backend-sync.js"></script>
 </head>
 <body>
 
@@ -154,6 +155,67 @@ const tests=[
   {id:7,title:'اختبار الكتابة',course:'اللغة العربية',questions:3,time:20,status:'notstart',score:0},
   {id:8,title:'اختبار نهائي',course:'اللغة العربية',questions:15,time:30,status:'notstart',score:0},
 ];
+const storedQuizzes = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
+storedQuizzes.forEach(q=>{
+  if(!tests.some(t=>String(t.id)===String(q.id))){
+    tests.push({
+      id:q.id,
+      title:q.title,
+      course:q.course || 'اختبار من لوحة التحكم',
+      questions:parseInt(q.questionsCount,10) || 5,
+      time:parseInt(q.time,10) || 30,
+      status:'notstart',
+      score:0
+    });
+  }
+});
+let currentQuizId = null;
+
+function getCurrentUser(){
+  return JSON.parse(localStorage.getItem('alamin_current') || 'null');
+}
+
+function getQuizAttempts(){
+  return JSON.parse(localStorage.getItem('alamin_quiz_attempts') || '{}');
+}
+
+function saveQuizAttempts(attempts){
+  localStorage.setItem('alamin_quiz_attempts', JSON.stringify(attempts));
+}
+
+function getQuizAttemptKey(quizId){
+  const user = getCurrentUser();
+  const userId = user ? (user.id || user.phone || user.email || user.name) : 'guest';
+  return `${userId}_${quizId}`;
+}
+
+function getQuizAttempt(quizId){
+  return getQuizAttempts()[getQuizAttemptKey(quizId)] || null;
+}
+
+function markQuizStarted(quizId){
+  const attempts = getQuizAttempts();
+  const key = getQuizAttemptKey(quizId);
+  if(!attempts[key]){
+    attempts[key] = {
+      quizId,
+      status:'started',
+      startedAt:new Date().toLocaleString('ar-EG')
+    };
+    saveQuizAttempts(attempts);
+  }
+}
+
+function markQuizSubmitted(quizId){
+  const attempts = getQuizAttempts();
+  const key = getQuizAttemptKey(quizId);
+  attempts[key] = {
+    ...(attempts[key] || {quizId}),
+    status:'submitted',
+    submittedAt:new Date().toLocaleString('ar-EG')
+  };
+  saveQuizAttempts(attempts);
+}
 
 const questions=[
   {q:'ما هي أساسيات اللغة العربية؟',opts:['القواعد والمفردات','التاريخ فقط','الثقافة فقط','لا شيء']},
@@ -166,35 +228,53 @@ const questions=[
 function renderTests(){
   const container=document.getElementById('testsContainer');
   container.innerHTML=tests.map(t=>{
-    const progress=t.status==='done'?100:t.status==='pending'?50:0;
+    const attempt = getQuizAttempt(t.id);
+    const locked = !!attempt;
+    const status = locked ? attempt.status : t.status;
+    const progress=locked?100:t.status==='done'?100:t.status==='pending'?50:0;
     return `
     <div class="test-card">
       <div class="test-header">
         <div class="test-icon">📋</div>
-        <span class="test-status ${t.status==='done'?'status-done':t.status==='pending'?'status-pending':'status-notstart'}">
-          ${t.status==='done'?'مكتمل':t.status==='pending'?'قيد الإجراء':'لم يبدأ'}
+        <span class="test-status ${locked || t.status==='done'?'status-done':t.status==='pending'?'status-pending':'status-notstart'}">
+          ${locked ? 'تم الدخول' : t.status==='done'?'مكتمل':t.status==='pending'?'قيد الإجراء':'لم يبدأ'}
         </span>
       </div>
       <div class="test-title">${t.title}</div>
       <div class="test-meta">
+        <span>ID: #${t.id}</span>
         <span>📚 ${t.course}</span>
         <span>❓ ${t.questions} أسئلة</span>
         <span>⏱️ ${t.time} دقيقة</span>
       </div>
-      ${t.status==='done'?`<p style="font-size:14px; color:var(--text2); margin-bottom:12px;">النتيجة: <strong style="color:var(--primary)">${t.score}%</strong></p>`:''}
+      ${locked?`<p style="font-size:14px; color:var(--text2); margin-bottom:12px;">هذا الاختبار اتفتح على حسابك قبل كده ومتاح مرة واحدة فقط.</p>`:t.status==='done'?`<p style="font-size:14px; color:var(--text2); margin-bottom:12px;">النتيجة: <strong style="color:var(--primary)">${t.score}%</strong></p>`:''}
       <div class="test-progress">
         <div class="progress-fill" style="width:${progress}%"></div>
       </div>
       <div class="test-actions">
-        <button class="btn btn-start" onclick="startQuiz(${t.id})">${t.status==='done'?'إعادة الاختبار':'ابدأ الآن'}</button>
-        ${t.status==='done'?`<button class="btn btn-review" onclick="alert('عرض التفاصيل')">التفاصيل</button>`:''}
+        <button class="btn btn-start" onclick="startQuiz(${t.id})" ${locked?'disabled style="opacity:.55;cursor:not-allowed"':''}>${locked?'تم استخدام المحاولة':t.status==='done'?'إعادة الاختبار':'ابدأ الآن'}</button>
+        ${locked?`<button class="btn btn-review" onclick="alert('بدأت هذا الاختبار بالفعل، ولا يمكن فتحه مرة أخرى.')">التفاصيل</button>`:t.status==='done'?`<button class="btn btn-review" onclick="alert('عرض التفاصيل')">التفاصيل</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
 function startQuiz(id){
-  const test=tests.find(t=>t.id===id);
+  const test=tests.find(t=>String(t.id)===String(id));
+  if(!test){ alert('الاختبار غير موجود'); return; }
+  const user = getCurrentUser();
+  if(!user){
+    alert('لازم تسجل دخولك الأول عشان الاختبار يتسجل على حسابك.');
+    window.location.href = 'login.html';
+    return;
+  }
+  if(getQuizAttempt(test.id)){
+    alert('أنت دخلت الاختبار ده قبل كده، والاختبار متاح مرة واحدة فقط لكل حساب.');
+    renderTests();
+    return;
+  }
+  currentQuizId = test.id;
+  markQuizStarted(test.id);
   document.getElementById('quizTitle').textContent=test.title;
   
   let html='';
@@ -230,6 +310,7 @@ function selectOption(el){
 }
 
 function submitQuiz(){
+  if(currentQuizId) markQuizSubmitted(currentQuizId);
   alert('تم إرسال إجاباتك! سيتم تصحيح الاختبار قريباً ✅');
   document.getElementById('quizModal').classList.remove('open');
   renderTests();
@@ -240,6 +321,11 @@ function closeQuiz(){
 }
 
 renderTests();
+const quizFromUrl = new URLSearchParams(window.location.search).get('quiz') || localStorage.getItem('alamin_selected_quiz');
+if(quizFromUrl && tests.some(t=>String(t.id)===String(quizFromUrl))){
+  setTimeout(()=>startQuiz(quizFromUrl), 150);
+  localStorage.removeItem('alamin_selected_quiz');
+}
 </script>
 </body>
 </html>
