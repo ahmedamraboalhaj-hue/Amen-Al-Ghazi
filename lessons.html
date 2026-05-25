@@ -231,7 +231,9 @@ const paymentReceiverNumber = '010XXXXXXXX';
 
 function hasCourseAccess(courseId){
   const user = getCurrentUser();
-  return user && Array.isArray(user.enrolledCourses) && user.enrolledCourses.some(id => String(id) === String(courseId));
+  if(!user) return false;
+  if(user.role === 'admin') return true;
+  return Array.isArray(user.enrolledCourses) && user.enrolledCourses.some(id => String(id) === String(courseId));
 }
 
 function grantCourseAccessToCurrentUser(courseId){
@@ -358,12 +360,8 @@ async function renderCoursePage(){
       if(doc.exists){
         const data = doc.data();
         if(Array.isArray(data.items) && data.items.length){
-          // دمج البيانات: احتفظ بالبيانات المحلية الأحدث
-          const fbCourses = data.items;
-          courses = courses.map(local => {
-            const fb = fbCourses.find(f => f.id === local.id);
-            return fb ? { ...fb, ...local } : local; // المحلي يفوق Firebase
-          });
+          // الاعتماد على Firebase كمصدر أساسي
+          courses = data.items;
           localStorage.setItem('alamin_courses', JSON.stringify(courses));
         }
       }
@@ -578,11 +576,11 @@ function selectLesson(courseId, lessonId){
       <div style="background:#fff4e5;border:1px solid #ffce9d;padding:18px;border-radius:16px;">
         <div style="font-size:16px;font-weight:800;margin-bottom:10px;color:#c46200">🔒 هذا الكورس مقفول حتى يتم التفعيل</div>
         ${course.type==='paid' ? `<div style="font-size:15px;font-weight:700;margin-bottom:10px;color:#2f3b52">💰 سعر الكورس: ${course.price || 'غير محدد'} ج.م</div>` : ''}
-        <div style="color:#5f4b32;margin-bottom:14px">${course.type==='paid' ? 'يمكنك تحويل المبلغ ثم طلب تفعيل من الإدارة، أو استخدام كود التفعيل إذا كان لديك.' : 'لديك خياران: إما أن تمنحك الإدارة تفعيل الوصول، أو تدخل كود التفعيل الصحيح هنا.'}</div>
+        <div style="color:#5f4b32;margin-bottom:14px">${course.type==='paid' ? 'يمكنك تحويل المبلغ ثم طلب تفعيل من الإدارة، أو استخدام كود التفعيل إذا كان لديك.' : 'هذا الكورس مجاني، يمكنك الاشتراك فيه فوراً مجاناً.'}</div>
 
         <!-- Show subscribe button first -->
         <div style="margin-bottom:12px;">
-          <button id="subscribeBtn" style="padding:12px 18px;background:#0077b6;color:white;border:none;border-radius:12px;font-weight:900;cursor:pointer">اشترك الآن</button>
+          <button id="subscribeBtn" style="padding:12px 18px;background:#0077b6;color:white;border:none;border-radius:12px;font-weight:900;cursor:pointer">${course.type==='paid' ? 'اشترك الآن' : 'اشترك مجاناً'}</button>
         </div>
 
         <!-- Hidden options (voucher + payment) -->
@@ -612,9 +610,27 @@ function selectLesson(courseId, lessonId){
       const submitBtn = document.getElementById('submitPaymentBtn');
       if(subBtn && opts){
         subBtn.addEventListener('click', ()=>{
-          opts.style.display = 'block';
-          subBtn.style.display = 'none';
-          opts.scrollIntoView({behavior:'smooth', block:'center'});
+          if(course.type === 'free'){
+            // Enroll directly
+            const user = getCurrentUser();
+            if(!user.enrolledCourses) user.enrolledCourses = [];
+            user.enrolledCourses.push(course.id);
+            localStorage.setItem('alamin_current', JSON.stringify(user));
+            // update in users array
+            const users = JSON.parse(localStorage.getItem('alamin_users')||'[]');
+            const idx = users.findIndex(u=>String(u.id)===String(user.id));
+            if(idx > -1){ users[idx].enrolledCourses = user.enrolledCourses; localStorage.setItem('alamin_users', JSON.stringify(users)); }
+            // firebase sync
+            if(window.db){
+               window.db.collection('students').doc(String(user.id)).set({ enrolledCourses: user.enrolledCourses }, { merge: true }).catch(console.warn);
+            }
+            alert('تم الاشتراك في الكورس المجاني بنجاح! ✅');
+            location.reload();
+          } else {
+            opts.style.display = 'block';
+            subBtn.style.display = 'none';
+            opts.scrollIntoView({behavior:'smooth', block:'center'});
+          }
         });
       }
       if(checkBtn){
@@ -742,28 +758,6 @@ function renderVideo(url, segment){
       allowfullscreen
       referrerpolicy="origin"
       loading="lazy"></iframe>`;
-
-  // 2) YouTube
-  } else if(v.includes('youtube') || v.includes('youtu.be')){
-    let id = '';
-    if(v.includes('watch')){
-      const m = v.match(/[?&]v=([^&]+)/);
-      id = m ? m[1] : '';
-    } else {
-      const m = v.match(/youtu\.be\/([^?&]+)/);
-      id = m ? m[1] : v;
-    }
-    vpElement.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="border-radius:12px"></iframe>`;
-
-  // 3) Direct video file
-  } else if(v){
-    vpElement.innerHTML = `<video width="100%" height="100%" controls src="${v}" style="border-radius:12px">متصفحك لا يدعم عرض الفيديو</video>`;
-
-  // 4) No video
-  } else {
-    vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">⏳ الفيديو جاري الترميز، سيظهر قريباً</div>';
-  }
-}
 
   // 2) YouTube
   } else if(v.includes('youtube') || v.includes('youtu.be')){

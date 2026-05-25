@@ -990,8 +990,25 @@ function enrollCourse(id) {
     return;
   }
   const stored = JSON.parse(localStorage.getItem('alamin_courses')||'[]');
-  const course = stored.find(c=>c.id===id);
+  const course = stored.find(c=>String(c.id)===String(id));
   if(!course) return;
+
+  if (course.type === 'free') {
+    if (!user.enrolledCourses) user.enrolledCourses = [];
+    if (!user.enrolledCourses.includes(id) && !user.enrolledCourses.includes(String(id))) {
+      user.enrolledCourses.push(id);
+      localStorage.setItem('alamin_current', JSON.stringify(user));
+      const users = JSON.parse(localStorage.getItem('alamin_users')||'[]');
+      const idx = users.findIndex(u => String(u.id) === String(user.id));
+      if (idx > -1) {
+        users[idx].enrolledCourses = user.enrolledCourses;
+        localStorage.setItem('alamin_users', JSON.stringify(users));
+      }
+      if (window.db) {
+         window.db.collection('students').doc(String(user.id)).set({ enrolledCourses: user.enrolledCourses }, { merge: true }).catch(console.warn);
+      }
+    }
+  }
 
   window.location.href = 'lessons.html?course=' + id;
 }
