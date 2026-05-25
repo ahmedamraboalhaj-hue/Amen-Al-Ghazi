@@ -686,8 +686,25 @@ function renderLessonSegments(courseId, lesson, segments){
   const box = document.getElementById('segmentsBox');
   const list = document.getElementById('segmentsList');
   if(!box || !list) return;
-  box.style.display = 'none';
-  list.innerHTML = '';
+  
+  // ✅ اصلاح: عرض المقاطع إذا كانت موجودة
+  if(segments && segments.length > 0){
+    box.style.display = 'block';
+    list.innerHTML = segments.map((segment, index) => {
+      const safeId = String(segment.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `
+        <div class="segment-item" data-lesson="${lesson.id}" data-segment="${escapeHTML(segment.id)}" 
+             onclick="selectLessonSegment(${lesson.id}, '${safeId}')">
+          <span class="segment-dot"></span>
+          <span class="segment-title">${escapeHTML(segment.title || `المقطع ${index + 1}`)}</span>
+          <span class="segment-duration">${escapeHTML(segment.duration || '')}</span>
+        </div>
+      `;
+    }).join('');
+  } else {
+    box.style.display = 'none';
+    list.innerHTML = '';
+  }
 }
 
 function selectLessonSegment(lessonId, segmentId){
