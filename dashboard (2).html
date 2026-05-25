@@ -225,6 +225,32 @@ tr:hover td{background:rgba(0,180,216,.03);}
   #printArea div[style] { background:transparent !important; }
   #printPreviewInfo { display:block !important; color:#000 !important; font-size:12px !important; margin-bottom:12px !important; }
 }
+
+/* AI Helper Page Styles */
+.ai-tab {
+  padding: 11px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text2);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all .2s;
+}
+.ai-tab.active {
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+  font-weight: 800;
+}
+.ai-pane {
+  animation: fadeInAi 0.4s ease-in-out;
+}
+@keyframes fadeInAi {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -297,6 +323,9 @@ tr:hover td{background:rgba(0,180,216,.03);}
   </a>
   <a class="nav-item" onclick="window.location='explore.html'" style="cursor:pointer">
     <span class="icon">🔍</span> استكشاف الدورات
+  </a>
+  <a class="nav-item admin-only" onclick="showPage('ai-helper')">
+    <span class="icon">🤖</span> الأمين AI (المساعد الذكي)
   </a>
   <a class="nav-item" onclick="showPage('settings')">
     <span class="icon">⚙️</span> الإعدادات
@@ -522,6 +551,125 @@ tr:hover td{background:rgba(0,180,216,.03);}
           <h3>الرسائل والإشعارات 💬</h3>
         </div>
         <div id="messagesContent" style="padding:24px;color:#444;min-height:220px;"></div>
+      </div>
+    </div>
+
+    <!-- AI HELPER PAGE -->
+    <div class="page" id="page-ai-helper">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:900">مساعد الذكاء الاصطناعي الأمين AI 🤖</h2>
+      </div>
+      
+      <div style="display:grid;grid-template-columns: 2fr 1fr;gap:24px;">
+        <!-- Left: Workspace -->
+        <div class="table-card" style="padding:28px">
+          <!-- Workspace Tabs -->
+          <div style="display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0">
+            <button class="ai-tab active" onclick="switchAiTab('quiz')" id="ai-tab-quiz" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid var(--primary);color:var(--primary);font-weight:800;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">📝 توليد اختبار ذكي</button>
+            <button class="ai-tab" onclick="switchAiTab('summary')" id="ai-tab-summary" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-weight:700;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">🎬 تلخيص وشرح فيديو</button>
+            <button class="ai-tab" onclick="switchAiTab('settings')" id="ai-tab-settings" style="padding:11px 20px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-weight:700;font-size:15px;cursor:pointer;font-family:'Cairo',sans-serif">⚙️ إعدادات المفتاح</button>
+          </div>
+
+          <!-- GENERATE QUIZ PANE -->
+          <div id="ai-pane-quiz" class="ai-pane">
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:14px;color:var(--primary)">توليد اختبار ذكي بالكامل ونشره فوراً للطلاب 🪄</h4>
+            <div class="modal-form">
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:16px">
+                <div class="form-group">
+                  <label>موضوع أو عنوان الاختبار</label>
+                  <input type="text" id="aiQuizTitle" placeholder="مثال: اختبار البلاغة في الكناية والاستعارة">
+                </div>
+                <div class="form-group">
+                  <label>الصف الدراسي</label>
+                  <select id="aiQuizGrade">
+                    <option value="1">الأول الثانوي</option>
+                    <option value="2">الثاني الثانوي</option>
+                    <option value="3">الثالث الثانوي</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>عدد الأسئلة</label>
+                  <input type="number" id="aiQuizCount" value="5" min="2" max="20">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>نص مصدر الأسئلة (ألصق نص الـ PDF أو اكتب موجه الذكاء الاصطناعي)</label>
+                <textarea id="aiQuizContext" placeholder="ألصق هنا نصوص شرح المنهج، أو فقرة القراءة، أو الأبيات الشعرية التي تريد صياغة الأسئلة عليها..." style="width:100%;height:150px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom:20px">
+                <label style="display:block;margin-bottom:6px">أو ارفع ملف نصي مصدر للأسئلة (.txt)</label>
+                <input type="file" id="aiQuizFile" accept=".txt" onchange="handleAiQuizFileUpload()" style="font-size:13px;padding:8px;">
+              </div>
+
+              <button class="btn-save" id="btnGenQuiz" onclick="generateQuizViaAI()">توليد الاختبار فوراً ونشره للطلاب 🚀</button>
+            </div>
+          </div>
+
+          <!-- GENERATE SUMMARY PANE -->
+          <div id="ai-pane-summary" class="ai-pane" style="display:none">
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:14px;color:var(--primary)">تلخيص وشرح محاضرة أو فيديو المنهج 🎬</h4>
+            <div class="modal-form">
+              <div class="form-group">
+                <label>اسم المحاضرة أو موضوع الشرح</label>
+                <input type="text" id="aiSumTitle" placeholder="مثال: شرح أسلوب الاختصاص بالتفصيل">
+              </div>
+              <div class="form-group">
+                <label>أفكار المحاضرة الرئيسية أو تفريغ من الشرح (Transcript)</label>
+                <textarea id="aiSumContext" placeholder="اكتب بعض الأفكار التي وردت بالفيديو أو ألصق تلخيص المحاضرة ليقوم الذكاء الاصطناعي بصياغتها كشرح جذاب للطلاب..." style="width:100%;height:150px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:vertical;"></textarea>
+              </div>
+              
+              <button class="btn-save" id="btnGenSummary" onclick="generateSummaryViaAI()">توليد الشرح الجذاب وتجهيزه 🪄</button>
+            </div>
+            
+            <!-- Result Summary Display -->
+            <div id="aiSummaryResultBox" style="display:none;margin-top:20px;padding:16px;background:var(--bg);border:1px dashed var(--primary);border-radius:14px">
+              <h5 style="font-weight:800;margin-bottom:10px;color:var(--primary)">الشرح المقترح للمحاضرة:</h5>
+              <div id="aiSummaryText" style="font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap;margin-bottom:16px;background:var(--card-bg);padding:14px;border-radius:10px;border:1px solid var(--border)"></div>
+              <button class="btn-add" onclick="copyAiSummary()">نسخ الشرح المقترح 📋</button>
+            </div>
+          </div>
+
+          <!-- AI SETTINGS PANE -->
+          <div id="ai-pane-settings" class="ai-pane" style="display:none">
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:14px;color:var(--primary)">إعدادات مفتاح API لذكاء اصطناعي Gemini ⚙️</h4>
+            <div class="modal-form" style="max-width:500px">
+              <div class="form-group">
+                <label>مفتاح API Key لـ Gemini</label>
+                <input type="text" id="aiApiKeyField" style="font-family:monospace;letter-spacing:1px;" placeholder="AIzaSy...">
+                <p class="field-hint">مفتاح الـ API تم تعيينه تلقائياً بالمفتاح النشط الذي وفرته. يمكنك تغييره هنا في أي وقت.</p>
+              </div>
+              <button class="btn-save" onclick="saveAiApiKey()">حفظ مفتاح الـ API 💾</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Prompt guide & Quick Tools -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Quick Status Card -->
+          <div class="table-card" style="padding:20px">
+            <h4 style="font-size:15px;font-weight:800;margin-bottom:12px">🤖 حالة المساعد الذكي</h4>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <span style="width:12px;height:12px;border-radius:50%;background:#2ed573;display:inline-block;box-shadow:0 0 8px #2ed573"></span>
+              <span style="font-size:13px;font-weight:700;color:#27ae60">الأمين AI متصل وجاهز للعمل</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">
+              تم ربط لوحة التحكم بمستودع المعرفة للذكاء الاصطناعي Gemini ليوفر لك تجربة صياغة تربوية ممتازة تناسب طلاب الثانوية العامة بمصر.
+            </div>
+          </div>
+
+          <!-- Prompt Guidance Card -->
+          <div class="table-card" style="padding:20px">
+            <h4 style="font-size:15px;font-weight:800;margin-bottom:12px">💡 نصائح لنتائج مبهرة</h4>
+            <ul style="list-style:none;padding:0;font-size:13px;color:var(--text2);display:flex;flex-direction:column;gap:10px">
+              <li>📌 <strong>تحديد الأجزاء</strong>: حدد ما إذا كنت تريد اختباراً يغطي النحو، البلاغة، الأدب، أو النصوص.</li>
+              <li>📄 <strong>نص الـ PDF</strong>: انسخ صفحات الشرح من ملف الـ PDF وألصقها في مربع المصدر للحصول على أسئلة دقيقة من المذكرة تماماً.</li>
+              <li>⏰ <strong>تحديد الزمن</strong>: الاختبارات المتولدة سيتم جدولتها تلقائياً بزمن يناسب عدد الأسئلة (دقيقتين لكل سؤال).</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1123,7 +1271,7 @@ const pageTitles = {
   payments:'المدفوعات 💳', 'student-courses':'كورساتي 🎓',
   lectures:'المحاضرات 🎬', quizzes:'الاختبارات 📝',
   results:'نتائج الاختبارات 📊', views:'مشاهدات الدروس 👁️',
-  vouchers:'أكواد التفعيل 🎟️'
+  vouchers:'أكواد التفعيل 🎟️', 'ai-helper':'الأمين AI (المساعد الذكي) 🤖'
 };
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1147,6 +1295,7 @@ function showPage(id) {
   if(id==='results') renderResultsTable();
   if(id==='views') renderViewsTable();
   if(id==='vouchers') initVouchersPage();
+  if(id==='ai-helper') initAiHelperPage();
 }
 
 // ---- DATA ----
@@ -3209,6 +3358,229 @@ ${phone}`
     localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
     showAlert('تم إرسال طلب الاشتراك! انتظر تأكيد المسؤول أو احصل على كود تفعيل.');
   }
+}
+
+// ---- GEMINI AI HELPER INTEGRATION ----
+
+// Retrieve saved API Key or use default
+function getAiApiKey() {
+  return localStorage.getItem('alamin_gemini_api_key') || 'AIzaSyD4s6Zs40WRYuswMmusprBwC7uduhZTs5U';
+}
+
+function saveAiApiKey() {
+  const val = document.getElementById('aiApiKeyField').value.trim();
+  if(!val) { alert('برجاء إدخال المفتاح أولاً!'); return; }
+  localStorage.setItem('alamin_gemini_api_key', val);
+  alert('تم حفظ مفتاح API بنجاح! 💾');
+}
+
+function initAiHelperPage() {
+  const keyField = document.getElementById('aiApiKeyField');
+  if(keyField) {
+    keyField.value = getAiApiKey();
+  }
+}
+
+function switchAiTab(tab) {
+  document.querySelectorAll('.ai-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ai-pane').forEach(p => p.style.display = 'none');
+  
+  const activeTab = document.getElementById('ai-tab-' + tab);
+  const activePane = document.getElementById('ai-pane-' + tab);
+  
+  if(activeTab) activeTab.classList.add('active');
+  if(activePane) activePane.style.display = 'block';
+}
+
+// Handle file upload text extraction
+function handleAiQuizFileUpload() {
+  const fileInput = document.getElementById('aiQuizFile');
+  const contextArea = document.getElementById('aiQuizContext');
+  if(!fileInput.files || !fileInput.files[0]) return;
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    contextArea.value = e.target.result;
+    alert('تم تحميل وقراءة محتوى الملف بنجاح! 📄');
+  };
+  reader.readAsText(file);
+}
+
+// Generate Quiz using Gemini
+async function generateQuizViaAI() {
+  const title = document.getElementById('aiQuizTitle').value.trim();
+  const grade = document.getElementById('aiQuizGrade').value;
+  const count = parseInt(document.getElementById('aiQuizCount').value, 10) || 5;
+  const context = document.getElementById('aiQuizContext').value.trim();
+  const btn = document.getElementById('btnGenQuiz');
+  
+  if(!title) { alert('برجاء إدخال عنوان للاختبار أولاً!'); return; }
+  if(!context) { alert('برجاء إدخال نص مصدر الأسئلة (أو ألصق نص الـ PDF) ليصيغ منه الذكاء الاصطناعي الأسئلة!'); return; }
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري تفكير وصياغة الأسئلة بالذكاء الاصطناعي...';
+  
+  const apiKey = getAiApiKey();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  
+  const systemPrompt = `أنت خبير تربوي متمكن في تدريس اللغة العربية للمرحلة الثانوية بمصر ومساعد لمنصة "الأمين".
+مهمتك هي إنشاء اختبار اختيار من متعدد (Multiple Choice Quiz) مبني بالكامل على المحتوى المرفق.
+يجب أن ترد بصيغة JSON فقط دون أي نصوص خارجية أو علامات Markdown (لا تستخدم \`\`\`json أو \`\`\`).
+الـ JSON يجب أن يكون كائناً يحتوي على مفتاحين: "title" وهو عنوان الاختبار، و "questions" وهو مصفوفة تحتوي على الأسئلة بعدد ${count} أسئلة بالضبط.
+هيكل مصفوفة الأسئلة يجب أن يكون كالتالي بالضبط:
+{
+  "title": "${title}",
+  "questions": [
+    {
+      "q": "نص السؤال بوضوح ودقة لغوية تامة؟",
+      "opts": ["الاختيار الأول الصحيح دائمًا", "الاختيار الثاني الخاطئ", "الاختيار الثالث الخاطئ", "الاختيار الرابع الخاطئ"]
+    }
+  ]
+}
+ملاحظة هامة جداً: يجب أن يكون الاختيار الأول في مصفوفة "opts" هو الإجابة الصحيحة دائمًا، والـ 3 خيارات الأخرى خاطئة تمامًا ومقنعة لغويًا ومستخرجة من المنهج. سنقوم نحن بخلط الاختيارات برمجياً للطلاب.
+يجب أن تحتوي الأسئلة على عمق لغوي وبلاغي يناسب الثانوية العامة في مصر.`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: systemPrompt },
+              { text: `المحتوى المرفق الذي يجب صياغة الأسئلة منه:\n\n${context}` }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+    
+    if(!response.ok) {
+      throw new Error(`فشل الاتصال بخادم الذكاء الاصطناعي: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const jsonText = data.candidates[0].content.parts[0].text;
+    const generatedQuiz = JSON.parse(jsonText);
+    
+    if(!generatedQuiz.questions || !generatedQuiz.questions.length) {
+      throw new Error('لم يقم الذكاء الاصطناعي بتوليد أي أسئلة بشكل متطابق!');
+    }
+    
+    // Save quiz to localStorage
+    const newQuiz = {
+      id: Date.now(),
+      title: generatedQuiz.title || title,
+      grade: grade,
+      questionsCount: generatedQuiz.questions.length,
+      time: generatedQuiz.questions.length * 2, // 2 minutes per question
+      status: 'نشط',
+      questionsList: generatedQuiz.questions // custom questions list!
+    };
+    
+    quizzesData.push(newQuiz);
+    localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesData));
+    
+    // Also save in Firebase if available
+    if(window.db) {
+      try {
+        await window.db.collection('quizzes').doc(String(newQuiz.id)).set(newQuiz);
+      } catch(e) { console.warn('Could not sync to Firebase:', e); }
+    }
+    
+    alert(`🎉 نجاح باهر! تم توليد اختبار ذكي بالكامل يحتوي على ${newQuiz.questionsCount} أسئلة احترافية، وتم نشره فوراً للطلاب في صفحة الاختبارات.`);
+    
+    // Reset form
+    document.getElementById('aiQuizTitle').value = '';
+    document.getElementById('aiQuizContext').value = '';
+    document.getElementById('aiQuizFile').value = '';
+    
+    // Redirect to Quizzes view
+    showPage('quizzes');
+    renderQuizzesTable();
+    
+  } catch(error) {
+    console.error(error);
+    alert(`❌ حدث خطأ أثناء التوليد: ${error.message}\nبرجاء التأكد من صحة مفتاح الـ API والاتصال بالإنترنت.`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'توليد الاختبار فوراً ونشره للطلاب 🚀';
+  }
+}
+
+// Generate Lecture Summary/Description
+async function generateSummaryViaAI() {
+  const title = document.getElementById('aiSumTitle').value.trim();
+  const context = document.getElementById('aiSumContext').value.trim();
+  const btn = document.getElementById('btnGenSummary');
+  const resultBox = document.getElementById('aiSummaryResultBox');
+  const textDiv = document.getElementById('aiSummaryText');
+  
+  if(!title) { alert('برجاء إدخال اسم المحاضرة أولاً!'); return; }
+  if(!context) { alert('برجاء إدخال أفكار أو محتوى تفريغ المحاضرة لصياغته!'); return; }
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري تفكير وصياغة الشرح والملخص...';
+  resultBox.style.display = 'none';
+  
+  const apiKey = getAiApiKey();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  
+  const systemPrompt = `أنت مساعد تعليمي متميز لمنصة "الأمين" لتعليم اللغة العربية للثانوية العامة بمصر.
+مهمتك هي صياغة شرح وتلخص جذاب، احترافي، وواضح جداً لعنوان الفيديو المرفق وأفكاره.
+يجب أن تركز على النقاط البلاغية أو النحوية بأسلوب مبسط ومحفز للطلاب، مستخدماً علامات التنسيق والرموز التعبيرية المناسبة والتربوية.
+تجنب تكرار الكلام، واجعله يبدو كمرجع سريع للطالب يقرأه قبل مشاهدة المحاضرة أو بعدها ليفهم الفكرة فوراً.`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: systemPrompt },
+              { text: `اسم المحاضرة:\n${title}\n\nالأفكار والمحتوى التوضيحي:\n${context}` }
+            ]
+          }
+        ]
+      })
+    });
+    
+    if(!response.ok) {
+      throw new Error(`فشل الاتصال بخادم الذكاء الاصطناعي: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const generatedText = data.candidates[0].content.parts[0].text;
+    
+    textDiv.textContent = generatedText;
+    resultBox.style.display = 'block';
+    
+  } catch(error) {
+    console.error(error);
+    alert(`❌ حدث خطأ أثناء التلخيص: ${error.message}\nبرجاء التأكد من صحة مفتاح الـ API والاتصال بالإنترنت.`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'توليد الشرح الجذاب وتجهيزه 🪄';
+  }
+}
+
+function copyAiSummary() {
+  const text = document.getElementById('aiSummaryText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('تم نسخ الشرح المقترح إلى الحافظة بنجاح! 📋 يمكنك الآن لصقه في وصف المحاضرة أثناء إنشائها.');
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
 }
 
 // ---- INIT ----
