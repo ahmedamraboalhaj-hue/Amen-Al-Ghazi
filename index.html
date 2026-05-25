@@ -243,78 +243,94 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
   gap:28px;
 }
 .course-card {
-  background:var(--card); border-radius:22px;
-  border:1px solid var(--border); overflow:visible;
-  box-shadow:var(--shadow); transition:all .3s;
-  position:relative; margin-top:18px;
+  background: transparent; border-radius: 22px;
+  overflow: visible; transition: all .3s;
+  position: relative; margin-top: 28px;
+  display: flex; flex-direction: column; align-items: center;
 }
-.course-card:hover { transform:translateY(-8px); box-shadow:var(--shadow-lg); border-color:var(--primary); }
+.course-card:hover { transform: translateY(-8px); }
 
 .teacher-chip {
-  position:absolute; top:-15px; right:50%; transform:translateX(50%);
-  background:var(--card); border:2px solid var(--border);
-  color:var(--text); font-size:13px; font-weight:800;
-  padding:6px 20px; border-radius:50px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.08); white-space:nowrap; z-index:5;
+  position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+  background: #0f172a; border: 1px solid #1e293b;
+  color: #fff; font-size: 14px; font-weight: 800;
+  padding: 8px 24px; border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3); white-space: nowrap; z-index: 5;
 }
 
 .course-thumb {
-  width:100%; height:210px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:72px; position:relative;
-  border-radius:20px 20px 0 0;
-  overflow:hidden;
-}
-.course-thumb::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:60px;
-  background:linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+  width: 100%; height: 260px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px; position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 .course-badge-pin {
-  position:absolute; top:14px; left:14px; z-index:3;
-  background:linear-gradient(135deg,#ff6b9d,#ff4757);
-  color:white; font-size:11px; font-weight:800;
-  padding:5px 14px; border-radius:50px;
-  box-shadow:0 4px 12px rgba(255,75,87,0.4);
+  position: absolute; top: 24px; right: -30px; z-index: 3;
+  background: #ff3366; color: white;
+  font-size: 14px; font-weight: 800;
+  padding: 6px 40px; text-align: center;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 12px rgba(255,51,102,0.4);
 }
 .free-pin {
-  position:absolute; top:14px; right:14px; z-index:3;
-  background:linear-gradient(135deg,#2ed573,#17c45a);
-  color:white; font-size:11px; font-weight:800;
-  padding:5px 14px; border-radius:50px;
-  box-shadow:0 4px 12px rgba(46,213,115,0.4);
+  position: absolute; top: 14px; left: 14px; z-index: 3;
+  background: linear-gradient(135deg,#2ed573,#17c45a);
+  color: white; font-size: 11px; font-weight: 800;
+  padding: 5px 14px; border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(46,213,115,0.4);
 }
 
-.course-body { padding:22px 20px 20px; }
+.course-body {
+  background: #111827; /* Dark background like the reference */
+  border-radius: 16px;
+  padding: 24px 20px 30px;
+  width: 92%; margin-top: -60px;
+  position: relative; z-index: 10;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  text-align: center;
+  border: 1px solid #1f2937;
+}
+
 .course-grade-tag {
-  display:inline-block;
-  background:linear-gradient(135deg,var(--accent),#f7b731);
-  color:white; font-size:12px; font-weight:700;
-  padding:5px 14px; border-radius:8px; margin-bottom:14px;
+  display: block; width: 100%;
+  background: #b49141; /* Gold/yellow color */
+  color: #fff; font-size: 15px; font-weight: 800;
+  padding: 10px 14px; border-radius: 8px; margin-bottom: 20px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-.course-title { font-size:19px; font-weight:900; margin-bottom:10px; line-height:1.4; }
-.course-desc { font-size:14px; color:var(--text2); line-height:1.8; margin-bottom:18px; }
-.course-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+.course-title {
+  font-size: 20px; font-weight: 900; margin-bottom: 14px; line-height: 1.5; color: #fff;
+}
+.course-divider {
+  width: 100%; height: 2px; background: #00b4d8; margin: 16px auto; border-radius: 2px;
+}
+
+.course-desc {
+  font-size: 14px; color: #9ca3af; line-height: 1.8; margin-bottom: 24px;
+}
+
+.course-actions {
+  display: flex; flex-direction: column; gap: 14px; align-items: center;
+}
 .btn-enter {
-  background:transparent; color:var(--primary);
-  border:2px solid var(--primary); border-radius:10px;
-  font-family:'Cairo',sans-serif; font-weight:700; font-size:14px;
-  padding:9px 20px; cursor:pointer; transition:all .2s;
+  background: transparent; color: #00b4d8;
+  border: 2px solid #00b4d8; border-radius: 50px;
+  font-family: 'Cairo',sans-serif; font-weight: 800; font-size: 15px;
+  padding: 10px 32px; cursor: pointer; transition: all .2s; width: max-content;
 }
-.btn-enter:hover { background:var(--primary); color:white; }
+.btn-enter:hover { background: #00b4d8; color: #fff; box-shadow: 0 4px 14px rgba(0,180,216,0.3); }
+
 .btn-free-enroll {
-  background:linear-gradient(135deg,var(--accent2),#ff4757);
-  color:white; border:none; border-radius:10px;
-  font-family:'Cairo',sans-serif; font-weight:800; font-size:14px;
-  padding:9px 20px; cursor:pointer; transition:all .2s;
-  box-shadow:0 4px 14px rgba(255,107,157,0.3);
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: white; border: none; border-radius: 50px;
+  font-family: 'Cairo',sans-serif; font-weight: 800; font-size: 15px;
+  padding: 10px 32px; cursor: pointer; transition: all .2s; width: max-content;
+  box-shadow: 0 6px 16px rgba(236,72,153,0.3);
 }
-.btn-free-enroll:hover { opacity:.88; transform:translateY(-1px); }
-.course-meta {
-  margin-top:14px; padding-top:14px;
-  border-top:1px solid var(--border);
-  display:flex; flex-direction:column; gap:4px;
-}
-.course-meta span { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:6px; }
+.btn-free-enroll:hover { opacity: .9; transform: translateY(-2px); }
 
 /* ===================== FEATURES ===================== */
 .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
@@ -904,20 +920,17 @@ async function renderStudentPanel() {
   } else {
     myGrid.innerHTML = myCourses.map(c => `
       <div class="course-card fade-up">
-        <div class="teacher-chip">${c.type==='free'?'مجاني':'مدفوع'}</div>
+        <div class="teacher-chip">الأستاذ الأمين</div>
         <div class="course-thumb" style="background:${c.bg || c.color || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
           ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:60px;z-index:2">${c.emoji||'📚'}</span>`}
         </div>
         <div class="course-body">
           <div class="course-grade-tag">${getGradeLabel(c.grade)}</div>
           <div class="course-title">${c.title}</div>
+          <div class="course-divider"></div>
           <div class="course-desc">${c.desc || 'ادخل الكورس عشان تشوف الدروس والملفات.'}</div>
           <div class="course-actions">
-            <button class="btn-enter" onclick="window.location.href='lessons.html?course=${c.id}'">عرض المحتوى</button>
-          </div>
-          <div class="course-meta">
-            <span>عدد الدروس: ${c.lessons?c.lessons.length:0}</span>
-            <span>${c.type==='free' ? '🆓 مجاني' : `💰 ${c.price || 'غير محدد'} ج.م`}</span>
+            <button class="btn-enter" onclick="window.location.href='lessons.html?course=${c.id}'">الدخول للكورس</button>
           </div>
         </div>
       </div>
@@ -964,18 +977,15 @@ async function renderCourses() {
       <div class="course-thumb" style="background:${c.bg || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
         ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:80px;z-index:2">${c.emoji || '📚'}</span>`}
         <div class="course-badge-pin">كورس مثبّت</div>
-        ${c.type === 'free' ? '<div class="free-pin">🆓 مجاني</div>' : ''}
       </div>
       <div class="course-body">
         <div class="course-grade-tag">${getGradeLabel(c.grade)}</div>
         <div class="course-title">${c.title}</div>
+        <div class="course-divider"></div>
         <div class="course-desc">${c.desc}</div>
         <div class="course-actions">
           <button class="btn-enter" onclick="${actionHandler}">${actionLabel}</button>
-        </div>
-        <div class="course-meta">
-          <span>📅 آخر تحديث: ${c.updated || c.created}</span>
-          <span>${c.type==='free'?'🆓 مجاني':'💰 سعر الكورس: '+(c.price || 'غير محدد')+' ج.م'}</span>
+          ${c.type === 'free' ? `<button class="btn-free-enroll" onclick="${actionHandler}">كورس مجاني !</button>` : ''}
         </div>
       </div>
     </div>

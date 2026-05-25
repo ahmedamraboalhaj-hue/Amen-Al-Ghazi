@@ -252,7 +252,7 @@ async function doLogin(){
         user.role = 'student';
         localStorage.setItem('alamin_current',JSON.stringify(user));
         showAlert('✅ أهلاً بيك يا '+ (user.name || 'طالب') +'! جاري التوجيه...','success');
-        setTimeout(()=>window.location.href='dashboard.html',1000);
+        setTimeout(()=>window.location.href='index.html',1000);
       } else {
         showAlert('❌ الكود غير صحيح أو غير مسجل!','error');
         setLoading(false);
@@ -286,7 +286,7 @@ async function doLogin(){
         user.role = 'student';
         localStorage.setItem('alamin_current',JSON.stringify(user));
         showAlert('✅ أهلاً بيك يا '+(user.name || user.firstName || 'طالب')+'! جاري التوجيه...','success');
-        setTimeout(()=>window.location.href='dashboard.html',1000);
+        setTimeout(()=>window.location.href='index.html',1000);
       } else {
         // Fallback to local storage users
         const users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
@@ -295,7 +295,7 @@ async function doLogin(){
           user.role='student';
           localStorage.setItem('alamin_current',JSON.stringify(user));
           showAlert('✅ أهلاً بيك يا '+user.firstName+'! جاري التوجيه...','success');
-          setTimeout(()=>window.location.href='dashboard.html',1000);
+          setTimeout(()=>window.location.href='index.html',1000);
         } else {
           showAlert('❌ رقم الموبايل أو كلمة المرور غلط!','error');
           setLoading(false);
