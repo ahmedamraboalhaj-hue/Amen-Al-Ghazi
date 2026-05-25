@@ -1219,9 +1219,13 @@ function addLessonToCourse(courseId, lesson){
     title: segment.title || `المقطع ${index + 1}`,
     videoUrl: segment.videoUrl || '',
     duration: segment.duration || '',
+    bunnyVideoId: segment.bunnyVideoId || '',
+    bunnyLibraryId: segment.bunnyLibraryId || BUNNY_LIBRARY_ID,
+    source: segment.source || '',
     position: index + 1
   })) : [];
   lesson.videoUrl = lesson.videoUrl || (lesson.segments[0] ? lesson.segments[0].videoUrl : '');
+  lesson.bunnyLibraryId = lesson.bunnyLibraryId || BUNNY_LIBRARY_ID;
   cs[idx].lessons.push(lesson);
   saveCourses(cs);
   return lesson;

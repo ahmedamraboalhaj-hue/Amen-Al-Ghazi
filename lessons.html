@@ -393,13 +393,15 @@ async function renderCoursePage(){
   const nav = document.querySelector('.lesson-nav');
   if(nav){
     nav.innerHTML = lessonsList.map((ls,i)=>{
+      // ✅ FIX: تأكد من أن المقاطع موجودة ومُحدثة بشكل صحيح
+      const segments = getLessonSegments(ls);
       const items = getLessonContentItems(ls);
       return `
         <div class="lesson-unit" data-lesson-unit="${ls.id}">
           <div class="lesson-item" data-lesson="${ls.id}" onclick="toggleLesson(${courseId},${ls.id})">
             <span class="lesson-arrow">›</span>
             <span>${i+1}. ${escapeHTML(ls.title)}</span>
-            <span class="lesson-count">0/${items.length}</span>
+            <span class="lesson-count">${segments.length}/${items.length}</span>
           </div>
           <div class="lesson-segments-menu">
             ${items.length ? items.map(item => renderCourseContentItem(ls.id, item)).join('') : '<div class="segment-item" style="cursor:default"><span class="segment-title">لا توجد محتويات داخل هذا الدرس</span></div>'}
