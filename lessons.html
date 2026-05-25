@@ -339,23 +339,38 @@ async function renderCoursePage(){
   const courseId = parseInt(getQueryParam('course'), 10);
   if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
 
-  // جيب الكورسات من Firebase أولاً، وبعدين fallback للـ localStorage
+  // ✅ FIX: جيب من localStorage أولاً (الأساسي)، ثم دمج مع Firebase إذا توفر
   let courses = [];
-  if(window.db){
+  const stored = localStorage.getItem('alamin_courses');
+  if(stored){
+    try{
+      courses = JSON.parse(stored);
+    }catch(e){ 
+      console.warn('Failed to parse local courses:', e); 
+      courses = [];
+    }
+  }
+  
+  // حاول تحديث من Firebase إذا متصل (لكن لا تستبدل البيانات المحلية تماماً)
+  if(window.db && courses.length){
     try{
       const doc = await window.db.collection('platform_data').doc('courses_list').get();
       if(doc.exists){
         const data = doc.data();
         if(Array.isArray(data.items) && data.items.length){
-          courses = data.items;
+          // دمج البيانات: احتفظ بالبيانات المحلية الأحدث
+          const fbCourses = data.items;
+          courses = courses.map(local => {
+            const fb = fbCourses.find(f => f.id === local.id);
+            return fb ? { ...fb, ...local } : local; // المحلي يفوق Firebase
+          });
           localStorage.setItem('alamin_courses', JSON.stringify(courses));
         }
       }
-    }catch(e){ console.warn('Firebase courses load failed in lessons:', e); }
-  }
-  if(!courses.length){
-    const stored = localStorage.getItem('alamin_courses');
-    courses = stored ? JSON.parse(stored) : [];
+    }catch(e){ 
+      console.warn('Firebase sync optional:', e);
+      // استمر مع البيانات المحلية
+    }
   }
 
   const course = courses.find(c=>String(c.id)===String(courseId));

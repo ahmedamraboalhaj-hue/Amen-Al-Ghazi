@@ -1574,14 +1574,48 @@ function saveNewCourse(){
         price,
       };
       saveCourses(courses);
+      
+      // ✅ FIX: تحديث Firebase عند تعديل كورس
+      if(window.db){
+        try {
+          window.db.collection('platform_data').doc('courses_list').set({
+            items: courses,
+            lastUpdated: new Date().toISOString()
+          }, { merge: true }).catch(e => console.warn('Firebase sync optional:', e));
+        } catch(e){ console.warn('Firebase update skipped:', e); }
+      }
+      
       closeModal('addCourseModal');
       renderCoursesAdmin();
       showAlert('تم حفظ تعديل الكورس بنجاح ✅ (يظهر للطلاب فوراً)');
       return;
     }
   }
-  courses.push({id:Date.now(),title,desc,grade,type,price,emoji:emojis[Math.floor(Math.random()*emojis.length)],color:colors[Math.floor(Math.random()*colors.length)],created:new Date().toLocaleDateString('ar-EG'),lessons:[]});
+  const newCourse = {
+    id:Date.now(),
+    title,
+    desc,
+    grade,
+    type,
+    price,
+    emoji:emojis[Math.floor(Math.random()*emojis.length)],
+    color:colors[Math.floor(Math.random()*colors.length)],
+    created:new Date().toLocaleDateString('ar-EG'),
+    lessons:[]
+  };
+  courses.push(newCourse);
   saveCourses(courses);
+  
+  // ✅ FIX: تحديث Firebase عند إضافة كورس جديد
+  if(window.db){
+    try {
+      window.db.collection('platform_data').doc('courses_list').set({
+        items: courses,
+        lastUpdated: new Date().toISOString()
+      }, { merge: true }).catch(e => console.warn('Firebase sync optional:', e));
+    } catch(e){ console.warn('Firebase update skipped:', e); }
+  }
+  
   closeModal('addCourseModal');
   renderCoursesAdmin();
   showAlert('تم إضافة الكورس بنجاح ✅ (يظهر للطلاب فوراً)');
@@ -2067,14 +2101,27 @@ async function saveNewLesson(){
   const added = addLessonToCourse(parseInt(courseId,10), lesson);
   if(!added){ alert('حدث خطأ أثناء حفظ الدرس'); return; }
 
-  // Link video to course in Firebase
-  if(window.db && bunnyVideoId){
+  // ✅ FIX: تحديث Firebase بالكورس الكامل (مع الدرس الجديد)
+  if(window.db){
     try {
-      await window.db.collection('videos').doc(bunnyVideoId).update({
-        courseId: parseInt(courseId,10),
-        lessonTitle: title
-      });
-    } catch(e){ console.warn('Could not link video to course:', e); }
+      const allCourses = getCourses();
+      const updatedCourse = allCourses.find(c => c.id === parseInt(courseId,10));
+      if(updatedCourse){
+        // تحديث سجل الكورس بالكامل (يتضمن جميع الدروس والفيديوهات والامتحانات)
+        await window.db.collection('platform_data').doc('courses_list').set({
+          items: allCourses,
+          lastUpdated: new Date().toISOString()
+        }, { merge: true });
+      }
+      
+      // Link video to course in Firebase
+      if(bunnyVideoId){
+        await window.db.collection('videos').doc(bunnyVideoId).update({
+          courseId: parseInt(courseId,10),
+          lessonTitle: title
+        });
+      }
+    } catch(e){ console.warn('Could not sync to Firebase:', e); }
   }
 
   clearInterval(_bunnyStatusInterval);
