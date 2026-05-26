@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة التحكم - الأمين في اللغة العربية</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{
   --primary:#00b4d8;--primary-dark:#0077b6;--accent:#f5a623;--accent2:#ff6b9d;
@@ -86,6 +87,15 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .badge.grade3{background:#fce8ff;color:#8e44ad;}
 .action-btns{display:flex;gap:6px;}
 .btn-view{background:#e8f4ff;color:var(--primary);border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;font-weight:600;}
+.quiz-preview-list{display:flex;flex-direction:column;gap:16px;max-height:55vh;overflow-y:auto;padding-left:4px;}
+.quiz-preview-q{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+.quiz-preview-q-num{font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px;}
+.quiz-preview-q-text{font-size:15px;font-weight:700;line-height:1.6;margin-bottom:12px;color:var(--text);}
+.quiz-preview-opts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.quiz-preview-opts li{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--card-bg);border:2px solid var(--border);border-radius:10px;font-size:14px;}
+.quiz-preview-opts li.is-correct{border-color:#2ed573;background:#e8fff3;}
+.quiz-preview-opts .opt-letter{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:8px;background:var(--bg);font-weight:800;font-size:12px;color:var(--primary);}
+.quiz-preview-opts .correct-tag{font-size:12px;font-weight:800;color:#1ea760;margin-right:auto;}
 .btn-delete{background:#fff0f3;color:var(--danger);border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;font-weight:600;}
 .avatar-cell{display:flex;align-items:center;gap:10px;}
 .avatar-sm{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0;}
@@ -594,13 +604,15 @@ tr:hover td{background:rgba(0,180,216,.03);}
               </div>
 
               <div class="form-group">
-                <label>نص مصدر الأسئلة (ألصق نص الـ PDF أو اكتب موجه الذكاء الاصطناعي)</label>
-                <textarea id="aiQuizContext" placeholder="ألصق هنا نصوص شرح المنهج، أو فقرة القراءة، أو الأبيات الشعرية التي تريد صياغة الأسئلة عليها..." style="width:100%;height:150px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:vertical;"></textarea>
+                <label>نص مصدر الأسئلة (ألصق النص أو ارفع PDF)</label>
+                <textarea id="aiQuizContext" placeholder="ألصق هنا نصوص شرح المنهج، أو فقرة القراءة، أو الأبيات الشعرية... أو ارفع ملف PDF بالأسفل لاستخراج النص تلقائياً." style="width:100%;height:150px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:vertical;"></textarea>
               </div>
 
               <div class="form-group" style="margin-bottom:20px">
-                <label style="display:block;margin-bottom:6px">أو ارفع ملف نصي مصدر للأسئلة (.txt)</label>
-                <input type="file" id="aiQuizFile" accept=".txt" onchange="handleAiQuizFileUpload()" style="font-size:13px;padding:8px;">
+                <label style="display:block;margin-bottom:6px">أو ارفع ملف PDF / TXT (يُستخرج النص تلقائياً للاختبار)</label>
+                <input type="file" id="aiQuizFile" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleAiQuizFileUpload()" style="font-size:13px;padding:8px;width:100%;">
+                <p id="aiQuizFileStatus" class="field-hint" style="margin-top:8px;min-height:18px;"></p>
+                <p class="field-hint" style="margin-top:4px;">يدعم PDF نصي (Word أو شرح محفوظ كنص). ملفات المسح الضوئي (صور فقط) قد لا يُستخرج منها نص — الصق النص يدوياً في هذه الحالة.</p>
               </div>
 
               <button class="btn-save" id="btnGenQuiz" onclick="generateQuizViaAI()">توليد الاختبار فوراً ونشره للطلاب 🚀</button>
@@ -1195,6 +1207,23 @@ tr:hover td{background:rgba(0,180,216,.03);}
     <div class="modal-actions">
       <button class="btn-save" onclick="saveNewQuiz()">حفظ ونشر الاختبار ✅</button>
       <button class="btn-cancel" onclick="closeModal('addQuizModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW QUIZ MODAL -->
+<div class="modal-overlay" id="viewQuizModal">
+  <div class="modal" style="max-width:760px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;">
+      <div style="flex:1;">
+        <h3 id="viewQuizTitle" style="margin-bottom:10px;">معاينة الاختبار</h3>
+        <div id="viewQuizMeta" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--text2);"></div>
+      </div>
+      <button type="button" class="btn-cancel" onclick="closeViewQuizModal()" style="padding:8px 14px;min-width:auto;">✕</button>
+    </div>
+    <div id="viewQuizQuestions" class="quiz-preview-list"></div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button type="button" class="btn-cancel" onclick="closeViewQuizModal()">إغلاق</button>
     </div>
   </div>
 </div>
@@ -2554,11 +2583,70 @@ function renderQuizzesTable() {
       <td>${q.questionsCount} أسئلة</td>
       <td><span class="badge active">${q.status}</span></td>
       <td>
-        <button class="btn-delete" onclick="deleteQuiz(${q.id})">حذف</button>
+        <div class="action-btns">
+          <button class="btn-view" onclick="viewQuiz('${q.id}')">عرض الاختبار</button>
+          <button class="btn-delete" onclick="deleteQuiz(${q.id})">حذف</button>
+        </div>
       </td>
     </tr>
   `).join('');
 }
+
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function viewQuiz(id) {
+  const quiz = quizzesData.find(q => String(q.id) === String(id));
+  if(!quiz) { alert('الاختبار غير موجود'); return; }
+
+  document.getElementById('viewQuizTitle').textContent = quiz.title || 'اختبار بدون عنوان';
+  document.getElementById('viewQuizMeta').innerHTML = `
+    <span class="badge ${gradeClass(quiz.grade)}">${gradeLabel(quiz.grade)}</span>
+    <span>❓ ${quiz.questionsCount || 0} أسئلة</span>
+    <span>⏱️ ${quiz.time || '—'} دقيقة</span>
+    <span class="badge active">${quiz.status || 'نشط'}</span>
+    <span style="color:var(--text2);">#${quiz.id}</span>
+  `;
+
+  const container = document.getElementById('viewQuizQuestions');
+  const list = Array.isArray(quiz.questionsList) ? quiz.questionsList : [];
+
+  if(!list.length) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding:30px 10px;">
+        <div class="icon">📋</div>
+        <p>لا توجد أسئلة محفوظة لهذا الاختبار.</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:8px;">الاختبارات المُنشأة يدوياً من «إنشاء اختبار» أو القديمة قبل الذكاء الاصطناعي لا تحتوي على قائمة أسئلة — أنشئ اختباراً جديداً عبر الأمين AI لحفظ الأسئلة.</p>
+      </div>`;
+  } else {
+    const optLetters = ['أ', 'ب', 'ج', 'د', 'هـ', 'و'];
+    container.innerHTML = list.map((question, i) => {
+      const opts = Array.isArray(question.opts) ? question.opts : [];
+      return `
+        <div class="quiz-preview-q">
+          <div class="quiz-preview-q-num">السؤال ${i + 1} من ${list.length}</div>
+          <div class="quiz-preview-q-text">${escHtml(question.q || question.text || '—')}</div>
+          <ul class="quiz-preview-opts">
+            ${opts.map((opt, j) => `
+              <li class="${j === 0 ? 'is-correct' : ''}">
+                <span class="opt-letter">${optLetters[j] || (j + 1)}</span>
+                <span>${escHtml(opt)}</span>
+                ${j === 0 ? '<span class="correct-tag">✓ الإجابة الصحيحة</span>' : ''}
+              </li>
+            `).join('')}
+          </ul>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('viewQuizModal').classList.add('open');
+}
+
+function closeViewQuizModal() {
+  document.getElementById('viewQuizModal').classList.remove('open');
+}
+
 function deleteQuiz(id) {
   if(!confirm('هل أنت متأكد من الحذف؟')) return;
   quizzesData = quizzesData.filter(q => q.id !== id);
@@ -3432,18 +3520,102 @@ function switchAiTab(tab) {
   if(activePane) activePane.style.display = 'block';
 }
 
-// Handle file upload text extraction
-function handleAiQuizFileUpload() {
+const AI_QUIZ_TEXT_MAX = 28000;
+
+function setAiQuizFileStatus(msg, isError) {
+  const el = document.getElementById('aiQuizFileStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.style.color = isError ? 'var(--danger)' : 'var(--text2)';
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result || '');
+    reader.onerror = () => reject(new Error('فشل قراءة الملف النصي'));
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+async function extractTextFromPdf(file) {
+  const pdfjs = window.pdfjsLib;
+  if(!pdfjs) throw new Error('مكتبة PDF غير محمّلة. حدّث الصفحة وحاول مرة أخرى.');
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const data = await file.arrayBuffer();
+  const pdf = await pdfjs.getDocument({ data }).promise;
+  const parts = [];
+  for(let p = 1; p <= pdf.numPages; p++) {
+    setAiQuizFileStatus(`جاري قراءة PDF... صفحة ${p} من ${pdf.numPages}`);
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(' ').replace(/\s+/g, ' ').trim();
+    if(pageText) parts.push(pageText);
+  }
+  return { text: parts.join('\n\n'), pages: pdf.numPages };
+}
+
+function trimQuizSourceText(text) {
+  let t = String(text || '').replace(/\r/g, '').trim();
+  if(!t) return '';
+  if(t.length > AI_QUIZ_TEXT_MAX) {
+    t = t.substring(0, AI_QUIZ_TEXT_MAX) + '\n\n[... تم اختصار النص لطول الملف — الأسئلة ستُبنى على الجزء الأول ...]';
+  }
+  return t;
+}
+
+async function handleAiQuizFileUpload() {
   const fileInput = document.getElementById('aiQuizFile');
   const contextArea = document.getElementById('aiQuizContext');
-  if(!fileInput.files || !fileInput.files[0]) return;
+  const btn = document.getElementById('btnGenQuiz');
+  if(!fileInput?.files?.[0]) return;
+
   const file = fileInput.files[0];
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    contextArea.value = e.target.result;
-    alert('تم تحميل وقراءة محتوى الملف بنجاح! 📄');
-  };
-  reader.readAsText(file);
+  const lower = file.name.toLowerCase();
+  const isPdf = lower.endsWith('.pdf') || file.type === 'application/pdf';
+  const isTxt = lower.endsWith('.txt') || file.type === 'text/plain';
+
+  if(!isPdf && !isTxt) {
+    alert('الملفات المدعومة: PDF أو TXT فقط');
+    fileInput.value = '';
+    return;
+  }
+
+  if(btn) btn.disabled = true;
+  setAiQuizFileStatus('جاري قراءة الملف واستخراج النص...');
+
+  try {
+    let extracted = '';
+    let pages = 0;
+
+    if(isPdf) {
+      const result = await extractTextFromPdf(file);
+      extracted = result.text;
+      pages = result.pages;
+    } else {
+      extracted = await readFileAsText(file);
+    }
+
+    const text = trimQuizSourceText(extracted);
+    if(!text) {
+      throw new Error(isPdf
+        ? 'لم يُستخرج نص من الـ PDF. قد يكون ملف مسح ضوئي (صورة). جرّب PDF فيه نص قابل للتحديد أو الصق المحتوى يدوياً.'
+        : 'الملف النصي فارغ.');
+    }
+
+    contextArea.value = text;
+    const pagesInfo = pages ? ` — ${pages} صفحة` : '';
+    setAiQuizFileStatus(`✅ تم استخراج ${text.length.toLocaleString('ar-EG')} حرف من «${file.name}»${pagesInfo}`);
+    alert(`تم تحميل الملف بنجاح!${pagesInfo}\nعدد الأحرف: ${text.length}\nيمكنك الآن توليد الاختبار.`);
+  } catch(err) {
+    console.error('PDF/TXT upload error:', err);
+    setAiQuizFileStatus('❌ ' + err.message, true);
+    alert('فشل قراءة الملف: ' + err.message);
+    fileInput.value = '';
+  } finally {
+    if(btn) btn.disabled = false;
+  }
 }
 
 // Generate Quiz using Gemini
@@ -3455,7 +3627,7 @@ async function generateQuizViaAI() {
   const btn = document.getElementById('btnGenQuiz');
   
   if(!title) { alert('برجاء إدخال عنوان للاختبار أولاً!'); return; }
-  if(!context) { alert('برجاء إدخال نص مصدر الأسئلة (أو ألصق نص الـ PDF) ليصيغ منه الذكاء الاصطناعي الأسئلة!'); return; }
+  if(!context) { alert('برجاء إدخال نص مصدر الأسئلة، أو رفع ملف PDF/TXT لاستخراج النص أولاً!'); return; }
   
   btn.disabled = true;
   btn.textContent = '⏳ جاري تفكير وصياغة الأسئلة بالذكاء الاصطناعي...';
@@ -3479,7 +3651,7 @@ async function generateQuizViaAI() {
 
 المحتوى المرفق الذي يجب صياغة الأسئلة منه:
 
-${context}
+${trimQuizSourceText(context)}
 
 ملاحظة مهمة: يجب أن يكون الرد JSON صالحاً فقط ولا تضف أي نصوص توضيحية أو علامات ماركداون خارج الـ JSON.`;
 
