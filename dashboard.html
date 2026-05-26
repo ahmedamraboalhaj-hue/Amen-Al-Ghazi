@@ -650,7 +650,8 @@ tr:hover td{background:rgba(0,180,216,.03);}
               <div class="form-group">
                 <label>مفتاح API Key لـ Gemini</label>
                 <input type="text" id="aiApiKeyField" style="font-family:monospace;letter-spacing:1px;" placeholder="AIzaSy...">
-                <p class="field-hint">نفس مفتاح مشروع حامل القرآن (gemini-2.5-flash). يُحفظ محلياً ويمكن تغييره من <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</p>
+                <p class="field-hint" style="color:var(--danger);font-weight:700;">⚠️ المفتاح القديم المسرب لم يعد يعمل. أنشئ مفتاحاً <strong>جديداً</strong> من <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a> (مجاني) والصقه هنا ثم احفظ.</p>
+                <p class="field-hint">يُخزَّن في متصفحك فقط — لا تشاركه علناً ولا ترفعه على GitHub.</p>
               </div>
               <button class="btn-save" onclick="saveAiApiKey()">حفظ مفتاح الـ API 💾</button>
             </div>
@@ -3450,28 +3451,74 @@ ${phone}`
   }
 }
 
-// ---- GEMINI AI — نفس آلية admin.html في مشروع حامل القرآن ----
+// ---- GEMINI AI — مفتاحك الخاص فقط (بدون مفتاح افتراضي مسرب) ----
+const LEAKED_GEMINI_KEYS = new Set([
+  'AIzaSyAFytMNz6LCfkO5jTK9Ie5iUz11ADPOZ-g',
+  'AIzaSyAFytMNz6LCfkO5jTK9le5iUz11ADPOZ-g',
+  'AIzaSyD4s6Zs40WRYuswMmusprBwC7uduhZTs5U'
+]);
+
+function isLeakedGeminiKey(key) {
+  return !key || LEAKED_GEMINI_KEYS.has(key.trim());
+}
+
+function purgeLeakedGeminiKeys() {
+  ['gemini_api_key', 'alamin_gemini_api_key'].forEach(storageKey => {
+    const k = localStorage.getItem(storageKey);
+    if(isLeakedGeminiKey(k)) localStorage.removeItem(storageKey);
+  });
+}
+
 function getGeminiApiKey() {
-  return localStorage.getItem('gemini_api_key') || 'AIzaSyAFytMNz6LCfkO5jTK9Ie5iUz11ADPOZ-g';
+  const key = (localStorage.getItem('gemini_api_key') || '').trim();
+  if(isLeakedGeminiKey(key)) return '';
+  return key;
 }
 
 function getAiApiKey() { return getGeminiApiKey(); }
 
-function initGeminiApiKeyField() {
-  let geminiKey = getGeminiApiKey();
-  if(geminiKey === 'AIzaSyAFytMNz6LCfkO5jTK9le5iUz11ADPOZ-g') {
-    geminiKey = 'AIzaSyAFytMNz6LCfkO5jTK9Ie5iUz11ADPOZ-g';
-    localStorage.setItem('gemini_api_key', geminiKey);
+function formatGeminiErrorMessage(msg) {
+  const raw = String(msg || '');
+  const lower = raw.toLowerCase();
+  if(lower.includes('leaked') || lower.includes('reported as leaked')) {
+    purgeLeakedGeminiKeys();
+    switchAiTab('settings');
+    return 'المفتاح أصبح مسرباً عند Google وتم إيقافه.\n\n① افتح Google AI Studio\n② أنشئ مفتاح API جديد\n③ الصقه في تبويب «إعدادات المفتاح» واحفظ\n\nلا تستخدم المفتاح القديم مرة أخرى.';
   }
+  if(lower.includes('api key not valid') || lower.includes('invalid api key')) {
+    return 'مفتاح API غير صالح. تأكد من نسخ المفتاح كاملاً من Google AI Studio.';
+  }
+  return raw || 'فشل الاتصال بـ Gemini API';
+}
+
+function requireGeminiApiKey() {
+  const apiKey = getGeminiApiKey();
+  if(apiKey) return apiKey;
+  alert('⚠️ مطلوب مفتاح Gemini API جديد!\n\nافتح تبويب «إعدادات المفتاح»، أنشئ مفتاحاً من Google AI Studio، واحفظه.');
+  switchAiTab('settings');
+  return '';
+}
+
+function initGeminiApiKeyField() {
+  purgeLeakedGeminiKeys();
   const keyField = document.getElementById('aiApiKeyField');
-  if(keyField) keyField.value = geminiKey;
+  if(keyField) keyField.value = getGeminiApiKey();
 }
 
 function saveAiApiKey() {
   const val = document.getElementById('aiApiKeyField').value.trim();
   if(!val) { alert('برجاء إدخال المفتاح أولاً!'); return; }
+  if(isLeakedGeminiKey(val)) {
+    alert('⚠️ هذا المفتاح القديم مسرب ولا يعمل. أنشئ مفتاحاً جديداً من Google AI Studio.');
+    return;
+  }
+  if(!val.startsWith('AIza')) {
+    alert('⚠️ شكل المفتاح غير صحيح. يجب أن يبدأ بـ AIzaSy');
+    return;
+  }
   localStorage.setItem('gemini_api_key', val);
-  alert('✅ تم حفظ مفتاح API بنجاح.');
+  localStorage.removeItem('alamin_gemini_api_key');
+  alert('✅ تم حفظ مفتاح API بنجاح. جرّب توليد الاختبار الآن.');
 }
 
 function initAiHelperPage() {
@@ -3480,12 +3527,8 @@ function initAiHelperPage() {
 
 /** نفس fetch في runAiAnalysis() — حامل القرآن admin.html */
 async function callGeminiApi(promptText, jsonMode) {
-  const apiKey = getGeminiApiKey();
-  if(!apiKey) {
-    alert('⚠️ يرجى إعداد وحفظ مفتاح Google Gemini API أولاً في تبويب الإعدادات.');
-    switchAiTab('settings');
-    throw new Error('لا يوجد مفتاح API');
-  }
+  const apiKey = requireGeminiApiKey();
+  if(!apiKey) throw new Error('لا يوجد مفتاح API');
   const payload = {
     contents: [{ parts: [{ text: promptText }] }]
   };
@@ -3498,8 +3541,12 @@ async function callGeminiApi(promptText, jsonMode) {
     body: JSON.stringify(payload)
   });
   if(!response.ok) {
-    const errData = await response.json();
-    throw new Error(errData.error?.message || 'فشل الاتصال بـ Gemini API');
+    let errMsg = 'فشل الاتصال بـ Gemini API';
+    try {
+      const errData = await response.json();
+      errMsg = errData.error?.message || errMsg;
+    } catch(e) { /* ignore */ }
+    throw new Error(formatGeminiErrorMessage(errMsg));
   }
   const resultData = await response.json();
   const responseText = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -3702,7 +3749,7 @@ ${trimQuizSourceText(context)}
     
   } catch(error) {
     console.error('AI Quiz Error:', error);
-    alert('⚠️ فشل تحليل الذكاء الاصطناعي: ' + error.message);
+    alert('⚠️ فشل توليد الاختبار:\n\n' + formatGeminiErrorMessage(error.message));
   } finally {
     btn.disabled = false;
     btn.textContent = 'توليد الاختبار فوراً ونشره للطلاب 🚀';
@@ -3742,7 +3789,7 @@ ${context}`;
     
   } catch(error) {
     console.error('AI Summary Error:', error);
-    alert('⚠️ فشل تحليل الذكاء الاصطناعي: ' + error.message);
+    alert('⚠️ فشل التلخيص:\n\n' + formatGeminiErrorMessage(error.message));
   } finally {
     btn.disabled = false;
     btn.textContent = 'توليد الشرح الجذاب وتجهيزه 🪄';
@@ -3760,10 +3807,8 @@ function copyAiSummary() {
 
 // ---- INIT ----
 loadPlatformSettings();
+purgeLeakedGeminiKeys();
 initGeminiApiKeyField();
-if(localStorage.getItem('alamin_gemini_api_key') === 'AIzaSyD4s6Zs40WRYuswMmusprBwC7uduhZTs5U') {
-  localStorage.removeItem('alamin_gemini_api_key');
-}
 if(currentUser && currentUser.role === 'student') {
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
   document.querySelectorAll('.student-only').forEach(el=>el.style.display='block');
