@@ -1230,6 +1230,8 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
 <script>
 // ---- STATE ----
+var AI_QUIZ_TEXT_MAX = 28000;
+
 const currentUser = JSON.parse(localStorage.getItem('alamin_current'));
 if(!currentUser) {
   window.location.href = 'login.html';
@@ -3520,8 +3522,6 @@ function switchAiTab(tab) {
   if(activePane) activePane.style.display = 'block';
 }
 
-const AI_QUIZ_TEXT_MAX = 28000;
-
 function setAiQuizFileStatus(msg, isError) {
   const el = document.getElementById('aiQuizFileStatus');
   if(!el) return;
@@ -3539,8 +3539,12 @@ function readFileAsText(file) {
 }
 
 async function extractTextFromPdf(file) {
-  const pdfjs = window.pdfjsLib;
-  if(!pdfjs) throw new Error('مكتبة PDF غير محمّلة. حدّث الصفحة وحاول مرة أخرى.');
+  let pdfjs = window.pdfjsLib;
+  if(!pdfjs) {
+    await new Promise(r => setTimeout(r, 400));
+    pdfjs = window.pdfjsLib;
+  }
+  if(!pdfjs) throw new Error('مكتبة PDF لم تُحمّل. تأكد من الاتصال بالإنترنت وحدّث الصفحة (F5).');
   pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
   const data = await file.arrayBuffer();
@@ -3557,10 +3561,11 @@ async function extractTextFromPdf(file) {
 }
 
 function trimQuizSourceText(text) {
+  const maxLen = typeof AI_QUIZ_TEXT_MAX === 'number' ? AI_QUIZ_TEXT_MAX : 28000;
   let t = String(text || '').replace(/\r/g, '').trim();
   if(!t) return '';
-  if(t.length > AI_QUIZ_TEXT_MAX) {
-    t = t.substring(0, AI_QUIZ_TEXT_MAX) + '\n\n[... تم اختصار النص لطول الملف — الأسئلة ستُبنى على الجزء الأول ...]';
+  if(t.length > maxLen) {
+    t = t.substring(0, maxLen) + '\n\n[... تم اختصار النص لطول الملف — الأسئلة ستُبنى على الجزء الأول ...]';
   }
   return t;
 }
