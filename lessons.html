@@ -65,6 +65,8 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .segment-btn.type-video { background: #fdf2f8; border-color: #fbcfe8; color: #db2777; }
 [data-theme="dark"] .segment-btn.type-video { background: rgba(219,39,119,0.1); border-color: rgba(219,39,119,0.2); color: #f472b6; }
 .segment-btn.type-video:hover { background: #fce7f3; }
+.segment-btn.type-video.active { border-color: #db2777; border-width: 2px; box-shadow: 0 0 10px rgba(219,39,119,0.2); }
+[data-theme="dark"] .segment-btn.type-video.active { border-color: #f472b6; box-shadow: 0 0 10px rgba(244,114,182,0.3); }
 
 .segment-btn.type-pdf { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
 [data-theme="dark"] .segment-btn.type-pdf { background: rgba(37,99,235,0.1); border-color: rgba(37,99,235,0.2); color: #60a5fa; }
@@ -281,6 +283,7 @@ async function renderCoursePage(){
   }
   const courseId = parseInt(getQueryParam('course'), 10);
   if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
+  currentCourseId = courseId;
 
   // ✅ FIX: جيب من localStorage أولاً (الأساسي)، ثم دمج مع Firebase إذا توفر
   let courses = [];
@@ -568,6 +571,7 @@ function selectLessonSegment(lessonId, segmentId){
   if(!segment) return;
   
   currentSegmentId = segment.id;
+  currentLessonId = lessonId;
   
   const titleBar = document.getElementById('currentSegmentTitle');
   if(titleBar) titleBar.textContent = lesson.title + ' - ' + (segment.title || 'الفيديو');
@@ -578,6 +582,11 @@ function selectLessonSegment(lessonId, segmentId){
     // Scroll to video so user can see it
     videoWrapper.scrollIntoView({behavior: 'smooth', block: 'start'});
   }
+
+  // Highlight active segment
+  document.querySelectorAll('.segment-btn').forEach(el=>el.classList.remove('active'));
+  const selected = document.querySelector(`.segment-btn[data-lesson="${lessonId}"][data-segment="${escapeSelectorValue(segment.id)}"]`);
+  if(selected) selected.classList.add('active');
 
   renderVideo(segment.videoUrl, segment);
 }
@@ -606,48 +615,7 @@ function escapeSelectorValue(value){
   if(window.CSS && CSS.escape) return CSS.escape(String(value));
   return String(value).replace(/["\\]/g, '\\$&');
 }
-
-function renderLessonSegments(courseId, lesson, segments){
-  const box = document.getElementById('segmentsBox');
-  const list = document.getElementById('segmentsList');
-  if(!box || !list) return;
-  
-  // ✅ اصلاح: عرض المقاطع إذا كانت موجودة
-  if(segments && segments.length > 0){
-    box.style.display = 'block';
-    list.innerHTML = segments.map((segment, index) => {
-      const safeId = String(segment.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      return `
-        <div class="segment-item" data-lesson="${lesson.id}" data-segment="${escapeHTML(segment.id)}" 
-             onclick="selectLessonSegment(${lesson.id}, '${safeId}')">
-          <span class="segment-dot"></span>
-          <span class="segment-title">${escapeHTML(segment.title || `المقطع ${index + 1}`)}</span>
-          <span class="segment-duration">${escapeHTML(segment.duration || '')}</span>
-        </div>
-      `;
-    }).join('');
-  } else {
-    box.style.display = 'none';
-    list.innerHTML = '';
-  }
-}
-
-function selectLessonSegment(lessonId, segmentId){
-  const courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
-  const course = courses.find(c=>String(c.id)===String(currentCourseId));
-  const lesson = course ? (course.lessons || []).find(l=>l.id===lessonId) : null;
-  if(!lesson) return;
-  const segments = getLessonSegments(lesson);
-  const segment = segments.find(s=>String(s.id)===String(segmentId)) || segments[0];
-  if(!segment) return;
-  currentSegmentId = segment.id;
-  document.querySelectorAll('.segment-item').forEach(el=>el.classList.remove('active'));
-  const selected = document.querySelector(`.segment-item[data-lesson="${lessonId}"][data-segment="${escapeSelectorValue(segment.id)}"]`);
-  if(selected) selected.classList.add('active');
-  const unit = document.querySelector(`.lesson-unit[data-lesson-unit="${lessonId}"]`);
-  if(unit) unit.classList.add('open');
-  renderVideo(segment.videoUrl, segment);
-}
+// Duplicate functions removed
 
 function renderVideo(url, segment){
   const vpElement = document.querySelector('.video-player');
