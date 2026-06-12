@@ -1,0 +1,36 @@
+{
+  "name": "الأمين في اللغة العربية",
+  "short_name": "الأمين",
+  "description": "منصة الأمين في اللغة العربية للدروس والكورسات والاختبارات.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "any",
+  "background_color": "#f0f9ff",
+  "theme_color": "#00b4d8",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "./app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

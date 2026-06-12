@@ -103,7 +103,10 @@ tr:hover td{background:rgba(0,180,216,.03);}
 /* COURSES PAGE */
 .courses-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
 .course-admin-card{background:var(--card-bg);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.04);}
-.course-admin-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.course-admin-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden;position:relative;background-size:cover;background-position:center;}
+.course-admin-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.course-img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:12px;border:2px solid var(--border);display:none;margin-top:10px;}
+.course-img-preview.visible{display:block;}
 .course-admin-body{padding:16px;}
 .course-admin-title{font-size:15px;font-weight:800;margin-bottom:8px;}
 .course-admin-meta{font-size:12px;color:#888;margin-bottom:12px;}
@@ -265,7 +268,6 @@ tr:hover td{background:rgba(0,180,216,.03);}
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="assets/backend-sync.js"></script>
 </head>
 <body>
 
@@ -1100,6 +1102,14 @@ tr:hover td{background:rgba(0,180,216,.03);}
         <select id="acType"><option value="free">مجاني</option><option value="paid">مدفوع</option></select>
       </div>
       <div class="form-group"><label>سعر الكورس (ج.م)</label><input type="number" id="acPrice" min="0" placeholder="مثال: 150"></div>
+      <div class="form-group">
+        <label>صورة غلاف الكورس (تظهر للطلاب من الخارج)</label>
+        <input type="file" id="acImageFile" accept="image/*" onchange="handleCourseImageUpload()" style="font-size:13px;padding:8px;width:100%;">
+        <input type="hidden" id="acThumbnail" value="">
+        <img id="acImagePreview" class="course-img-preview" alt="معاينة صورة الكورس">
+        <p id="acImageStatus" class="field-hint" style="margin-top:8px;min-height:18px;"></p>
+        <p class="field-hint">تُرفع تلقائياً على Cloudinary وتظهر في الصفحة الرئيسية وبطاقات الكورسات.</p>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-save" id="acSaveButton" onclick="saveNewCourse()">إضافة الكورس ✅</button>
@@ -1679,7 +1689,7 @@ function renderCoursesAdmin(){
   const grid=document.getElementById('coursesAdminGrid');
   grid.innerHTML=courses.map(c=>`
     <div class="course-admin-card">
-        <div class="course-admin-thumb" style="background:${c.color}">${c.emoji||'📚'}</div>
+        <div class="course-admin-thumb" style="background:${c.color}">${courseThumbHtml(c)}</div>
         <div class="course-admin-body">
           <div class="course-admin-title">${c.title}</div>
           <div class="course-admin-meta">${c.desc||''}<br>الصف: ${gradeLabel(c.grade)} | عدد الدروس: ${(c.lessons||[]).length} | ${c.type==='free'?'مجاني 🆓':`مدفوع 💰 ${c.price || 'سعر غير محدد'} ج.م`}</div>
@@ -1708,6 +1718,7 @@ function openEditCourse(id){
   document.getElementById('acGrade').value = c.grade || '';
   document.getElementById('acType').value = c.type || 'free';
   document.getElementById('acPrice').value = c.price != null ? c.price : '';
+  resetCourseImageFields(c.thumbnail || '');
   document.getElementById('acSaveButton').textContent = 'حفظ التعديلات ✅';
   document.getElementById('addCourseModal').classList.add('open');
 }
@@ -1739,8 +1750,107 @@ function openAddCourseModal(){
   document.getElementById('acType').value='free';
   document.getElementById('acPrice').value='';
   document.getElementById('acSaveButton').textContent = 'إضافة الكورس ✅';
+  resetCourseImageFields('');
   document.getElementById('addCourseModal').classList.add('open');
 }
+
+// ---- CLOUDINARY — صور غلاف الكورسات ----
+const CLOUDINARY_CLOUD_NAME = 'dwrhl6gjf';
+const CLOUDINARY_UPLOAD_PRESET = 'asr-kareem';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+function setCourseImageStatus(msg, isError) {
+  const el = document.getElementById('acImageStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.style.color = isError ? 'var(--danger)' : 'var(--text2)';
+}
+
+function resetCourseImageFields(thumbnailUrl) {
+  const thumbField = document.getElementById('acThumbnail');
+  const preview = document.getElementById('acImagePreview');
+  const fileInput = document.getElementById('acImageFile');
+  if(thumbField) thumbField.value = thumbnailUrl || '';
+  if(fileInput) fileInput.value = '';
+  if(preview) {
+    if(thumbnailUrl) {
+      preview.src = thumbnailUrl;
+      preview.classList.add('visible');
+    } else {
+      preview.removeAttribute('src');
+      preview.classList.remove('visible');
+    }
+  }
+  setCourseImageStatus(thumbnailUrl ? '✅ صورة الغلاف جاهزة' : '');
+}
+
+async function uploadImageToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+  if(!response.ok) {
+    let errMsg = 'فشل رفع الصورة على Cloudinary';
+    try {
+      const errData = await response.json();
+      errMsg = errData.error?.message || errMsg;
+    } catch(e) { /* ignore */ }
+    throw new Error(errMsg);
+  }
+  const data = await response.json();
+  if(!data.secure_url) throw new Error('لم يُرجع Cloudinary رابط الصورة');
+  return data.secure_url;
+}
+
+async function handleCourseImageUpload() {
+  const fileInput = document.getElementById('acImageFile');
+  const saveBtn = document.getElementById('acSaveButton');
+  if(!fileInput?.files?.[0]) return;
+
+  const file = fileInput.files[0];
+  if(!file.type.startsWith('image/')) {
+    alert('من فضلك ارفع صورة فقط (JPG, PNG, WEBP...)');
+    fileInput.value = '';
+    return;
+  }
+  if(file.size > 8 * 1024 * 1024) {
+    alert('حجم الصورة كبير جداً. الحد الأقصى 8 ميجابايت.');
+    fileInput.value = '';
+    return;
+  }
+
+  if(saveBtn) saveBtn.disabled = true;
+  setCourseImageStatus('جاري رفع الصورة على Cloudinary...');
+
+  try {
+    const url = await uploadImageToCloudinary(file);
+    document.getElementById('acThumbnail').value = url;
+    const preview = document.getElementById('acImagePreview');
+    if(preview) {
+      preview.src = url;
+      preview.classList.add('visible');
+    }
+    setCourseImageStatus(`✅ تم رفع الصورة بنجاح — ستظهر على بطاقة الكورس`);
+  } catch(err) {
+    console.error('Course image upload error:', err);
+    setCourseImageStatus('❌ ' + err.message, true);
+    alert('فشل رفع الصورة: ' + err.message);
+    fileInput.value = '';
+  } finally {
+    if(saveBtn) saveBtn.disabled = false;
+  }
+}
+
+function courseThumbHtml(c) {
+  if(c.thumbnail) return `<img src="${escHtml(c.thumbnail)}" alt="">`;
+  return escHtml(c.emoji || '📚');
+}
+
+function sccCoverContent(c) {
+  if(c.thumbnail) return `<img class="scc-cover-img" src="${escHtml(c.thumbnail)}" alt="">`;
+  return `<span style="position:relative;z-index:1;font-size:72px">${c.emoji || '📚'}</span>`;
+}
+
 function saveNewCourse(){
   const courseId = document.getElementById('acId').value.trim();
   const title=document.getElementById('acTitle').value.trim();
@@ -1748,6 +1858,7 @@ function saveNewCourse(){
   const grade=document.getElementById('acGrade').value;
   const type=document.getElementById('acType').value;
   const price = parseFloat(document.getElementById('acPrice').value) || 0;
+  const thumbnail = (document.getElementById('acThumbnail').value || '').trim();
   if(!title){alert('ادخل اسم الكورس');return;}
   const emojis=['📖','🌿','🔥','⭐','🎯','💡','🚀','📝'];
   const colors=['linear-gradient(135deg,#1a1a2e,#0077b6)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
@@ -1761,6 +1872,7 @@ function saveNewCourse(){
         grade,
         type,
         price,
+        thumbnail: thumbnail || courses[idx].thumbnail || ''
       };
       saveCourses(courses);
       
@@ -1789,6 +1901,7 @@ function saveNewCourse(){
     price,
     emoji:emojis[Math.floor(Math.random()*emojis.length)],
     color:colors[Math.floor(Math.random()*colors.length)],
+    thumbnail,
     created:new Date().toLocaleDateString('ar-EG'),
     lessons:[]
   };
@@ -2380,7 +2493,6 @@ function buildStudentCourseCard(c, enrolled) {
   const gradeText = gradeLabel(c.grade);
   const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
   const teacherName = settings.teacherName || 'الأستاذ الأمين';
-  const coverEmoji = c.emoji || '📚';
   const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#0077b6)';
   const createdDate = c.created || today;
   
@@ -2388,7 +2500,7 @@ function buildStudentCourseCard(c, enrolled) {
     return `
     <div class="student-course-card">
       <div class="scc-cover" style="background:${coverBg}">
-        <span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>
+        ${sccCoverContent(c)}
         <div class="scc-badge enrolled">مشترك ✅</div>
         <div class="scc-teacher">${teacherName}</div>
         <div class="scc-grade-tag">${gradeText}</div>
@@ -2424,7 +2536,7 @@ function buildStudentCourseCard(c, enrolled) {
     return `
     <div class="student-course-card">
       <div class="scc-cover" style="background:${coverBg}">
-        <span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>
+        ${sccCoverContent(c)}
         ${badgeHTML}
         <div class="scc-teacher">${teacherName}</div>
         <div class="scc-grade-tag">${gradeText}</div>

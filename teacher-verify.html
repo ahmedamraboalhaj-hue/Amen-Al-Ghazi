@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التحقق من التحويلات - لوحة المدرس | الأمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+/* ═══ نفس ديزاين الأمين ═══ */
+:root{
+  --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623;
+  --success:#2ed573; --danger:#ff4757; --warning:#ffa502;
+  --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569;
+  --border:#e3f4f9; --sidebar-bg:#0f172a; --sidebar-text:#94a3b8;
+}
+[data-theme="dark"]{
+  --bg:#0a0e1a; --card:#111827; --text:#e2e8f0;
+  --text2:#8ba3c0; --border:#1e293b; --sidebar-bg:#020617;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--card);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid var(--border);
+  box-shadow:0 2px 12px rgba(0,0,0,.06);position:sticky;top:0;z-index:50;
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:19px;color:white;font-weight:900;
+}
+.logo-text{font-size:17px;font-weight:900;color:var(--primary);font-family:'Tajawal',sans-serif;}
+.logo-sub{font-size:11px;color:var(--text2);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-btn{
+  padding:8px 14px;border-radius:10px;
+  background:var(--bg);border:2px solid var(--border);
+  cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;
+  color:var(--text2);font-weight:600;text-decoration:none;
+  transition:all .2s;
+}
+.topbar-btn:hover{border-color:var(--primary);color:var(--primary);}
+.teacher-badge{
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  color:white;padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:800;
+}
+
+/* ── LAYOUT ── */
+.content{max-width:1100px;margin:0 auto;padding:32px 20px;width:100%;}
+
+/* ── PAGE TITLE ── */
+.page-header{margin-bottom:32px;}
+.page-title{font-family:'Tajawal',sans-serif;font-size:28px;font-weight:900;margin-bottom:6px;}
+.page-sub{font-size:14px;color:var(--text2);}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;display:flex;align-items:center;gap:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,.04);transition:transform .2s;
+}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.stat-val{font-size:26px;font-weight:900;font-family:'Tajawal',sans-serif;}
+.stat-label{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+.card-head{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.card-body{padding:24px;}
+
+/* ── SMS INPUT ZONE ── */
+.sms-zone{
+  border:2px dashed var(--border);border-radius:14px;
+  padding:20px;background:var(--bg);
+  transition:all .2s;margin-bottom:18px;position:relative;
+}
+.sms-zone:focus-within{border-color:var(--primary);border-style:solid;background:var(--card);}
+.sms-zone-label{
+  font-size:13px;font-weight:800;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sms-hint{font-size:11px;color:var(--text2);font-weight:400;}
+.sms-ta{
+  width:100%;border:none;background:transparent;
+  font-family:'Cairo',sans-serif;font-size:14px;color:var(--text);
+  outline:none;resize:none;min-height:110px;line-height:1.8;
+  direction:auto;
+}
+.sms-ta::placeholder{color:var(--text2);}
+
+/* ── PARSED BOX ── */
+.parsed-box{
+  display:none;border-radius:12px;padding:14px 16px;
+  background:linear-gradient(135deg,rgba(0,180,216,.08),rgba(0,119,182,.04));
+  border:1px solid rgba(0,180,216,.2);margin-bottom:18px;
+}
+.parsed-box.show{display:block;}
+.parsed-box-title{font-size:12px;color:var(--primary);font-weight:800;margin-bottom:10px;letter-spacing:.4px;}
+.parsed-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid rgba(0,180,216,.1);font-size:13px;
+}
+.parsed-row:last-child{border-bottom:none;}
+.parsed-key{color:var(--text2);}
+.parsed-val{
+  font-weight:800;font-size:14px;padding:2px 10px;border-radius:6px;
+  background:var(--bg);
+}
+.parsed-val.ok{color:var(--success);}
+.parsed-val.miss{color:var(--warning);}
+
+/* ── BTN ── */
+.btn{
+  padding:13px 20px;border:none;border-radius:12px;
+  font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;
+  cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;width:100%;
+  box-shadow:0 6px 20px rgba(0,119,182,.25);
+}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,119,182,.35);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:8px;}
+.btn-success{background:linear-gradient(135deg,#10b981,#059669);color:white;}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;}
+.btn-ghost{background:var(--bg);color:var(--text2);border:2px solid var(--border);}
+
+.spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULT INLINE ── */
+.result-inline{
+  display:none;border-radius:14px;padding:20px;margin-top:18px;
+  animation:fadeIn .3s ease;
+}
+.result-inline.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result-inline.success{background:#d1fae5;border:2px solid #34d399;}
+.result-inline.error{background:#fee2e2;border:2px solid #f87171;}
+.result-inline.warning{background:#fef3c7;border:2px solid #fbbf24;}
+.result-inline.info{background:#dbeafe;border:2px solid #60a5fa;}
+.res-icon{font-size:36px;margin-bottom:8px;text-align:center;}
+.res-title{font-size:17px;font-weight:900;text-align:center;margin-bottom:12px;}
+.result-inline.success .res-title{color:#064e3b;}
+.result-inline.error   .res-title{color:#7f1d1d;}
+.result-inline.warning .res-title{color:#78350f;}
+.result-inline.info    .res-title{color:#1e3a8a;}
+.res-detail{
+  background:rgba(255,255,255,.65);border-radius:10px;padding:12px 14px;
+  margin-bottom:12px;
+}
+.res-detail-row{
+  display:flex;justify-content:space-between;padding:5px 0;
+  border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;
+}
+.res-detail-row:last-child{border-bottom:none;}
+.res-dk{color:#6b7280;}
+.res-dv{font-weight:800;color:#111827;}
+.res-dv.red{color:#dc2626;}
+.res-dv.green{color:#059669;}
+.res-msg{font-size:13px;line-height:1.7;text-align:center;margin-bottom:14px;}
+.res-actions{display:flex;gap:10px;}
+
+/* ── HISTORY TABLE ── */
+.history-table{width:100%;border-collapse:collapse;font-size:13px;}
+.history-table th{
+  background:var(--bg);padding:10px 14px;
+  text-align:right;color:var(--text2);font-weight:700;
+  border-bottom:2px solid var(--border);
+}
+.history-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.history-table tr:last-child td{border-bottom:none;}
+.history-table tr:hover td{background:rgba(0,180,216,.03);}
+
+.status-badge{
+  display:inline-block;padding:4px 10px;border-radius:20px;
+  font-size:11px;font-weight:800;
+}
+.status-badge.approved{background:#d1fae5;color:#065f46;}
+.status-badge.pending{background:#fef3c7;color:#92400e;}
+.status-badge.rejected{background:#fee2e2;color:#7f1d1d;}
+.status-badge.mismatch{background:#ede9fe;color:#4c1d95;}
+
+.amount-chip{
+  background:var(--bg);border:1px solid var(--border);
+  padding:3px 10px;border-radius:6px;font-weight:800;font-family:monospace;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px;text-align:center;color:var(--text2);}
+.empty-state .icon{font-size:48px;margin-bottom:12px;}
+
+/* ── MANUAL SECTION ── */
+.section-divider{
+  display:flex;align-items:center;gap:12px;margin:18px 0;
+  font-size:12px;color:var(--text2);font-weight:600;
+}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.field-group{margin-bottom:14px;}
+.field-label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;}
+.field-input{
+  width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:11px;
+  font-family:'Cairo',sans-serif;font-size:14px;background:var(--card);color:var(--text);
+  outline:none;transition:border .2s;
+}
+.field-input:focus{border-color:var(--primary);}
+
+/* ── NOTIFICATION TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:24px;
+  background:#0f172a;color:white;
+  padding:14px 20px;border-radius:14px;
+  font-size:14px;font-weight:700;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);
+  transform:translateY(100px);opacity:0;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:9999;display:flex;align-items:center;gap:10px;max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success-toast{background:linear-gradient(135deg,#059669,#047857);}
+.toast.error-toast{background:linear-gradient(135deg,#dc2626,#b91c1c);}
+
+@media(max-width:860px){
+  .main-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:500px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .content{padding:20px 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <a href="dashboard.html" class="logo">
+    <div class="logo-icon">أ</div>
+    <div>
+      <div class="logo-text">الأمين</div>
+      <div class="logo-sub">لوحة تحكم المدرس</div>
+    </div>
+  </a>
+  <div class="topbar-right">
+    <span class="teacher-badge">👨‍🏫 مدرس</span>
+    <a href="dashboard.html" class="topbar-btn">📊 الداشبورد</a>
+    <button class="topbar-btn" onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">📩 التحقق من تحويلات الطلاب</div>
+    <div class="page-sub">انسخ رسالة التحويل اللي وصلتك من فودافون كاش أو وينساب — هيتحقق تلقائياً ويفعّل الكورس</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e0f2fe;">✅</div>
+      <div>
+        <div class="stat-val" id="statApproved">0</div>
+        <div class="stat-label">تحويلات مقبولة اليوم</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef3c7;">⏳</div>
+      <div>
+        <div class="stat-val" id="statPending">0</div>
+        <div class="stat-label">في انتظار التحقق</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fee2e2;">❌</div>
+      <div>
+        <div class="stat-val" id="statRejected">0</div>
+        <div class="stat-label">غير مطابق</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f0fdf4;">💰</div>
+      <div>
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-label">إجمالي المقبول (ج.م)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- ════ VERIFY CARD ════ -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📋 رفع رسالة التحويل</div>
+        <div style="font-size:12px;color:var(--text2);">الصق ونقر تحقق</div>
+      </div>
+      <div class="card-body">
+
+        <!-- SMS TEXTAREA -->
+        <div class="sms-zone">
+          <div class="sms-zone-label">
+            <span>📱 نص رسالة التحويل</span>
+            <span class="sms-hint">فودافون كاش / وينساب</span>
+          </div>
+          <textarea
+            class="sms-ta"
+            id="smsInput"
+            placeholder="الصق هنا نص رسالة التحويل اللي وصلتك...
+
+أمثلة:
+▸ تم استلام مبلغ 500 جنيه من رقم 01012345678...
+▸ Received EGP 150 from 00201025876738..."
+            oninput="onSmsInput()">
+          </textarea>
+        </div>
+
+        <!-- PARSED PREVIEW -->
+        <div class="parsed-box" id="parsedBox">
+          <div class="parsed-box-title">⚡ تم استخراج البيانات من الرسالة</div>
+          <div class="parsed-row">
+            <span class="parsed-key">📱 رقم المُحوِّل</span>
+            <span class="parsed-val" id="pPhone">—</span>
+          </div>
+          <div class="parsed-row">
+            <span class="parsed-key">💰 المبلغ المحوَّل</span>
+            <span class="parsed-val" id="pAmount">—</span>
+          </div>
+        </div>
+
+        <!-- MANUAL (Collapsible) -->
+        <div class="section-divider">أو أدخل يدوياً</div>
+        <div class="field-group">
+          <label class="field-label">📱 رقم التليفون</label>
+          <input class="field-input" id="manPhone" placeholder="01xxxxxxxxx" dir="ltr" oninput="onManualInput()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">💰 المبلغ (أرقام)</label>
+          <input class="field-input" id="manAmount" type="number" placeholder="مثال: 500" oninput="onManualInput()">
+        </div>
+
+        <!-- VERIFY BTN -->
+        <button class="btn btn-primary" id="btnVerify" onclick="doVerify()" disabled>
+          <span class="spinner" id="spinner"></span>
+          <span id="btnTxt">🔍 تحقق وفعّل الكورس</span>
+        </button>
+
+        <!-- RESULT -->
+        <div class="result-inline" id="resultBox">
+          <div class="res-icon" id="rIcon"></div>
+          <div class="res-title" id="rTitle"></div>
+          <div class="res-detail" id="rDetail" style="display:none;"></div>
+          <div class="res-msg" id="rMsg"></div>
+          <div class="res-actions">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="resetVerify()">🔄 تحويل جديد</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ HISTORY CARD ════ -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📜 سجل التحويلات</div>
+        <button class="btn btn-ghost btn-sm" onclick="clearHistory()">🗑 مسح الكل</button>
+      </div>
+      <div class="card-body" style="padding:0;overflow-x:auto;max-height:600px;overflow-y:auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>الرقم</th>
+              <th>المبلغ</th>
+              <th>الطالب</th>
+              <th>الكورس</th>
+              <th>الحالة</th>
+              <th>الوقت</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="icon">📋</div>
+                  <p>لا يوجد سجل بعد</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═════════════════════════════════════════
+     FIREBASE + LOGIC
+═════════════════════════════════════════ -->
+<script>
+// ── Firebase Init ──────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyCoUAGpTJANr-voTNxvEIlos2I8w_1kXtA",
+  authDomain:        "yghjni.firebaseapp.com",
+  projectId:         "yghjni",
+  storageBucket:     "yghjni.firebasestorage.app",
+  messagingSenderId: "629167303662",
+  appId:             "1:629167303662:web:91069e95be3ac626c13cff",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── State ──────────────────────────────────────────────────
+let parsed    = { phone: null, amount: null };
+let history   = JSON.parse(localStorage.getItem('alamin_teacher_history') || '[]');
+
+// ── SMS PARSER ─────────────────────────────────────────────
+// يدعم فودافون كاش عربي + وينساب إنجليزي (الصورتين اللي شفناهم)
+function parseSms(txt) {
+  let phone = null, amount = null;
+
+  // === استخراج رقم التليفون ===
+  const phoneRules = [
+    /من\s+رقم\s+(\d{11})/,           // "من رقم 01033016065"
+    /from\s+(002\d{11}|\d{11})/i,    // "from 00201025876738"
+    /(002\d{11})/,                    // رقم دولي مصري
+    /(\b01[0-9]{9}\b)/,               // رقم مصري عادي
+  ];
+  for (const r of phoneRules) {
+    const m = txt.match(r);
+    if (m) { phone = m[1].replace(/^0020/, '0'); break; }
+  }
+
+  // === استخراج المبلغ ===
+  const amountRules = [
+    /مبلغ\s+([\d,]+(?:\.\d+)?)\s*جنيه/,          // فودافون عربي
+    /(?:EGP|Received EGP)\s*([\d,]+(?:\.\d+)?)/i, // وينساب
+    /استلام\s+مبلغ\s+([\d,]+)/,
+    /([\d,]+(?:\.\d{1,2})?)\s*(?:جنيه|ج\.م)/i,
+  ];
+  for (const r of amountRules) {
+    const m = txt.match(r);
+    if (m) { amount = m[1].replace(/,/g, ''); break; }
+  }
+
+  return { phone, amount };
+}
+
+// ── INPUT HANDLERS ─────────────────────────────────────────
+function onSmsInput() {
+  const txt = document.getElementById('smsInput').value.trim();
+  if (!txt) { hideParsed(); syncBtn(); return; }
+  parsed = parseSms(txt);
+  renderParsed(parsed);
+  syncBtn();
+}
+function onManualInput() { syncBtn(); }
+
+function renderParsed({ phone, amount }) {
+  const el  = document.getElementById('parsedBox');
+  const elP = document.getElementById('pPhone');
+  const elA = document.getElementById('pAmount');
+  elP.textContent = phone  || '⚠️ غير واضح';
+  elA.textContent = amount ? `${amount} جنيه` : '⚠️ غير واضح';
+  elP.className = 'parsed-val ' + (phone  ? 'ok' : 'miss');
+  elA.className = 'parsed-val ' + (amount ? 'ok' : 'miss');
+  el.classList.add('show');
+}
+function hideParsed() {
+  document.getElementById('parsedBox').classList.remove('show');
+  parsed = { phone: null, amount: null };
+}
+
+function syncBtn() {
+  // أولوية: البيانات المستخرجة من SMS → ثم اليدوي
+  const hasAuto   = parsed.phone && parsed.amount;
+  const manPhone  = document.getElementById('manPhone').value.trim();
+  const manAmount = document.getElementById('manAmount').value.trim();
+  const hasManual = manPhone.length >= 10 && manAmount.length > 0;
+  document.getElementById('btnVerify').disabled = !(hasAuto || hasManual);
+}
+
+// ── MAIN VERIFY ────────────────────────────────────────────
+async function doVerify() {
+  // جمع البيانات — SMS تأخذ أولوية، لو مفيش نرجع لليدوي
+  let phone  = parsed.phone;
+  let amount = parsed.amount;
+
+  const manPhone  = document.getElementById('manPhone').value.trim();
+  const manAmount = document.getElementById('manAmount').value.trim();
+
+  if (!phone && manPhone)   phone  = manPhone.replace(/^0020/, '0');
+  if (!amount && manAmount) amount = manAmount;
+
+  const amountNum = parseFloat(amount);
+  if (!phone || isNaN(amountNum)) {
+    showToast('❌ تأكد من الرقم والمبلغ', 'error-toast');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // ═══════════════════════════════════════════
+    //  FIREBASE LOOKUP
+    // ═══════════════════════════════════════════
+    let student    = null;
+    let courseInfo = null;
+    let isDemo     = false;
+
+    // ── جلب الطالب بالرقم من Firebase ──
+    try {
+      const snap = await db.collection('students')
+        .where('phone', '==', phone)
+        .limit(1)
+        .get();
+      if (!snap.empty) {
+        student = { _id: snap.docs[0].id, ...snap.docs[0].data() };
+      }
+    } catch(e) {
+      // Firebase offline → وضع تجريبي
+      isDemo = true;
+      if (phone === '01012345678') {
+        student = {
+          _id: 'demo-001',
+          name: 'أحمد محمد (تجريبي)',
+          phone: '01012345678',
+          grade: 'الثانوية العامة',
+          enrolledCourses: [],
+          pendingCourseId: 'arabic-basics',
+        };
+      }
+    }
+
+    // ── جلب بيانات الكورس المنتظر للطالب ──
+    if (student && !isDemo) {
+      const courseId = student.pendingCourseId || student.pendingCourse;
+      if (courseId) {
+        try {
+          const cSnap = await db.collection('courses').doc(courseId).get();
+          if (cSnap.exists) courseInfo = { _id: cSnap.id, ...cSnap.data() };
+        } catch(e) {}
+      }
+    }
+
+    // ── FALLBACK: جلب الكورس بالمبلغ ──
+    if (!courseInfo && !isDemo) {
+      try {
+        const cSnap = await db.collection('courses')
+          .where('price', '==', amountNum)
+          .limit(1)
+          .get();
+        if (!cSnap.empty) courseInfo = { _id: cSnap.docs[0].id, ...cSnap.docs[0].data() };
+      } catch(e) {}
+    }
+
+    // Demo fallback
+    if (isDemo && amountNum === 500) {
+      courseInfo = { _id: 'arabic-basics', name: 'أساسيات اللغة العربية', price: 500 };
+    }
+
+    setLoading(false);
+
+    // ════════════════════════════════════════
+    //  CONDITION 1: الطالب موجود؟
+    // ════════════════════════════════════════
+    if (!student) {
+      logToHistory({ phone, amount: amountNum, status: 'rejected', reason: 'رقم غير مسجّل' });
+      return showResult('error', '🔍', 'الرقم غير مسجّل', [
+        ['رقم المُحوِّل', phone],
+        ['المبلغ', `${amountNum} ج.م`],
+      ], 'هذا الرقم غير موجود في قاعدة البيانات. تأكد إن الطالب مسجّل وأن الرقم صحيح.');
+    }
+
+    // ════════════════════════════════════════
+    //  CONDITION 2: مشترك قبل كده؟
+    // ════════════════════════════════════════
+    const enrolled = student.enrolledCourses || [];
+    const courseId = courseInfo?._id || student.pendingCourseId;
+    if (courseId && enrolled.includes(courseId)) {
+      logToHistory({ phone, amount: amountNum, studentName: student.name, courseId, status: 'duplicate' });
+      return showResult('info', 'ℹ️', 'مشترك بالفعل!', [
+        ['الطالب', student.name],
+        ['الكورس', courseInfo?.name || courseId],
+      ], 'الطالب ده مشترك قبل كده في نفس الكورس.');
+    }
+
+    // ════════════════════════════════════════
+    //  CONDITION 3: المبلغ مطابق؟
+    // ════════════════════════════════════════
+    const expectedPrice = courseInfo?.price ?? null;
+    if (expectedPrice !== null && amountNum !== expectedPrice) {
+      logToHistory({ phone, amount: amountNum, studentName: student.name, courseId, status: 'mismatch', expected: expectedPrice });
+      return showResult('warning', '⚠️', 'المبلغ مش مطابق', [
+        ['الطالب',         student.name],
+        ['مبلغ التحويل',   `${amountNum} ج.م`,  'red'],
+        ['سعر الكورس',     `${expectedPrice} ج.م`, 'green'],
+        ['الفرق',          `${Math.abs(amountNum - expectedPrice)} ج.م`],
+      ], `الطالب حوّل ${amountNum} ج.م والكورس بـ ${expectedPrice} ج.م. راجع مع الطالب.`);
+    }
+
+    // ════════════════════════════════════════
+    //  ✅ كل الشروط اتحققت — تفعيل الكورس
+    // ════════════════════════════════════════
+    if (!isDemo && courseId) {
+      await db.collection('students').doc(student._id).update({
+        enrolledCourses: firebase.firestore.FieldValue.arrayUnion(courseId),
+        pendingCourseId:  firebase.firestore.FieldValue.delete(),
+        [`payments.${courseId}`]: {
+          amount:     amountNum,
+          senderPhone: phone,
+          courseId,
+          verifiedAt: new Date().toISOString(),
+          verifiedBy: 'teacher',
+          status:     'approved',
+        }
+      });
+    } else {
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    logToHistory({
+      phone, amount: amountNum,
+      studentName: student.name,
+      courseId: courseId || '—',
+      courseName: courseInfo?.name || '—',
+      status: 'approved',
+    });
+
+    showResult('success', '🎉', 'تم التفعيل بنجاح!', [
+      ['الطالب',         student.name + (isDemo ? ' 🧪' : '')],
+      ['الكورس',         courseInfo?.name || courseId || '—'],
+      ['رقم المُحوِّل',  phone],
+      ['المبلغ',         `${amountNum} ج.م`],
+    ], 'تم تفعيل الكورس للطالب تلقائياً. يقدر يدخل من حسابه دلوقتي! 🚀');
+
+    showToast('✅ تم التفعيل بنجاح!', 'success-toast');
+
+  } catch(e) {
+    setLoading(false);
+    showResult('error', '❌', 'خطأ في الاتصال', [], 'تأكد من الإنترنت وحاول مرة أخرى.');
+    console.error(e);
+  }
+}
+
+// ── HISTORY ────────────────────────────────────────────────
+function logToHistory(entry) {
+  history.unshift({
+    ...entry,
+    time: new Date().toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' }),
+    date: new Date().toLocaleDateString('ar-EG'),
+  });
+  if (history.length > 50) history.pop();
+  localStorage.setItem('alamin_teacher_history', JSON.stringify(history));
+  renderHistory();
+  updateStats();
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  if (!history.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">📋</div><p>لا يوجد سجل بعد</p></div></td></tr>`;
+    return;
+  }
+  const statusMap = {
+    approved: ['approved', 'مقبول ✅'],
+    rejected: ['rejected', 'غير مسجّل ❌'],
+    mismatch: ['mismatch', 'مبلغ خاطئ ⚠️'],
+    duplicate:['info',     'مشترك مسبقاً ℹ️'],
+  };
+  tbody.innerHTML = history.map(h => {
+    const [cls, label] = statusMap[h.status] || ['pending', h.status];
+    return `
+    <tr>
+      <td dir="ltr" style="font-size:12px;font-family:monospace">${h.phone || '—'}</td>
+      <td><span class="amount-chip">${h.amount} ج.م</span></td>
+      <td>${h.studentName || '—'}</td>
+      <td style="font-size:12px">${h.courseName || h.courseId || '—'}</td>
+      <td><span class="status-badge ${cls}">${label}</span></td>
+      <td style="font-size:11px;color:var(--text2)">${h.time}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStats() {
+  const today = new Date().toLocaleDateString('ar-EG');
+  const todayH = history.filter(h => h.date === today);
+  document.getElementById('statApproved').textContent = todayH.filter(h=>h.status==='approved').length;
+  document.getElementById('statPending').textContent  = 0;
+  document.getElementById('statRejected').textContent = todayH.filter(h=>h.status==='mismatch'||h.status==='rejected').length;
+  const total = todayH.filter(h=>h.status==='approved').reduce((s,h)=>s+h.amount, 0);
+  document.getElementById('statTotal').textContent = total;
+}
+
+function clearHistory() {
+  if (!confirm('هتمسح كل السجل؟')) return;
+  history = [];
+  localStorage.removeItem('alamin_teacher_history');
+  renderHistory();
+  updateStats();
+}
+
+// ── UI HELPERS ─────────────────────────────────────────────
+function showResult(type, icon, title, rows, msg) {
+  const box = document.getElementById('resultBox');
+  document.getElementById('rIcon').textContent  = icon;
+  document.getElementById('rTitle').textContent = title;
+  document.getElementById('rMsg').textContent   = msg;
+
+  const det = document.getElementById('rDetail');
+  if (rows.length) {
+    det.innerHTML = rows.map(([k,v,cls=''])=>`
+      <div class="res-detail-row">
+        <span class="res-dk">${k}</span>
+        <span class="res-dv ${cls}">${v}</span>
+      </div>`).join('');
+    det.style.display = 'block';
+  } else {
+    det.style.display = 'none';
+  }
+
+  box.className = `result-inline show ${type}`;
+}
+
+function resetVerify() {
+  document.getElementById('resultBox').className = 'result-inline';
+  document.getElementById('smsInput').value = '';
+  document.getElementById('manPhone').value = '';
+  document.getElementById('manAmount').value = '';
+  parsed = { phone:null, amount:null };
+  hideParsed();
+  syncBtn();
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('btnVerify');
+  document.getElementById('spinner').style.display = on ? 'block' : 'none';
+  document.getElementById('btnTxt').textContent = on ? 'جاري التحقق...' : '🔍 تحقق وفعّل الكورس';
+  btn.disabled = on;
+}
+
+let toastTimer;
+function showToast(msg, cls='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${cls}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+}
+
+function toggleTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  localStorage.setItem('alamin-theme', dark ? 'light' : 'dark');
+}
+const saved = localStorage.getItem('alamin-theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+// ── INIT ───────────────────────────────────────────────────
+renderHistory();
+updateStats();
+</script>
+</body>
+</html>

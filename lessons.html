@@ -81,7 +81,6 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .segment-icon { display: flex; align-items: center; gap: 12px; }
 .segment-action-text { font-size: 14px; font-weight: 700; opacity: 0.8; }
 </style>
-<script src="assets/backend-sync.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -244,14 +243,39 @@ async function verifyCourseCode(courseId){
   alert('تم تفعيل الكورس بنجاح! يمكنك الآن مشاهدة الفيديوهات.');
   renderCoursePage();
 }
-function submitCoursePaymentRequest(courseId){
+function normalizePaymentPhone(phone) {
+  let value = String(phone || '').replace(/[^\d+]/g, '');
+  if (value.startsWith('+20')) value = '0' + value.slice(3);
+  if (value.startsWith('0020')) value = '0' + value.slice(4);
+  if (value.startsWith('20') && value.length === 12) value = '0' + value.slice(2);
+  return value;
+}
+
+async function createFirebasePaymentRequest(user, courseId, phone, amount) {
+  if (!window.db || !window.firebase) return null;
+  const amountNumber = Number(String(amount || '').replace(',', '.'));
+  if (!Number.isFinite(amountNumber)) throw new Error('Invalid payment amount');
+  return window.db.collection('paymentRequests').add({
+    studentId: String(user.id),
+    courseId: String(courseId),
+    phone,
+    phoneNormalized: normalizePaymentPhone(phone),
+    amount: String(amount),
+    amountNumber,
+    provider: 'vodafone_cash',
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+async function submitCoursePaymentRequest(courseId){
   const phone = document.getElementById('paymentPhoneInput')?.value.trim();
   const amount = document.getElementById('paymentAmountInput')?.value.trim();
   if(!phone || !amount){ alert('من فضلك أدخل رقم المحفظة والمبلغ المحول'); return; }
   const user = getCurrentUser();
   if(!user){ alert('برجاء تسجيل الدخول أولاً'); window.location='login.html'; return; }
   const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
-  pending.push({
+  const localRequest = {
     transactionId: Date.now(),
     studentId: user.id,
     courseId,
@@ -259,9 +283,19 @@ function submitCoursePaymentRequest(courseId){
     amount,
     timestamp: new Date().toLocaleString('ar-EG'),
     status: 'pending'
-  });
+  };
+  pending.push(localRequest);
   localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
-  alert('تم إرسال طلب التفعيل بنجاح. سيتم تفعيل الكورس بعد مراجعة الإدارة.');
+  try {
+    const docRef = await createFirebasePaymentRequest(user, courseId, phone, amount);
+    if (docRef) {
+      localRequest.firebasePaymentRequestId = docRef.id;
+      localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+    }
+  } catch (error) {
+    console.warn('Firebase payment request failed:', error);
+  }
+  alert('تم إرسال طلب التفعيل بنجاح. سيتم تفعيل الكورس تلقائياً بعد وصول رسالة فودافون كاش ومطابقتها.');
   document.getElementById('paymentPhoneInput').value = '';
   document.getElementById('paymentAmountInput').value = '';
 }

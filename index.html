@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#00b4d8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="&#x627;&#x644;&#x623;&#x645;&#x64A;&#x646;">
 <title>منصة الأمين - في اللغة العربية</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="app-icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -148,6 +155,117 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 .nav-search-btn:hover {
   color: var(--primary);
   transform: scale(1.1);
+}
+.install-app-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(0,180,216,0.35);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,119,182,0.18);
+  transition: transform .2s, box-shadow .2s, opacity .2s;
+  white-space: nowrap;
+}
+.install-app-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0,119,182,0.24);
+}
+.install-app-btn:disabled {
+  cursor: wait;
+  opacity: .7;
+  transform: none;
+}
+.pwa-install-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 18px;
+  z-index: 2500;
+  display: none;
+  max-width: 520px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(0,180,216,0.26);
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 18px 50px rgba(15,23,42,0.22);
+}
+.pwa-install-banner.is-ready {
+  display: flex;
+}
+.pwa-install-icon {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+}
+.pwa-install-copy {
+  min-width: 0;
+  flex: 1;
+}
+.pwa-install-title {
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+.pwa-install-text {
+  margin-top: 2px;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.pwa-install-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pwa-install-action {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pwa-install-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15,23,42,0.08);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+[data-theme="dark"] .pwa-install-close {
+  background: rgba(255,255,255,0.10);
 }
 
 /* Switch style matching bassthalk.com */
@@ -666,6 +784,24 @@ footer {
 
 @media (max-width:768px) {
   .navbar { padding: 0 16px; height: 64px; }
+  .nav-right { gap: 8px; }
+  .install-app-btn { width: 38px; padding: 0; border-radius: 50%; }
+  .install-app-btn .install-label { display: none; }
+  .pwa-install-banner {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+  .pwa-install-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+  .pwa-install-text { display: none; }
+  .pwa-install-action { min-height: 36px; padding: 0 12px; font-size: 12px; }
   .nav-menu-dropdown { top: 64px; }
   .hero { flex-direction:column-reverse; padding:40px 24px; text-align:center; min-height:auto; padding-top:60px; }
   .hero-title { font-size:42px; }
@@ -692,7 +828,7 @@ footer {
 .student-card .sub { margin-top:14px; font-size:14px; color:var(--text2); line-height:1.8; }
 .student-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(0,180,216,0.12); color:var(--primary); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700; margin-top:16px; }
 </style>
-<script src="assets/backend-sync.js"></script>
+<script src="pwa-install.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -719,6 +855,10 @@ footer {
 
   <!-- Right: Search & Theme Switch -->
   <div class="nav-right" id="navRight">
+    <button class="install-app-btn" type="button" data-pwa-install aria-label="&#x62A;&#x62B;&#x628;&#x64A;&#x62A; &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642;">
+      <span aria-hidden="true">&#x2B07;</span>
+      <span class="install-label">&#x62A;&#x62B;&#x628;&#x64A;&#x62A; &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642;</span>
+    </button>
     <button class="nav-search-btn" onclick="alert('البحث سيكون متاحاً قريباً 🔍')" aria-label="بحث">🔍</button>
     <div class="theme-switch" onclick="toggleTheme()" title="تغيير المظهر">
       <div class="theme-switch-bg-icons">
@@ -731,6 +871,18 @@ footer {
     </div>
   </div>
 </nav>
+
+<div class="pwa-install-banner" data-pwa-install-banner role="status" aria-live="polite">
+  <div class="pwa-install-icon" aria-hidden="true">&#x0623;</div>
+  <div class="pwa-install-copy">
+    <div class="pwa-install-title">&#x062A;&#x062B;&#x0628;&#x064A;&#x062A; &#x0627;&#x0644;&#x062A;&#x0637;&#x0628;&#x064A;&#x0642;</div>
+    <div class="pwa-install-text">&#x062B;&#x0628;&#x062A; &#x0627;&#x0644;&#x0645;&#x0646;&#x0635;&#x0629; &#x0628;&#x0631;&#x0627; &#x0639;&#x0644;&#x0649; &#x0627;&#x0644;&#x0645;&#x0648;&#x0628;&#x0627;&#x064A;&#x0644; &#x0648;&#x0627;&#x0641;&#x062A;&#x062D;&#x0647;&#x0627; &#x0639;&#x0644;&#x0649; &#x0637;&#x0648;&#x0644;.</div>
+  </div>
+  <div class="pwa-install-actions">
+    <button class="pwa-install-action" type="button" data-pwa-install>&#x062A;&#x062B;&#x0628;&#x064A;&#x062A;</button>
+    <button class="pwa-install-close" type="button" data-pwa-dismiss aria-label="&#x0625;&#x063A;&#x0644;&#x0627;&#x0642;">&times;</button>
+  </div>
+</div>
 
 <!-- Blue Dropdown Drawer Panel -->
 <div class="nav-menu-dropdown" id="navDropdown">
@@ -1270,7 +1422,32 @@ function closeVfModal() {
   document.getElementById('vfModal').style.display = 'none';
 }
 
-function submitVfPayment() {
+function normalizePaymentPhone(phone) {
+  let value = String(phone || '').replace(/[^\d+]/g, '');
+  if (value.startsWith('+20')) value = '0' + value.slice(3);
+  if (value.startsWith('0020')) value = '0' + value.slice(4);
+  if (value.startsWith('20') && value.length === 12) value = '0' + value.slice(2);
+  return value;
+}
+
+async function createFirebasePaymentRequest(user, courseId, phone, amount) {
+  if (!window.db || !window.firebase) return null;
+  const amountNumber = Number(String(amount || '').replace(',', '.'));
+  if (!Number.isFinite(amountNumber)) throw new Error('Invalid payment amount');
+  return window.db.collection('paymentRequests').add({
+    studentId: String(user.id),
+    courseId: String(courseId),
+    phone,
+    phoneNormalized: normalizePaymentPhone(phone),
+    amount: String(amount),
+    amountNumber,
+    provider: 'vodafone_cash',
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+async function submitVfPayment() {
   const phone = document.getElementById('vfPhone').value.trim();
   const amount = document.getElementById('vfAmount').value.trim();
   const cId = parseInt(document.getElementById('vfCourseId').value);
@@ -1279,8 +1456,13 @@ function submitVfPayment() {
     return;
   }
   const user = JSON.parse(localStorage.getItem('alamin_current'));
+  if(!user) {
+    alert('برجاء تسجيل الدخول أولاً');
+    window.location.href = 'login.html';
+    return;
+  }
   const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
-  pending.push({
+  const localRequest = {
     transactionId: Date.now(),
     studentId: user.id,
     courseId: cId,
@@ -1288,10 +1470,20 @@ function submitVfPayment() {
     amount: amount,
     timestamp: new Date().toLocaleString('ar-EG'),
     status: 'pending'
-  });
+  };
+  pending.push(localRequest);
   localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+  try {
+    const docRef = await createFirebasePaymentRequest(user, cId, phone, amount);
+    if (docRef) {
+      localRequest.firebasePaymentRequestId = docRef.id;
+      localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+    }
+  } catch (error) {
+    console.warn('Firebase payment request failed:', error);
+  }
   closeVfModal();
-  alert('تم تسجيل طلبك! سيتم مراجعة التحويل وتفعيل الكورس قريباً. ⏳');
+  alert('تم تسجيل طلبك! سيتم تفعيل الكورس تلقائياً بعد وصول رسالة فودافون كاش ومطابقتها.');
 }
 
 // ---- SCROLL ANIMATIONS ----
@@ -1312,6 +1504,9 @@ window.addEventListener('scroll', () => {
 
 // ---- INIT ----
 (async () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
   await renderStudentPanel();
   await renderCourses();
   observeFadeUp();
