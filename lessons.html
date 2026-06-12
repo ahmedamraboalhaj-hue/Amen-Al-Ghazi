@@ -493,33 +493,35 @@ async function renderCoursePage(){
   if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
   currentCourseId = courseId;
 
-  // ✅ FIX: جيب من localStorage أولاً (الأساسي)، ثم دمج مع Firebase إذا توفر
+  // ✅ دائماً اجلب أحدث نسخة من Firebase أولاً — هي المصدر الأساسي
   let courses = [];
-  const stored = localStorage.getItem('alamin_courses');
-  if(stored){
-    try{
-      courses = JSON.parse(stored);
-    }catch(e){ 
-      console.warn('Failed to parse local courses:', e); 
-      courses = [];
-    }
-  }
   
-  // حاول تحديث من Firebase إذا متصل (لكن لا تستبدل البيانات المحلية تماماً)
-  if(window.db && courses.length){
+  // أولاً: جرب Firebase كمصدر رئيسي
+  if(window.db){
     try{
       const doc = await window.db.collection('platform_data').doc('courses_list').get();
       if(doc.exists){
         const data = doc.data();
         if(Array.isArray(data.items) && data.items.length){
-          // الاعتماد على Firebase كمصدر أساسي
           courses = data.items;
           localStorage.setItem('alamin_courses', JSON.stringify(courses));
         }
       }
     }catch(e){ 
-      console.warn('Firebase sync optional:', e);
-      // استمر مع البيانات المحلية
+      console.warn('Firebase fetch failed, falling back to localStorage:', e);
+    }
+  }
+  
+  // ثانياً: لو Firebase فشل أو مفيش اتصال، استخدم localStorage
+  if(!courses.length){
+    const stored = localStorage.getItem('alamin_courses');
+    if(stored){
+      try{
+        courses = JSON.parse(stored);
+      }catch(e){ 
+        console.warn('Failed to parse local courses:', e); 
+        courses = [];
+      }
     }
   }
 
