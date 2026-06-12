@@ -103,7 +103,10 @@ tr:hover td{background:rgba(0,180,216,.03);}
 /* COURSES PAGE */
 .courses-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
 .course-admin-card{background:var(--card-bg);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.04);}
-.course-admin-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.course-admin-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden;position:relative;background-size:cover;background-position:center;}
+.course-admin-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.course-img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:12px;border:2px solid var(--border);display:none;margin-top:10px;}
+.course-img-preview.visible{display:block;}
 .course-admin-body{padding:16px;}
 .course-admin-title{font-size:15px;font-weight:800;margin-bottom:8px;}
 .course-admin-meta{font-size:12px;color:#888;margin-bottom:12px;}
@@ -117,7 +120,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .scc-cover-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
 .scc-badge{position:absolute;top:14px;right:14px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;z-index:2;}
 .scc-badge.free{background:linear-gradient(135deg,#2ed573,#1ea760);color:white;}
-.scc-badge.paid{background:linear-gradient(135deg,#f5a623,#e67e22);color:white;box-shadow:0 4px 12px rgba(245,166,35,0.35);}
+.scc-badge.paid{background:linear-gradient(135deg,#ff6b9d,#c0392b);color:white;}
 .scc-badge.enrolled{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;}
 .scc-teacher{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:white;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;z-index:2;}
 .scc-grade-tag{position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,.9);color:var(--text);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800;z-index:2;}
@@ -127,7 +130,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .scc-meta-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .scc-dates{display:flex;gap:12px;font-size:11px;color:var(--text2);}
 .scc-dates span{display:flex;align-items:center;gap:4px;}
-.scc-price-tag{font-size:13px;font-weight:800;color:#e67e22;background:rgba(245,166,35,0.1);padding:4px 12px;border-radius:8px;}
+.scc-price-tag{font-size:14px;font-weight:900;color:var(--accent);}
 .scc-price-free{font-size:13px;font-weight:800;color:#2ed573;background:#e8fff3;padding:4px 12px;border-radius:8px;}
 .scc-actions{display:flex;gap:8px;}
 .scc-btn-enter{flex:1;padding:11px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
@@ -260,144 +263,6 @@ tr:hover td{background:rgba(0,180,216,.03);}
 @keyframes fadeInAi {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Custom Activation & Subscription Styles */
-.activation-tabs {
-  display: flex;
-  background: var(--bg);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border);
-}
-.activation-tab {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.activation-tab.active {
-  background: var(--card-bg);
-  color: var(--primary-dark);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-[data-theme="dark"] .activation-tab.active {
-  background: var(--card-bg);
-  color: var(--primary);
-}
-.payment-instruction-box {
-  background: rgba(245, 166, 35, 0.08);
-  border: 1px solid rgba(245, 166, 35, 0.25);
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 20px;
-  text-align: right;
-}
-.payment-instruction-title {
-  color: #d68910;
-  font-weight: 800;
-  font-size: 15px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.payment-instruction-desc {
-  color: var(--text2);
-  font-size: 13.5px;
-  line-height: 1.6;
-  margin-bottom: 14px;
-}
-.payment-number-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 10px 14px;
-  border-radius: 10px;
-}
-.payment-number {
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--primary-dark);
-  letter-spacing: 1px;
-}
-[data-theme="dark"] .payment-number {
-  color: var(--primary);
-}
-.btn-copy {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.btn-copy:hover {
-  background: var(--primary-dark);
-}
-.activation-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  text-align: right;
-}
-.activation-input-group label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-.activation-input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  font-size: 14.5px;
-  outline: none;
-  transition: all 0.2s;
-}
-.activation-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
-}
-.btn-submit-action {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-family: 'Cairo', sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.2);
-}
-.btn-submit-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -1217,67 +1082,10 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
 <!-- ADD COURSE MODAL -->
 <div class="modal-overlay" id="addCourseModal">
-  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
+  <div class="modal">
     <h3>إضافة كورس جديد 📚</h3>
     <div class="modal-form">
-      <!-- صورة الكورس مع Drag & Drop -->
-      <div class="form-group">
-        <label>صورة الكورس 🖼️</label>
-        <div id="courseThumbnailContainer" style="border:3px dashed #00b4d8;border-radius:14px;padding:28px;text-align:center;cursor:pointer;background:var(--bg);position:relative;min-height:180px;display:flex;align-items:center;justify-content:center;transition:all .3s"
-             onclick="document.getElementById('acThumbnailInput').click()"
-             ondrop="handleCourseThumbnailDrop(event)" ondragover="event.preventDefault();event.target.style.borderColor='#0077b6';event.target.style.background='rgba(0,180,216,.1)'" ondragleave="event.target.style.borderColor='#00b4d8';event.target.style.background='var(--bg)'">
-          <div style="text-align:center">
-            <div style="font-size:48px;margin-bottom:10px">📁</div>
-            <div style="font-weight:700;font-size:14px;color:var(--primary)">اسحب الصورة هنا أو اضغط للاختيار</div>
-            <div style="font-size:12px;color:#888;margin-top:8px">PNG أو JPG (الحد الأقصى 5MB)</div>
-          </div>
-          <input type="file" id="acThumbnailInput" accept="image/*" style="display:none" onchange="handleCourseThumbnailSelect(event)">
-        </div>
-        <div id="courseThumbnailPreview" style="margin-top:10px;display:none;text-align:center">
-          <div style="position:relative;display:inline-block;width:100%;max-width:320px;height:180px;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.15);border:1px solid var(--border)">
-            <img id="courseThumbnailImg" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%">
-          </div>
-          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:320px;margin-left:auto;margin-right:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:12px;font-weight:700">التحريك أفقياً (يمين/يسار):</span>
-              <input type="range" id="acThumbnailX" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition()" style="width:150px">
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:12px;font-weight:700">التحريك رأسياً (أعلى/أسفل):</span>
-              <input type="range" id="acThumbnailY" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition()" style="width:150px">
-            </div>
-          </div>
-          <button type="button" class="btn-mini" onclick="clearCourseThumbnail()" style="margin-top:8px;background:var(--danger);color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif">🗑️ حذف الصورة</button>
-        </div>
-        <input type="hidden" id="acThumbnail">
-      </div>
-
       <div class="form-group"><label>اسم الكورس</label><input type="text" id="acTitle"></div>
-      
-      <!-- العنوان الثابت الملون -->
-      <div class="form-group">
-        <label>العنوان الثابت بالخلفية الملونة (الذي يظهر في البطاقة)</label>
-        <input type="text" id="acHeaderTitle" placeholder="مثال: اللغة العربية - الأستاذ الأمين - الصف الثالث الثانوي">
-        <div class="field-hint">هذا العنوان يظهر بخلفية ملونة في أعلى بطاقة الكورس</div>
-      </div>
-
-      <!-- منتقي الألوان -->
-      <div class="form-group">
-        <label>اختر لون العنوان الثابت 🎨</label>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="colorPaletteContainer">
-          <!-- Color swatches will be rendered by JS -->
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <input type="color" id="acCustomColor" value="#8B6F47" style="width:50px;height:50px;border:none;border-radius:10px;cursor:pointer">
-          <span style="font-size:12px;color:#888">أو اختر لون مخصص</span>
-        </div>
-        <input type="hidden" id="acHeaderColor" value="linear-gradient(135deg,#8B6F47,#A0826D)">
-        <div style="margin-top:10px;padding:12px;border-radius:10px;background:var(--bg);display:flex;align-items:center;gap:10px;height:60px">
-          <div id="colorPreview" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#8B6F47,#A0826D);box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
-          <span style="font-size:13px;font-weight:700;color:var(--text)">معاينة اللون</span>
-        </div>
-      </div>
-
       <div class="form-group"><label>وصف الكورس</label><textarea id="acDesc" rows="3" style="resize:vertical"></textarea></div>
       <div class="form-group">
         <label>الصف المستهدف</label>
@@ -1291,9 +1099,17 @@ tr:hover td{background:rgba(0,180,216,.03);}
       <input type="hidden" id="acId">
       <div class="form-group">
         <label>نوع الكورس</label>
-        <select id="acType" onchange="updatePriceFieldVisibility()"><option value="free">مجاني</option><option value="paid">مدفوع</option></select>
+        <select id="acType"><option value="free">مجاني</option><option value="paid">مدفوع</option></select>
       </div>
-      <div class="form-group" id="acPriceGroup"><label>سعر الكورس (ج.م)</label><input type="number" id="acPrice" min="0" placeholder="مثال: 150"></div>
+      <div class="form-group"><label>سعر الكورس (ج.م)</label><input type="number" id="acPrice" min="0" placeholder="مثال: 150"></div>
+      <div class="form-group">
+        <label>صورة غلاف الكورس (تظهر للطلاب من الخارج)</label>
+        <input type="file" id="acImageFile" accept="image/*" onchange="handleCourseImageUpload()" style="font-size:13px;padding:8px;width:100%;">
+        <input type="hidden" id="acThumbnail" value="">
+        <img id="acImagePreview" class="course-img-preview" alt="معاينة صورة الكورس">
+        <p id="acImageStatus" class="field-hint" style="margin-top:8px;min-height:18px;"></p>
+        <p class="field-hint">تُرفع تلقائياً على Cloudinary وتظهر في الصفحة الرئيسية وبطاقات الكورسات.</p>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-save" id="acSaveButton" onclick="saveNewCourse()">إضافة الكورس ✅</button>
@@ -1871,21 +1687,12 @@ function deleteStudent(id){
 // ---- COURSES ----
 function renderCoursesAdmin(){
   const grid=document.getElementById('coursesAdminGrid');
-  grid.innerHTML=courses.map(c=>{
-    const thumbHTML = c.thumbnail
-      ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;display:block">`
-      : `<span style="font-size:48px">${c.emoji || '📚'}</span>`;
-      
-    const typeBadge = c.type === 'free'
-      ? `<span style="background:rgba(46,213,115,0.12);color:#2ed573;padding:4px 10px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;font-size:12px;margin-top:6px;">مجاني 🆓</span>`
-      : `<span style="background:rgba(245,166,35,0.12);color:#f5a623;padding:4px 10px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;font-size:12px;margin-top:6px;">مدفوع 💰 ${c.price || '0'} ج.م</span>`;
-      
-    return `
+  grid.innerHTML=courses.map(c=>`
     <div class="course-admin-card">
-        <div class="course-admin-thumb" style="background:${c.color || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">${thumbHTML}</div>
+        <div class="course-admin-thumb" style="background:${c.color}">${courseThumbHtml(c)}</div>
         <div class="course-admin-body">
           <div class="course-admin-title">${c.title}</div>
-          <div class="course-admin-meta">${c.desc||''}<br>الصف: ${gradeLabel(c.grade)} | عدد الدروس: ${(c.lessons||[]).length}<br>${typeBadge}</div>
+          <div class="course-admin-meta">${c.desc||''}<br>الصف: ${gradeLabel(c.grade)} | عدد الدروس: ${(c.lessons||[]).length} | ${c.type==='free'?'مجاني 🆓':`مدفوع 💰 ${c.price || 'سعر غير محدد'} ج.م`}</div>
         <div class="course-admin-footer">
           <button class="btn-view" onclick="openEditCourse(${c.id})">تعديل</button>
           <button class="btn-view" onclick="openAddLessonModal(${c.id})">➕ إضافة درس</button>
@@ -1893,8 +1700,7 @@ function renderCoursesAdmin(){
           <button class="btn-delete" onclick="deleteCourse(${c.id})">حذف</button>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 function deleteCourse(id){
   if(!confirm('حذف هذا الكورس؟')) return;
@@ -1912,20 +1718,7 @@ function openEditCourse(id){
   document.getElementById('acGrade').value = c.grade || '';
   document.getElementById('acType').value = c.type || 'free';
   document.getElementById('acPrice').value = c.price != null ? c.price : '';
-
-  // تحميل قيم تموضع الصورة وصورة التغطية
-  document.getElementById('acThumbnail').value = c.thumbnail || '';
-  document.getElementById('acThumbnailX').value = c.thumbnailX != null ? c.thumbnailX : 50;
-  document.getElementById('acThumbnailY').value = c.thumbnailY != null ? c.thumbnailY : 50;
-  if (c.thumbnail) {
-    document.getElementById('courseThumbnailImg').src = c.thumbnail;
-    document.getElementById('courseThumbnailImg').style.objectPosition = `${c.thumbnailX || 50}% ${c.thumbnailY || 50}%`;
-    document.getElementById('courseThumbnailPreview').style.display = 'block';
-    document.getElementById('courseThumbnailContainer').style.display = 'none';
-  } else {
-    clearCourseThumbnail();
-  }
-
+  resetCourseImageFields(c.thumbnail || '');
   document.getElementById('acSaveButton').textContent = 'حفظ التعديلات ✅';
   document.getElementById('addCourseModal').classList.add('open');
 }
@@ -1956,10 +1749,108 @@ function openAddCourseModal(){
   document.getElementById('acGrade').value='1';
   document.getElementById('acType').value='free';
   document.getElementById('acPrice').value='';
-  clearCourseThumbnail();
   document.getElementById('acSaveButton').textContent = 'إضافة الكورس ✅';
+  resetCourseImageFields('');
   document.getElementById('addCourseModal').classList.add('open');
 }
+
+// ---- CLOUDINARY — صور غلاف الكورسات ----
+const CLOUDINARY_CLOUD_NAME = 'dwrhl6gjf';
+const CLOUDINARY_UPLOAD_PRESET = 'asr-kareem';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+function setCourseImageStatus(msg, isError) {
+  const el = document.getElementById('acImageStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.style.color = isError ? 'var(--danger)' : 'var(--text2)';
+}
+
+function resetCourseImageFields(thumbnailUrl) {
+  const thumbField = document.getElementById('acThumbnail');
+  const preview = document.getElementById('acImagePreview');
+  const fileInput = document.getElementById('acImageFile');
+  if(thumbField) thumbField.value = thumbnailUrl || '';
+  if(fileInput) fileInput.value = '';
+  if(preview) {
+    if(thumbnailUrl) {
+      preview.src = thumbnailUrl;
+      preview.classList.add('visible');
+    } else {
+      preview.removeAttribute('src');
+      preview.classList.remove('visible');
+    }
+  }
+  setCourseImageStatus(thumbnailUrl ? '✅ صورة الغلاف جاهزة' : '');
+}
+
+async function uploadImageToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+  if(!response.ok) {
+    let errMsg = 'فشل رفع الصورة على Cloudinary';
+    try {
+      const errData = await response.json();
+      errMsg = errData.error?.message || errMsg;
+    } catch(e) { /* ignore */ }
+    throw new Error(errMsg);
+  }
+  const data = await response.json();
+  if(!data.secure_url) throw new Error('لم يُرجع Cloudinary رابط الصورة');
+  return data.secure_url;
+}
+
+async function handleCourseImageUpload() {
+  const fileInput = document.getElementById('acImageFile');
+  const saveBtn = document.getElementById('acSaveButton');
+  if(!fileInput?.files?.[0]) return;
+
+  const file = fileInput.files[0];
+  if(!file.type.startsWith('image/')) {
+    alert('من فضلك ارفع صورة فقط (JPG, PNG, WEBP...)');
+    fileInput.value = '';
+    return;
+  }
+  if(file.size > 8 * 1024 * 1024) {
+    alert('حجم الصورة كبير جداً. الحد الأقصى 8 ميجابايت.');
+    fileInput.value = '';
+    return;
+  }
+
+  if(saveBtn) saveBtn.disabled = true;
+  setCourseImageStatus('جاري رفع الصورة على Cloudinary...');
+
+  try {
+    const url = await uploadImageToCloudinary(file);
+    document.getElementById('acThumbnail').value = url;
+    const preview = document.getElementById('acImagePreview');
+    if(preview) {
+      preview.src = url;
+      preview.classList.add('visible');
+    }
+    setCourseImageStatus(`✅ تم رفع الصورة بنجاح — ستظهر على بطاقة الكورس`);
+  } catch(err) {
+    console.error('Course image upload error:', err);
+    setCourseImageStatus('❌ ' + err.message, true);
+    alert('فشل رفع الصورة: ' + err.message);
+    fileInput.value = '';
+  } finally {
+    if(saveBtn) saveBtn.disabled = false;
+  }
+}
+
+function courseThumbHtml(c) {
+  if(c.thumbnail) return `<img src="${escHtml(c.thumbnail)}" alt="">`;
+  return escHtml(c.emoji || '📚');
+}
+
+function sccCoverContent(c) {
+  if(c.thumbnail) return `<img class="scc-cover-img" src="${escHtml(c.thumbnail)}" alt="">`;
+  return `<span style="position:relative;z-index:1;font-size:72px">${c.emoji || '📚'}</span>`;
+}
+
 function saveNewCourse(){
   const courseId = document.getElementById('acId').value.trim();
   const title=document.getElementById('acTitle').value.trim();
@@ -1967,12 +1858,7 @@ function saveNewCourse(){
   const grade=document.getElementById('acGrade').value;
   const type=document.getElementById('acType').value;
   const price = parseFloat(document.getElementById('acPrice').value) || 0;
-
-  // قراءة قيم التغطية والتموضع المخصص
-  const thumbnail = document.getElementById('acThumbnail').value;
-  const thumbnailX = parseInt(document.getElementById('acThumbnailX').value, 10) || 50;
-  const thumbnailY = parseInt(document.getElementById('acThumbnailY').value, 10) || 50;
-
+  const thumbnail = (document.getElementById('acThumbnail').value || '').trim();
   if(!title){alert('ادخل اسم الكورس');return;}
   const emojis=['📖','🌿','🔥','⭐','🎯','💡','🚀','📝'];
   const colors=['linear-gradient(135deg,#1a1a2e,#0077b6)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
@@ -1986,9 +1872,7 @@ function saveNewCourse(){
         grade,
         type,
         price,
-        thumbnail,
-        thumbnailX,
-        thumbnailY,
+        thumbnail: thumbnail || courses[idx].thumbnail || ''
       };
       saveCourses(courses);
       
@@ -2015,11 +1899,9 @@ function saveNewCourse(){
     grade,
     type,
     price,
-    thumbnail,
-    thumbnailX,
-    thumbnailY,
     emoji:emojis[Math.floor(Math.random()*emojis.length)],
     color:colors[Math.floor(Math.random()*colors.length)],
+    thumbnail,
     created:new Date().toLocaleDateString('ar-EG'),
     lessons:[]
   };
@@ -2039,55 +1921,6 @@ function saveNewCourse(){
   closeModal('addCourseModal');
   renderCoursesAdmin();
   showAlert('تم إضافة الكورس بنجاح ✅ (يظهر للطلاب فوراً)');
-}
-
-// ---- COURSE THUMBNAIL HANDLERS ----
-function handleCourseThumbnailSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  processCourseThumbnailFile(file);
-}
-
-function handleCourseThumbnailDrop(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    processCourseThumbnailFile(file);
-  }
-}
-
-function processCourseThumbnailFile(file) {
-  if (file.size > 5 * 1024 * 1024) {
-    alert('حجم الصورة كبير جداً! الحد الأقصى هو 5 ميجابايت.');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const dataUrl = e.target.result;
-    document.getElementById('acThumbnail').value = dataUrl;
-    document.getElementById('courseThumbnailImg').src = dataUrl;
-    document.getElementById('courseThumbnailImg').style.objectPosition = '50% 50%';
-    document.getElementById('acThumbnailX').value = 50;
-    document.getElementById('acThumbnailY').value = 50;
-    document.getElementById('courseThumbnailPreview').style.display = 'block';
-    document.getElementById('courseThumbnailContainer').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearCourseThumbnail() {
-  document.getElementById('acThumbnail').value = '';
-  document.getElementById('acThumbnailInput').value = '';
-  document.getElementById('courseThumbnailImg').src = '';
-  document.getElementById('courseThumbnailPreview').style.display = 'none';
-  document.getElementById('courseThumbnailContainer').style.display = 'flex';
-}
-
-function updateThumbnailPreviewPosition() {
-  const x = document.getElementById('acThumbnailX').value;
-  const y = document.getElementById('acThumbnailY').value;
-  document.getElementById('courseThumbnailImg').style.objectPosition = `${x}% ${y}%`;
 }
 
 // ---- ADD LESSON HELPERS ----
@@ -2660,19 +2493,14 @@ function buildStudentCourseCard(c, enrolled) {
   const gradeText = gradeLabel(c.grade);
   const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
   const teacherName = settings.teacherName || 'الأستاذ الأمين';
-  const coverEmoji = c.emoji || '📚';
   const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#0077b6)';
   const createdDate = c.created || today;
-  
-  const coverHTML = c.thumbnail
-    ? `<img src="${c.thumbnail}" class="scc-cover-img" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;position:absolute;inset:0;">`
-    : `<span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>`;
   
   if (enrolled) {
     return `
     <div class="student-course-card">
       <div class="scc-cover" style="background:${coverBg}">
-        ${coverHTML}
+        ${sccCoverContent(c)}
         <div class="scc-badge enrolled">مشترك ✅</div>
         <div class="scc-teacher">${teacherName}</div>
         <div class="scc-grade-tag">${gradeText}</div>
@@ -2708,7 +2536,7 @@ function buildStudentCourseCard(c, enrolled) {
     return `
     <div class="student-course-card">
       <div class="scc-cover" style="background:${coverBg}">
-        ${coverHTML}
+        ${sccCoverContent(c)}
         ${badgeHTML}
         <div class="scc-teacher">${teacherName}</div>
         <div class="scc-grade-tag">${gradeText}</div>
@@ -2844,11 +2672,6 @@ function deleteLecture(id) {
 
 // ---- QUIZZES ----
 let quizzesData = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
-function getNextQuizId() {
-  const sequentialIds = quizzesData.map(q => parseInt(q.id, 10)).filter(id => !isNaN(id) && id < 1000000);
-  const maxSeq = sequentialIds.length ? Math.max(...sequentialIds) : 8;
-  return maxSeq + 1;
-}
 function openAddQuizModal() { document.getElementById('addQuizModal').classList.add('open'); }
 function saveNewQuiz() {
   const title = document.getElementById('aqTitle').value.trim();
@@ -2856,7 +2679,7 @@ function saveNewQuiz() {
   const count = document.getElementById('aqCount').value;
   const time = document.getElementById('aqTime').value;
   if(!title) { alert('برجاء إدخال اسم الاختبار'); return; }
-  quizzesData.push({ id: getNextQuizId(), title, grade, questionsCount: count, time, status: 'نشط' });
+  quizzesData.push({ id: Date.now(), title, grade, questionsCount: count, time, status: 'نشط' });
   localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesData));
   closeModal('addQuizModal');
   renderQuizzesTable();
@@ -3576,167 +3399,18 @@ const saved=localStorage.getItem('theme');if(saved)document.documentElement.setA
 // ---- ACTIVATION CODE MODAL ----
 let _pendingCodeCourseId = null;
 
-function switchModalTab(tab) {
-  const btnCode = document.getElementById('tabModalBtnCode');
-  const btnTransfer = document.getElementById('tabModalBtnTransfer');
-  const contentCode = document.getElementById('tabModalContentCode');
-  const contentTransfer = document.getElementById('tabModalContentTransfer');
-  
-  if (tab === 'code') {
-    if (btnCode) btnCode.classList.add('active');
-    if (btnTransfer) btnTransfer.classList.remove('active');
-    if (contentCode) contentCode.style.display = 'block';
-    if (contentTransfer) contentTransfer.style.display = 'none';
-  } else {
-    if (btnCode) btnCode.classList.remove('active');
-    if (btnTransfer) btnTransfer.classList.add('active');
-    if (contentCode) contentCode.style.display = 'none';
-    if (contentTransfer) contentTransfer.style.display = 'block';
-  }
-}
-
-function copyPaymentNumber(suffix) {
-  const numEl = document.getElementById('payNum_' + suffix);
-  if (!numEl) return;
-  const num = numEl.textContent.trim();
-  navigator.clipboard.writeText(num).then(() => {
-    const btnText = document.getElementById('copyText_' + suffix);
-    if (btnText) {
-      btnText.textContent = 'تم النسخ! ✓';
-      setTimeout(() => {
-        btnText.textContent = 'نسخ الرقم';
-      }, 2000);
-    }
-  }).catch(err => {
-    alert('الرقم هو: ' + num);
-  });
-}
-
-function openCodeModal(courseId, defaultTab = 'code') {
+function openCodeModal(courseId) {
   _pendingCodeCourseId = courseId || null;
   document.getElementById('codeInput').value = '';
-  document.getElementById('modalPaymentPhoneInput').value = '';
-  document.getElementById('modalPaymentAmountInput').value = '';
-  
   const result = document.getElementById('codeResult');
   result.style.display = 'none';
   result.className = 'code-result';
-  
-  const courseInfo = document.getElementById('modalCourseInfo');
-  const courseTitle = document.getElementById('modalCourseTitle');
-  const coursePrice = document.getElementById('modalCoursePrice');
-  const amountInput = document.getElementById('modalPaymentAmountInput');
-  
-  if (courseId) {
-    const course = courses.find(c => String(c.id) === String(courseId));
-    if (course) {
-      if (courseInfo) courseInfo.style.display = 'block';
-      if (courseTitle) courseTitle.textContent = course.title;
-      if (coursePrice) coursePrice.textContent = course.price || '0';
-      if (amountInput) amountInput.value = course.price || '';
-    } else {
-      if (courseInfo) courseInfo.style.display = 'none';
-    }
-  } else {
-    if (courseInfo) courseInfo.style.display = 'none';
-  }
-  
-  switchModalTab(defaultTab);
-  
   document.getElementById('codeModal').classList.add('open');
-  if (defaultTab === 'code') {
-    setTimeout(() => document.getElementById('codeInput').focus(), 100);
-  } else {
-    setTimeout(() => document.getElementById('modalPaymentPhoneInput').focus(), 100);
-  }
+  setTimeout(() => document.getElementById('codeInput').focus(), 100);
 }
 
 function closeCodeModal() {
   document.getElementById('codeModal').classList.remove('open');
-}
-
-function normalizePaymentPhone(phone) {
-  let value = String(phone || '').replace(/[^\d+]/g, '');
-  if (value.startsWith('+20')) value = '0' + value.slice(3);
-  if (value.startsWith('0020')) value = '0' + value.slice(4);
-  if (value.startsWith('20') && value.length === 12) value = '0' + value.slice(2);
-  return value;
-}
-
-async function createFirebasePaymentRequest(user, courseId, phone, amount) {
-  if (!window.db || !window.firebase) return null;
-  const amountNumber = Number(String(amount || '').replace(',', '.'));
-  if (!Number.isFinite(amountNumber)) throw new Error('Invalid payment amount');
-  return window.db.collection('paymentRequests').add({
-    studentId: String(user.id),
-    courseId: String(courseId),
-    phone,
-    phoneNormalized: normalizePaymentPhone(phone),
-    amount: String(amount),
-    amountNumber,
-    provider: 'vodafone_cash',
-    status: 'pending',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-async function submitCoursePaymentRequestFromModal() {
-  const courseId = _pendingCodeCourseId;
-  if (!courseId) {
-    alert('عذراً، لم يتم تحديد كورس صالح للاشتراك.');
-    return;
-  }
-  
-  const phone = document.getElementById('modalPaymentPhoneInput').value.trim();
-  const amount = document.getElementById('modalPaymentAmountInput').value.trim();
-  
-  if (!phone || !amount) {
-    alert('من فضلك أدخل رقم المحفظة والمبلغ المحول أولاً.');
-    return;
-  }
-  
-  const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
-  if (!current) {
-    alert('برجاء تسجيل الدخول أولاً');
-    window.location = 'login.html';
-    return;
-  }
-  
-  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments') || '[]');
-  const already = pending.some(p => String(p.courseId) === String(courseId) && String(p.studentId) === String(current.id) && p.status === 'pending');
-  
-  if (already) {
-    alert('طلبك قيد المراجعة بالفعل. سيتم تفعيل الكورس فور تأكيد الدفع.');
-    closeCodeModal();
-    return;
-  }
-  
-  const localRequest = {
-    transactionId: Date.now(),
-    studentId: current.id,
-    studentName: current.name,
-    courseId: courseId,
-    amount: amount,
-    senderPhone: phone,
-    timestamp: new Date().toLocaleDateString('ar-EG'),
-    status: 'pending'
-  };
-  
-  pending.push(localRequest);
-  localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
-  
-  try {
-    const docRef = await createFirebasePaymentRequest(current, courseId, phone, amount);
-    if (docRef) {
-      localRequest.firebasePaymentRequestId = docRef.id;
-      localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
-    }
-  } catch (error) {
-    console.warn('Firebase payment request failed:', error);
-  }
-  
-  showAlert('✅ تم إرسال طلب التفعيل بنجاح! سيتم تفعيل الكورس فور تأكيد الدفع.');
-  closeCodeModal();
 }
 
 function submitActivationCode() {
@@ -3858,19 +3532,35 @@ document.getElementById('codeModal').addEventListener('click', function(e) {
 });
 
 function showPaymentForCourse(courseId) {
-  const course = courses.find(c => String(c.id) === String(courseId));
+  const course = courses.find(c => c.id === courseId);
   if (!course) return;
-  
+  const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
+  const phone = settings.contactPhone || '';
+  const msg = phone 
+    ? `للاشتراك في كورس "${course.title}" (${course.price} ج.م)، تواصل عبر واتساب:
+${phone}`
+    : `للاشتراك في كورس "${course.title}" (${course.price} ج.م)، تواصل مع المسؤول للحصول على كود التفعيل.`;
+  // Show a nice payment modal
   const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
-  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments') || '[]');
-  const already = pending.some(p => String(p.courseId) === String(courseId) && String(p.studentId) === String(current.id) && p.status === 'pending');
-  
-  if (already) {
-    alert('طلبك قيد المراجعة بالفعل. سيتم تفعيل الكورس فور تأكيد الدفع.');
-    return;
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments')||'[]');
+  const already = pending.some(p=>p.courseId===courseId && p.studentId===current.id && p.status==='pending');
+  if(already){ alert('طلبك قيد المراجعة بالفعل. سيتم تفعيل الكورس فور تأكيد الدفع.'); return; }
+  if(confirm(`للاشتراك في "${course.title}" بسعر ${course.price} ج.م
+
+هل تريد إرسال طلب اشتراك للمسؤول؟`)) {
+    pending.push({
+      transactionId: Date.now(),
+      studentId: current.id,
+      studentName: current.name,
+      courseId: courseId,
+      amount: course.price,
+      senderPhone: current.phone || '',
+      timestamp: new Date().toLocaleDateString('ar-EG'),
+      status: 'pending'
+    });
+    localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+    showAlert('تم إرسال طلب الاشتراك! انتظر تأكيد المسؤول أو احصل على كود تفعيل.');
   }
-  
-  openCodeModal(courseId, 'transfer');
 }
 
 // ---- GEMINI AI — مفتاحك الخاص فقط (بدون مفتاح افتراضي مسرب) ----
@@ -4139,7 +3829,7 @@ ${trimQuizSourceText(context)}
     
     // Save quiz to localStorage
     const newQuiz = {
-      id: getNextQuizId(),
+      id: Date.now(),
       title: generatedQuiz.title || title,
       grade: grade,
       questionsCount: generatedQuiz.questions.length,
@@ -4253,60 +3943,18 @@ if(currentUser && currentUser.role === 'student') {
 </script>
 <!-- ACTIVATION CODE MODAL -->
 <div class="code-modal-overlay" id="codeModal">
-  <div class="code-modal" style="max-width:500px; padding:32px 28px;">
-    <div class="code-modal-icon" style="font-size:48px; margin-bottom:12px;">🔑</div>
-    <h3 style="font-size:22px; font-weight:900; margin-bottom:6px;">اشتراك وتفعيل الكورس</h3>
-    <div id="modalCourseInfo" style="display:none; margin-bottom:18px; padding:8px 16px; background:rgba(0, 180, 216, 0.05); border:1px solid var(--border); border-radius:12px; font-size:14px; font-weight:700; color:var(--primary-dark);">
-      📚 كورس: <span id="modalCourseTitle"></span> | 💰 السعر: <span id="modalCoursePrice"></span> ج.م
+  <div class="code-modal">
+    <div class="code-modal-icon">🔑</div>
+    <h3>إدخال كود التفعيل</h3>
+    <p>اكتب كود التفعيل الخاص بيك وهيتفعّل الكورس على طول!</p>
+    <div class="code-input-wrap">
+      <input type="text" id="codeInput" placeholder="XXXXXXXX" maxlength="12" oninput="this.value=this.value.toUpperCase()">
     </div>
-    
-    <!-- Tabs -->
-    <div class="activation-tabs">
-      <button class="activation-tab active" id="tabModalBtnCode" onclick="switchModalTab('code')">🔑 كود التفعيل</button>
-      <button class="activation-tab" id="tabModalBtnTransfer" onclick="switchModalTab('transfer')">💳 تحويل فودافون كاش</button>
+    <div class="code-result" id="codeResult"></div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="submitActivationCode()" style="flex:1;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-weight:900;font-size:16px;cursor:pointer">تفعيل الكود ✅</button>
+      <button onclick="closeCodeModal()" style="padding:14px 20px;background:var(--bg);color:var(--text);border:2px solid var(--border);border-radius:14px;font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer">إلغاء</button>
     </div>
-
-    <!-- Tab Content 1: Code -->
-    <div id="tabModalContentCode">
-      <p style="color:var(--text2); margin-bottom:16px; font-size:13.5px; line-height:1.5;">اكتب كود التفعيل الخاص بالكورس وسيتم تفعيله لحسابك فوراً!</p>
-      <div class="code-input-wrap">
-        <input type="text" id="codeInput" placeholder="XXXXXXXX" maxlength="12" oninput="this.value=this.value.toUpperCase()" style="font-size:20px; padding:12px;">
-      </div>
-      <div class="code-result" id="codeResult"></div>
-      <button onclick="submitActivationCode()" class="btn-submit-action" style="margin-bottom:12px;">تفعيل الكود ✅</button>
-    </div>
-
-    <!-- Tab Content 2: Transfer -->
-    <div id="tabModalContentTransfer" style="display:none;">
-      <div class="payment-instruction-box">
-        <div class="payment-instruction-title" style="color: #d68910;">
-          <span>⚠️ تنبيه هام جداً:</span>
-        </div>
-        <div class="payment-instruction-desc">
-          يرجى تحويل قيمة الكورس أولاً إلى رقم فودافون كاش التالي قبل إرسال طلب التفعيل:
-        </div>
-        <div class="payment-number-container">
-          <span class="payment-number" id="payNum_modal">01012457129</span>
-          <button class="btn-copy" onclick="copyPaymentNumber('modal')">
-            <span>📋</span> <span id="copyText_modal">نسخ الرقم</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="activation-input-group">
-        <label for="modalPaymentPhoneInput">رقم المحفظة التي قمت بالتحويل منها</label>
-        <input id="modalPaymentPhoneInput" placeholder="مثال: 01012345678" class="activation-input" type="tel">
-      </div>
-
-      <div class="activation-input-group">
-        <label for="modalPaymentAmountInput">المبلغ الذي قمت بتحويله (ج.م)</label>
-        <input id="modalPaymentAmountInput" placeholder="المبلغ الفعلي المحول" class="activation-input" type="number" min="0">
-      </div>
-
-      <button id="modalSubmitPaymentBtn" onclick="submitCoursePaymentRequestFromModal()" class="btn-submit-action" style="margin-bottom:12px;">إرسال طلب التفعيل 🚀</button>
-    </div>
-
-    <button onclick="closeCodeModal()" style="width:100%; padding:12px; background:var(--bg); color:var(--text); border:1.5px solid var(--border); border-radius:12px; font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">إلغاء</button>
   </div>
 </div>
 

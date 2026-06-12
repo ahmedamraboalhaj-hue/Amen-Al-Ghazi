@@ -80,144 +80,6 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 .segment-icon { display: flex; align-items: center; gap: 12px; }
 .segment-action-text { font-size: 14px; font-weight: 700; opacity: 0.8; }
-
-/* Custom Activation & Subscription Styles */
-.activation-tabs {
-  display: flex;
-  background: var(--bg);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border);
-}
-.activation-tab {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.activation-tab.active {
-  background: var(--card);
-  color: var(--primary-dark);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-[data-theme="dark"] .activation-tab.active {
-  background: var(--card);
-  color: var(--primary);
-}
-.payment-instruction-box {
-  background: rgba(245, 166, 35, 0.08);
-  border: 1px solid rgba(245, 166, 35, 0.25);
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 20px;
-  text-align: right;
-}
-.payment-instruction-title {
-  color: #d68910;
-  font-weight: 800;
-  font-size: 15px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.payment-instruction-desc {
-  color: var(--text2);
-  font-size: 13.5px;
-  line-height: 1.6;
-  margin-bottom: 14px;
-}
-.payment-number-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 10px 14px;
-  border-radius: 10px;
-}
-.payment-number {
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--primary-dark);
-  letter-spacing: 1px;
-}
-[data-theme="dark"] .payment-number {
-  color: var(--primary);
-}
-.btn-copy {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.btn-copy:hover {
-  background: var(--primary-dark);
-}
-.activation-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  text-align: right;
-}
-.activation-input-group label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-.activation-input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  font-size: 14.5px;
-  outline: none;
-  transition: all 0.2s;
-}
-.activation-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
-}
-.btn-submit-action {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-family: 'Cairo', sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.2);
-}
-.btn-submit-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
-}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -307,43 +169,7 @@ function startTest(){
 function getCurrentUser(){
   return JSON.parse(localStorage.getItem('alamin_current') || 'null');
 }
-const paymentReceiverNumber = '01012457129';
-
-function switchActivationTab(tab) {
-  const btnCode = document.getElementById('tabBtnCode');
-  const btnTransfer = document.getElementById('tabBtnTransfer');
-  const contentCode = document.getElementById('tabContentCode');
-  const contentTransfer = document.getElementById('tabContentTransfer');
-  
-  if (tab === 'code') {
-    if (btnCode) btnCode.classList.add('active');
-    if (btnTransfer) btnTransfer.classList.remove('active');
-    if (contentCode) contentCode.style.display = 'block';
-    if (contentTransfer) contentTransfer.style.display = 'none';
-  } else {
-    if (btnCode) btnCode.classList.remove('active');
-    if (btnTransfer) btnTransfer.classList.add('active');
-    if (contentCode) contentCode.style.display = 'none';
-    if (contentTransfer) contentTransfer.style.display = 'block';
-  }
-}
-
-function copyPaymentNumber(suffix) {
-  const numEl = document.getElementById('payNum_' + suffix);
-  if (!numEl) return;
-  const num = numEl.textContent.trim();
-  navigator.clipboard.writeText(num).then(() => {
-    const btnText = document.getElementById('copyText_' + suffix);
-    if (btnText) {
-      btnText.textContent = 'تم النسخ! ✓';
-      setTimeout(() => {
-        btnText.textContent = 'نسخ الرقم';
-      }, 2000);
-    }
-  }).catch(err => {
-    alert('الرقم هو: ' + num);
-  });
-}
+const paymentReceiverNumber = '010XXXXXXXX';
 
 function hasCourseAccess(courseId){
   const user = getCurrentUser();
@@ -533,9 +359,7 @@ async function renderCoursePage(){
     meta.innerHTML = `
       <span>👨‍🏫 الأستاذ الأمين</span>
       <span>📅 آخر تحديث: ${course.updated || course.created || 'غير محدد'}</span>
-      <span>${course.type==='free' 
-        ? `<span style="background:rgba(46,213,115,0.12);color:#2ed573;padding:4px 10px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;font-size:13px;">🆓 مجاني</span>` 
-        : `<span style="background:rgba(245,166,35,0.12);color:#f5a623;padding:4px 10px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;font-size:13px;">💰 السعر: ${course.price || 'غير محدد'} ج.م</span>`}</span>
+      <span>${course.type==='free' ? '🆓 مجاني' : `💰 السعر: ${course.price || 'غير محدد'} ج.م`}</span>
     `;
   }
   const descEl = document.querySelector('.lesson-description p');
@@ -568,70 +392,36 @@ async function renderCoursePage(){
   if(!hasAccess){
     gate.style.display = 'block';
     gate.innerHTML = `
-      <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
-        <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
-        <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
-          ${course.type==='paid' 
-            ? `هذا الكورس مدفوع وقيمته <strong>${course.price || 'غير محدد'} ج.م</strong>. لتفعيل الكورس، يرجى إدخال كود التفعيل أو إرسال تفاصيل التحويل.` 
-            : 'هذا الكورس مجاني، اضغط على زر الاشتراك بالأسفل للبدء فوراً.'}
-        </p>
-
-        ${course.type==='free' ? `
-          <button id="subscribeBtn" class="btn-submit-action" style="background:linear-gradient(135deg,#2ed573,#1ea760);box-shadow:0 4px 14px rgba(46,213,115,0.25);">اشترك مجاناً الآن 🆓</button>
-        ` : `
-          <!-- Tabs -->
-          <div class="activation-tabs">
-            <button class="activation-tab active" id="tabBtnCode" onclick="switchActivationTab('code')">🔑 كود التفعيل</button>
-            <button class="activation-tab" id="tabBtnTransfer" onclick="switchActivationTab('transfer')">💳 تحويل فودافون كاش</button>
+      <div style="background:#fff4e5;border:1px solid #ffce9d;padding:24px;border-radius:16px;text-align:center;box-shadow:0 8px 24px rgba(255,206,157,0.3)">
+        <div style="font-size:18px;font-weight:800;margin-bottom:12px;color:#c46200">🔒 هذا الكورس مقفول حتى يتم التفعيل</div>
+        ${course.type==='paid' ? `<div style="font-size:16px;font-weight:700;margin-bottom:12px;color:#2f3b52">💰 سعر الكورس: ${course.price || 'غير محدد'} ج.م</div>` : ''}
+        <div style="color:#5f4b32;margin-bottom:18px">${course.type==='paid' ? 'يمكنك تحويل المبلغ ثم طلب تفعيل من الإدارة، أو استخدام كود التفعيل إذا كان لديك.' : 'هذا الكورس مجاني، يمكنك الاشتراك فيه فوراً.'}</div>
+        <div style="margin-bottom:12px;">
+          <button id="subscribeBtn" style="padding:14px 28px;background:var(--primary);color:white;border:none;border-radius:50px;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(0,180,216,0.3)">${course.type==='paid' ? 'اشترك الآن' : 'اشترك مجاناً'}</button>
+        </div>
+        <div id="subscribeOptions" style="display:none;margin-top:16px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:12px">
+            <input id="voucherCodeInput" placeholder="أدخل كود التفعيل" style="padding:12px 14px;border:1px solid #e5c07b;border-radius:12px;background:#fff;color:#000;outline:none;min-width:200px">
+            <button id="checkVoucherBtn" style="padding:12px 20px;background:linear-gradient(135deg,#ff6b9d,#ff4757);color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer">تحقق من الكود</button>
           </div>
-
-          <!-- Tab Content 1: Code -->
-          <div id="tabContentCode">
-            <div class="activation-input-group">
-              <label for="voucherCodeInput">كود التفعيل الخاص بالكورس</label>
-              <input id="voucherCodeInput" placeholder="أدخل كود التفعيل (مثال: XXXXXXXX)" class="activation-input" style="text-align:center;letter-spacing:1.5px;font-weight:700;" oninput="this.value=this.value.toUpperCase()">
+          ${course.type==='paid' ? `
+          <div style="margin-top:12px;padding:16px;border-radius:14px;background:#f3f8ff;border:1px solid #cbe4ff;text-align:right">
+            <div style="font-weight:800;margin-bottom:10px;color:#0b3d91">💳 رقم تحويل المحفظة: ${paymentReceiverNumber}</div>
+            <div style="display:grid;gap:10px;max-width:300px;margin:0 auto">
+              <input id="paymentPhoneInput" placeholder="رقم المحفظة المحول منها" style="padding:12px;border:1px solid #cbd5e1;border-radius:12px">
+              <input id="paymentAmountInput" placeholder="المبلغ" type="number" min="0" style="padding:12px;border:1px solid #cbd5e1;border-radius:12px">
+              <button id="submitPaymentBtn" style="padding:12px;background:#0b3d91;color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer">أرسل طلب التفعيل</button>
             </div>
-            <button id="checkVoucherBtn" class="btn-submit-action">تفعيل الكود ✅</button>
-          </div>
-
-          <!-- Tab Content 2: Transfer -->
-          <div id="tabContentTransfer" style="display:none;">
-            <div class="payment-instruction-box">
-              <div class="payment-instruction-title" style="color: #d68910;">
-                <span>⚠️ تنبيه هام جداً:</span>
-              </div>
-              <div class="payment-instruction-desc">
-                يرجى تحويل قيمة الاشتراك (<strong>${course.price || 'غير محدد'} ج.م</strong>) أولاً إلى رقم فودافون كاش التالي قبل إرسال طلب التفعيل:
-              </div>
-              <div class="payment-number-container">
-                <span class="payment-number" id="payNum_lessons">${paymentReceiverNumber}</span>
-                <button class="btn-copy" onclick="copyPaymentNumber('lessons')">
-                  <span>📋</span> <span id="copyText_lessons">نسخ الرقم</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="activation-input-group">
-              <label for="paymentPhoneInput">رقم المحفظة التي قمت بالتحويل منها</label>
-              <input id="paymentPhoneInput" placeholder="مثال: 01012345678" class="activation-input" type="tel">
-            </div>
-
-            <div class="activation-input-group">
-              <label for="paymentAmountInput">المبلغ الذي قمت بتحويله (ج.م)</label>
-              <input id="paymentAmountInput" placeholder="المبلغ الفعلي المحول" class="activation-input" type="number" min="0">
-            </div>
-
-            <button id="submitPaymentBtn" class="btn-submit-action">إرسال طلب التفعيل 🚀</button>
-          </div>
-        `}
+          </div>` : ''}
+        </div>
       </div>`;
     
     // Attach events
     setTimeout(()=>{
       const subBtn = document.getElementById('subscribeBtn');
-      if(subBtn && course.type === 'free'){
-        subBtn.addEventListener('click', ()=>{
+      const opts = document.getElementById('subscribeOptions');
+      if(subBtn) subBtn.addEventListener('click', ()=>{
+        if(course.type === 'free'){
           const user = getCurrentUser();
           if(!user.enrolledCourses) user.enrolledCourses = [];
           user.enrolledCourses.push(course.id);
