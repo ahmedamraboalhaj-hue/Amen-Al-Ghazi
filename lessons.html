@@ -489,44 +489,78 @@ async function renderCoursePage(){
     window.location='login.html';
     return;
   }
-  const courseId = parseInt(getQueryParam('course'), 10);
-  if(!courseId){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
-  currentCourseId = courseId;
 
-  // ✅ دائماً اجلب أحدث نسخة من Firebase أولاً — هي المصدر الأساسي
+  const rawCourseParam = getQueryParam('course');
+  console.log('[Alamin] URL param course =', rawCourseParam);
+
+  const courseId = parseInt(rawCourseParam, 10);
+  if(!courseId || isNaN(courseId)){
+    console.error('[Alamin] CourseId is missing or invalid:', rawCourseParam);
+    document.getElementById('mainTitle').textContent = 'الكورس غير موجود — لم يتم إرسال معرّف الكورس';
+    document.getElementById('lecturesList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);font-size:16px">⚠️ خطأ: لم يتم تمرير معرّف الكورس في الرابط.<br>يرجى العودة واختيار الكورس مجدداً.</div>';
+    return;
+  }
+  currentCourseId = courseId;
+  console.log('[Alamin] Loading course ID:', courseId);
+
+  // عرض مؤشر التحميل
+  const listContainer = document.getElementById('lecturesList');
+  if(listContainer) listContainer.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">⏳ جاري تحميل محتوى الكورس...</div>';
+
   let courses = [];
-  
+
   // أولاً: جرب Firebase كمصدر رئيسي
   if(window.db){
     try{
+      console.log('[Alamin] Fetching courses from Firebase: platform_data/courses_list');
       const doc = await window.db.collection('platform_data').doc('courses_list').get();
       if(doc.exists){
         const data = doc.data();
+        console.log('[Alamin] Firebase doc exists, items count:', Array.isArray(data.items) ? data.items.length : 'not array');
         if(Array.isArray(data.items) && data.items.length){
           courses = data.items;
           localStorage.setItem('alamin_courses', JSON.stringify(courses));
         }
+      } else {
+        console.warn('[Alamin] Firebase doc platform_data/courses_list does NOT exist');
       }
     }catch(e){ 
-      console.warn('Firebase fetch failed, falling back to localStorage:', e);
+      console.error('[Alamin] Firebase fetch failed:', e);
     }
+  } else {
+    console.warn('[Alamin] Firebase (window.db) not available');
   }
   
-  // ثانياً: لو Firebase فشل أو مفيش اتصال، استخدم localStorage
+  // ثانياً: لو Firebase فشل أو مفيش بيانات، استخدم localStorage
   if(!courses.length){
+    console.log('[Alamin] Falling back to localStorage');
     const stored = localStorage.getItem('alamin_courses');
     if(stored){
       try{
         courses = JSON.parse(stored);
+        console.log('[Alamin] localStorage courses count:', courses.length);
       }catch(e){ 
-        console.warn('Failed to parse local courses:', e); 
+        console.error('[Alamin] Failed to parse localStorage courses:', e); 
         courses = [];
       }
+    } else {
+      console.warn('[Alamin] No courses found in localStorage either');
     }
   }
 
+  console.log('[Alamin] Total courses loaded:', courses.length, '| Looking for courseId:', courseId);
+
   const course = courses.find(c=>String(c.id)===String(courseId));
-  if(!course){ document.getElementById('mainTitle').textContent='الكورس غير موجود'; return; }
+  if(!course){
+    console.error('[Alamin] Course NOT found! Available IDs:', courses.map(c=>c.id));
+    document.getElementById('mainTitle').textContent = 'الكورس غير موجود';
+    if(listContainer) listContainer.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);font-size:16px">
+      ⚠️ لا يوجد كورس بالمعرّف: <strong>${courseId}</strong><br>
+      <small style="color:#888">تأكد من أن بيانات الكورس محفوظة في Firebase أو localStorage</small>
+    </div>`;
+    return;
+  }
+  console.log('[Alamin] Course found:', course.title, '| Lessons count:', (course.lessons||[]).length);
 
   document.getElementById('courseName').textContent = course.title;
   document.getElementById('mainTitle').textContent = course.title;
@@ -544,24 +578,36 @@ async function renderCoursePage(){
   if(descEl) descEl.textContent = course.desc || '';
 
   const lessonsList = course.lessons && course.lessons.length ? course.lessons : [];
-  const listContainer = document.getElementById('lecturesList');
+  console.log('[Alamin] Lessons to render:', lessonsList.length);
+
   if(listContainer){
-    listContainer.innerHTML = lessonsList.map((ls,i)=>{
-      const items = getLessonContentItems(ls);
-      return `
-        <div class="lecture-card" data-lesson-unit="${ls.id}">
-          <div class="lecture-header" onclick="toggleLesson(${courseId}, ${ls.id})">
-            <div class="lecture-info">
-              <div class="lecture-title">${i+1}. ${escapeHTML(ls.title)}</div>
-              <div class="lecture-tip">✨ اضغط هنا لعرض المحتويات</div>
+    if(!lessonsList.length){
+      listContainer.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text2)">
+        <div style="font-size:48px;margin-bottom:16px">📭</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px">لا يوجد محتوى لهذا الكورس حتى الآن</div>
+        <div style="font-size:14px">سيتم إضافة الدروس قريباً، تابعنا!</div>
+      </div>`;
+    } else {
+      listContainer.innerHTML = lessonsList.map((ls,i)=>{
+        const items = getLessonContentItems(ls);
+        console.log(`[Alamin] Lesson "${ls.title}" (id:${ls.id}) → items:`, items.length);
+        return `
+          <div class="lecture-card" data-lesson-unit="${ls.id}">
+            <div class="lecture-header" onclick="toggleLesson(${courseId}, ${ls.id})">
+              <div class="lecture-info">
+                <div class="lecture-title">${i+1}. ${escapeHTML(ls.title)}</div>
+                <div class="lecture-tip">✨ اضغط هنا لعرض المحتويات (${items.length} عنصر)</div>
+              </div>
+              <div class="lecture-arrow">▼</div>
             </div>
-            <div class="lecture-arrow">▼</div>
-          </div>
-          <div class="lecture-body" id="lessonBody_${ls.id}">
-            ${items.length ? items.map(item => renderCourseContentItem(ls.id, item)).join('') : '<div style="text-align:center;padding:20px;color:var(--text2)">لا توجد محتويات</div>'}
-          </div>
-        </div>`;
-    }).join('');
+            <div class="lecture-body" id="lessonBody_${ls.id}">
+              ${items.length
+                ? items.map(item => renderCourseContentItem(ls.id, item)).join('')
+                : '<div style="text-align:center;padding:20px;color:var(--text2)">⚠️ لا توجد محتويات لهذا الدرس بعد</div>'}
+            </div>
+          </div>`;
+      }).join('');
+    }
   }
 
   // Handle Access Gate
@@ -636,17 +682,15 @@ async function renderCoursePage(){
         subBtn.addEventListener('click', ()=>{
           const user = getCurrentUser();
           if(!user.enrolledCourses) user.enrolledCourses = [];
-          user.enrolledCourses.push(course.id);
+          if(!user.enrolledCourses.includes(course.id)) user.enrolledCourses.push(course.id);
           localStorage.setItem('alamin_current', JSON.stringify(user));
           const users = JSON.parse(localStorage.getItem('alamin_users')||'[]');
           const idx = users.findIndex(u=>String(u.id)===String(user.id));
           if(idx > -1){ users[idx].enrolledCourses = user.enrolledCourses; localStorage.setItem('alamin_users', JSON.stringify(users)); }
           if(window.db){ window.db.collection('students').doc(String(user.id)).set({ enrolledCourses: user.enrolledCourses }, { merge: true }).catch(console.warn); }
           alert('تم الاشتراك بنجاح! ✅'); location.reload();
-        } else {
-          opts.style.display = 'block'; subBtn.style.display = 'none';
-        }
-      });
+        });
+      }
       document.getElementById('checkVoucherBtn')?.addEventListener('click', ()=>verifyCourseCode(courseId));
       document.getElementById('submitPaymentBtn')?.addEventListener('click', ()=>submitCoursePaymentRequest(courseId));
     }, 50);
@@ -654,15 +698,18 @@ async function renderCoursePage(){
     gate.style.display = 'none';
   }
 
-  if(!lessonsList.length){
-    if(listContainer) listContainer.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">لا توجد دروس حتى الآن</div>';
-  }
+  console.log('[Alamin] renderCoursePage() complete for course:', course.title);
 }
 
 function getLessonSegments(lesson){
   if(Array.isArray(lesson.segments) && lesson.segments.length){
+    console.log(`[Alamin] Lesson "${lesson.title}" has ${lesson.segments.length} segment(s)`);
     return lesson.segments
-      .filter(segment => segment && (segment.videoUrl || segment.bunnyVideoId))
+      .filter(segment => {
+        const valid = segment && (segment.videoUrl || segment.bunnyVideoId);
+        if(!valid) console.warn('[Alamin] Segment filtered out (no videoUrl or bunnyVideoId):', segment);
+        return valid;
+      })
       .map((segment, index)=>{
         // بناء videoUrl من bunnyVideoId لو videoUrl فاضي
         const videoUrl = segment.videoUrl ||
