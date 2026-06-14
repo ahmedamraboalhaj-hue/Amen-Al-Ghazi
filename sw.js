@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'alamin-platform-pwa-v2';
+const CACHE_VERSION = 'alamin-platform-pwa-v3';
 const APP_SHELL = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const APP_SHELL = [
   './tests.html',
   './certificates.html',
   './firebase-config.js',
+  './grade-mapping.js',
   './manifest.webmanifest',
   './pwa-install.js',
   './app-icon-192.png',

@@ -403,6 +403,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="grade-mapping.js"></script>
 </head>
 <body>
 
@@ -576,10 +577,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
             </select>
             <select id="studentsGradeFilter" onchange="filterStudents()" style="padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none">
               <option value="all">كل الصفوف</option>
-              <option value="1">الأول الثانوي</option>
-              <option value="2">الثاني الثانوي</option>
-              <option value="3">الثالث الثانوي</option>
-              <option value="prep3">الثالث الإعدادي</option>
+              <!-- تُملأ ديناميكياً من grade-mapping.js عند التحميل -->
             </select>
             <button class="btn-add" onclick="refreshCenterStudentsForStudentsPage()">استيراد طلاب السيستم</button>
             <button class="btn-add" onclick="openAddStudentModal()">➕ إضافة طالب</button>
@@ -1194,9 +1192,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
       <div class="form-group">
         <label>الصف الدراسي</label>
         <select id="asGR">
-          <option value="1">الصف الأول الثانوي</option>
-          <option value="2">الصف الثاني الثانوي</option>
-          <option value="3">الصف الثالث الثانوي</option>
+          <!-- تُملأ ديناميكياً من buildGradeOptions() في grade-mapping.js -->
         </select>
       </div>
       <div class="form-group">
@@ -1528,11 +1524,25 @@ function showPage(id) {
 function getUsers(){return JSON.parse(localStorage.getItem('alamin_users')||'[]');}
 function saveUsers(u){localStorage.setItem('alamin_users',JSON.stringify(u));}
 
-function gradeLabel(g){
-  const m={'1':'الأول الثانوي','2':'الثاني الثانوي','3':'الثالث الثانوي','prep3':'الثالث الإعدادي','all':'كل الصفوف'};
-  return m[g]||g;
+// gradeLabel و gradeClass يأتيان من grade-mapping.js
+// تعريف fallback محلي في حالة تحميل الصفحة قبل grade-mapping.js
+if (typeof gradeLabel === 'undefined') {
+  window.gradeLabel = function(g) {
+    const m={'1':'أولى ثانوي','2':'ثانية ثانوي','3':'ثالثة ثانوي',
+             'prep3':'ثالثة إعدادي','prep2':'ثانية إعدادي','prep1':'أولى إعدادي',
+             'prim1':'أولى ابتدائي','prim2':'ثانية ابتدائي','prim3':'ثالثة ابتدائي',
+             'prim4':'رابعة ابتدائي','prim5':'خامسة ابتدائي','prim6':'سادسة ابتدائي',
+             'all':'كل الصفوف'};
+    return m[g]||g;
+  };
 }
-function gradeClass(g){return{1:'grade1',2:'grade2',3:'grade3','prep3':'grade3'}[g]||'grade1';}
+if (typeof gradeClass === 'undefined') {
+  window.gradeClass = function(g) {
+    if(['prim1','prim2','prim3','prim4','prim5','prim6'].includes(g)) return 'grade-prim';
+    if(['prep1','prep2','prep3'].includes(g)) return 'grade-prep';
+    return {1:'grade1','1':'grade1',2:'grade2','2':'grade2',3:'grade3','3':'grade3'}[g]||'grade1';
+  };
+}
 function studentTypeLabel(type){return{'center':'طلاب السنتر','outside':'خارج السنتر','all':'كل الطلاب'}[type]||'غير محدد';}
 function getStudentType(user){return user.studentType||'outside';}
 function filterUsersByGradeAndType(users, grade, type){
@@ -1941,7 +1951,13 @@ function saveNewStudent(){
   const pw=document.getElementById('asPW').value;
   if(!fn||!ln||!ph||!gr||!type){alert('من فضلك اكمل البيانات');return;}
   const users=getUsers();
-  users.push({id:Date.now(),firstName:fn,lastName:ln,name:fn+' '+ln,phone:ph,grade:gr,studentType:type,password:pw,joinDate:new Date().toLocaleDateString('ar-EG'),status:'active',enrolledCourses:[]});
+  const base = {id:Date.now(),firstName:fn,lastName:ln,name:fn+' '+ln,
+    phone:ph,grade:gr,studentType:type,password:pw,
+    joinDate:new Date().toLocaleDateString('ar-EG'),status:'active',enrolledCourses:[]};
+  const student = typeof buildStudentExportPayload === 'function'
+    ? buildStudentExportPayload(base)
+    : { ...base, offlineGrade: gr, platformGrade: gr };
+  users.push(student);
   saveUsers(users);
   closeModal('addStudentModal');
   renderStudentsTable();
@@ -3005,10 +3021,21 @@ function saveVouchersData() {
   localStorage.setItem('alamin_vouchers', JSON.stringify(vouchersData));
 }
 function normalizeImportedStudentGrade(data) {
+  // يفوّض لـ grade-mapping.js (متاح كـ window global)
+  if (window.normalizeGrade) {
+    const candidates = [data.grade, data.offlineGrade, data.platformGrade];
+    for (const c of candidates) {
+      const n = window.normalizeGrade(c);
+      if (n) return n;
+    }
+    return 'all';
+  }
+  // fallback داخلي
   const raw = String(data.grade || data.offlineGrade || '');
-  const offline = String(data.offlineGrade || '');
-  const direct = { '301': '1', '302': '2', '303': '3', '203': 'prep3', '1': '1', '2': '2', '3': '3', 'prep3': 'prep3' };
-  return direct[raw] || direct[offline] || raw || 'all';
+  const legacyMap = {'301':'1','302':'2','303':'3','203':'prep3','1':'1','2':'2','3':'3',
+    'prep3':'prep3','prep2':'prep2','prep1':'prep1',
+    'prim1':'prim1','prim2':'prim2','prim3':'prim3','prim4':'prim4','prim5':'prim5','prim6':'prim6'};
+  return legacyMap[raw] || raw || 'all';
 }
 function isSystemStudentDoc(doc, data) {
   const docId = String(doc.id || '');
@@ -4248,6 +4275,38 @@ if(currentUser && currentUser.role === 'student') {
   }
   showPage('overview');
   renderPaymentsTable();
+
+  // ─── تهيئة قوائم الصفوف الدراسية من grade-mapping.js ───
+  (function initGradeSelects() {
+    // دالة بناء الخيارات (من grade-mapping.js أو fallback داخلي)
+    const buildOpts = typeof buildGradeOptions === 'function'
+      ? buildGradeOptions
+      : function(sel, incAll) {
+          const grades = [
+            ['prim1','أولى ابتدائي'],['prim2','ثانية ابتدائي'],['prim3','ثالثة ابتدائي'],
+            ['prim4','رابعة ابتدائي'],['prim5','خامسة ابتدائي'],['prim6','سادسة ابتدائي'],
+            ['prep1','أولى إعدادي'],['prep2','ثانية إعدادي'],['prep3','ثالثة إعدادي'],
+            ['1','أولى ثانوي'],['2','ثانية ثانوي'],['3','ثالثة ثانوي']
+          ];
+          let html = incAll ? '<option value="all">كل الصفوف</option>' : '<option value="">اختر الصف الدراسي</option>';
+          html += grades.map(([v,l]) => `<option value="${v}"${v===sel?' selected':''}>${l}</option>`).join('');
+          return html;
+        };
+
+    // فلتر الطلاب
+    const gf = document.getElementById('studentsGradeFilter');
+    if (gf) gf.innerHTML = buildOpts('', true);
+
+    // modal إضافة طالب
+    const ag = document.getElementById('asGR');
+    if (ag) ag.innerHTML = buildOpts('1', false);
+
+    // فلاتر الكورسات والفاوتشرات (لو موجودة)
+    ['coursesGradeFilter','voucherGradeFilter','lessonsGradeFilter','quizGradeFilter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = buildOpts('', true);
+    });
+  })();
 }
 
 </script>

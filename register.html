@@ -58,6 +58,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="grade-mapping.js"></script>
 </head>
 <body>
 <nav>
@@ -109,10 +110,7 @@
         <span class="input-icon">📚</span>
         <select id="grade">
           <option value="">اختر صفك الدراسي</option>
-          <option value="1">الصف الأول الثانوي</option>
-          <option value="2">الصف الثاني الثانوي</option>
-          <option value="3">الصف الثالث الثانوي</option>
-          <option value="prep3">الصف الثالث الإعدادي</option>
+          <!-- تُملأ ديناميكياً من grade-mapping.js -->
         </select>
       </div>
     </div>
@@ -160,6 +158,25 @@
   function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');localStorage.setItem('theme',h.getAttribute('data-theme'));}
   const saved=localStorage.getItem('theme');if(saved)document.documentElement.setAttribute('data-theme',saved);
 
+  // تملئة قائمة الصفوف ديناميكياً من grade-mapping.js
+  window.addEventListener('DOMContentLoaded', function() {
+    const gradeSelect = document.getElementById('grade');
+    if (!gradeSelect) return;
+    if (typeof buildGradeOptions === 'function') {
+      gradeSelect.innerHTML = buildGradeOptions('', false);
+    } else {
+      // fallback بسيط
+      const grades = [
+        ['prim1','أولى ابتدائي'],['prim2','ثانية ابتدائي'],['prim3','ثالثة ابتدائي'],
+        ['prim4','رابعة ابتدائي'],['prim5','خامسة ابتدائي'],['prim6','سادسة ابتدائي'],
+        ['prep1','أولى إعدادي'],['prep2','ثانية إعدادي'],['prep3','ثالثة إعدادي'],
+        ['1','أولى ثانوي'],['2','ثانية ثانوي'],['3','ثالثة ثانوي']
+      ];
+      gradeSelect.innerHTML = '<option value="">اختر صفك الدراسي</option>' +
+        grades.map(([v,l]) => `<option value="${v}">${l}</option>`).join('');
+    }
+  });
+
   // Password strength check removed per request
 
   function showAlert(msg,type){const a=document.getElementById('alert');a.textContent=msg;a.className='alert '+type;a.style.display='block';setTimeout(()=>a.style.display='none',4000);}
@@ -192,14 +209,23 @@
       const randNum = Math.floor(Math.random() * 900 + 100).toString();
       const uniqueCode = '2' + baseTime + randNum;
 
-      const newUser={
-        firstName:fn,lastName:ln,name:fn+' '+ln,
-        phone:ph,grade:gr,studentType:studentType,password:pw,
+      // تحديد platformGrade و gradeLabel من grade-mapping.js
+      const platformGrade = typeof gradeToPlatformCode === 'function' ? gradeToPlatformCode(gr) : gr;
+      const gradeLabelText = typeof gradeLabel === 'function' ? gradeLabel(gr) : gr;
+
+      const baseUser = {
+        firstName:fn, lastName:ln, name:fn+' '+ln,
+        phone:ph, grade:gr, studentType:studentType, password:pw,
         joinDate:new Date().toLocaleDateString('ar-EG'),
         lastLogin:new Date().toLocaleDateString('ar-EG'),
-        enrolledCourses:[],status:'active',role:'student',
+        enrolledCourses:[], status:'active', role:'student',
         qrCode: uniqueCode
       };
+
+      // بناء payload المنصة (يضيف platformGrade و offlineGrade و gradeLabel)
+      const newUser = typeof buildStudentExportPayload === 'function'
+        ? buildStudentExportPayload(baseUser)
+        : { ...baseUser, platformGrade, offlineGrade: gr, gradeLabel: gradeLabelText };
 
       // Save to Firebase
       const docRef = await db.collection('students').add(newUser);
