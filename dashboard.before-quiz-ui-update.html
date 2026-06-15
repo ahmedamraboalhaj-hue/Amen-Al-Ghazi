@@ -881,6 +881,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
               <th>الاختبار</th>
               <th>الصف</th>
               <th>عدد الأسئلة</th>
+              <th>الحالة</th>
               <th>الإجراءات</th>
             </tr>
           </thead>
@@ -1330,7 +1331,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
       </div>
       <div class="form-group">
         <label>اختبار الدرس (اختياري)</label>
-        <input type="text" id="alQuizId" list="lessonQuizOptions" placeholder="مثال: Q_178153">
+        <input type="number" id="alQuizId" list="lessonQuizOptions" placeholder="اكتب ID الاختبار">
         <datalist id="lessonQuizOptions"></datalist>
         <div class="field-hint">هتلاقي ID كل اختبار في صفحة الاختبارات.</div>
       </div>
@@ -1422,7 +1423,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
 <!-- ADVANCED QUIZ MODAL -->
 <div class="modal-overlay" id="addQuizModal">
-  <div class="modal" style="max-width:1040px; width:96%;">
+  <div class="modal" style="max-width:900px; width:95%;">
     <h3 id="quizModalTitle">إنشاء اختبار جديد 📝</h3>
     <input type="hidden" id="aqQuizId">
     
@@ -1452,8 +1453,24 @@ tr:hover td{background:rgba(0,180,216,.03);}
         <input type="number" id="aqTime" value="60" min="1">
       </div>
       <div class="form-group">
-        <label>الدرجة المتوسطة (%)</label>
-        <input type="number" id="aqPassingGrade" value="50" min="0" max="100"><div class="field-hint">الدرجة المرجعية أو الحد المتوسط للاختبار، والقيمة الافتراضية 50%.</div>
+        <label>درجة النجاح (%)</label>
+        <input type="number" id="aqPassingGrade" value="50" min="0" max="100">
+      </div>
+      <div class="form-group">
+        <label>تاريخ بداية الاختبار</label>
+        <input type="datetime-local" id="aqStartDate">
+      </div>
+      <div class="form-group">
+        <label>تاريخ نهاية الاختبار</label>
+        <input type="datetime-local" id="aqEndDate">
+      </div>
+      <div class="form-group">
+        <label>حالة الاختبار</label>
+        <select id="aqStatus">
+          <option value="published">منشور</option>
+          <option value="hidden">مخفي</option>
+          <option value="archived">مؤرشف</option>
+        </select>
       </div>
       <div class="form-group">
         <label>إحصائيات الأسئلة</label>
@@ -1472,11 +1489,11 @@ tr:hover td{background:rgba(0,180,216,.03);}
           <button type="button" class="btn-mini" onclick="openQuestionBankImport()" style="background:var(--primary); color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:700; cursor:pointer;">📚 بنك الأسئلة</button>
         </div>
       </div>
-      <div id="aqQuestionsList" style="max-height:54vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px; padding-right:4px;"></div>
+      <div id="aqQuestionsList" style="max-height:40vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px; padding-right:4px;"></div>
     </div>
 
     <div class="modal-actions" style="margin-top:24px;">
-      <button type="button" class="btn-save" onclick="saveNewQuiz()">💾 حفظ الاختبار</button>
+      <button class="btn-save" onclick="saveNewQuiz()">💾 حفظ الاختبار</button>
       <button class="btn-cancel" onclick="closeModal('addQuizModal')">إلغاء</button>
     </div>
   </div>
@@ -2951,7 +2968,7 @@ async function saveNewLesson(){
   const pdfUrl = document.getElementById('alPdf').value.trim();
   const pdfFileUrl = await readPdfInputAsDataUrl();
   if(pdfFileUrl === null) return;
-  const quizId = document.getElementById('alQuizId').value.trim() || null;
+  const quizId = parseInt(document.getElementById('alQuizId').value,10) || null;
   const quizzes = JSON.parse(localStorage.getItem('alamin_quizzes') || '[]');
   if(quizId && !quizzes.some(q=>String(q.id)===String(quizId))){
     alert('لا يوجد اختبار بهذا الـ ID. راجع صفحة الاختبارات واكتب ID صحيح.');
@@ -3323,12 +3340,16 @@ function openAddQuizModal(quizId = null) {
   const modal = document.getElementById('addQuizModal');
   const modalTitle = document.getElementById('quizModalTitle');
   
+  // تنظيف الحقول
   document.getElementById('aqQuizId').value = '';
   document.getElementById('aqTitle').value = '';
   document.getElementById('aqGrade').value = '1';
   document.getElementById('aqSubject').value = '';
   document.getElementById('aqTime').value = '60';
   document.getElementById('aqPassingGrade').value = '50';
+  document.getElementById('aqStartDate').value = '';
+  document.getElementById('aqEndDate').value = '';
+  document.getElementById('aqStatus').value = 'published';
   document.getElementById('aqQuestionsList').innerHTML = '';
   
   if (quizId) {
@@ -3340,7 +3361,11 @@ function openAddQuizModal(quizId = null) {
       document.getElementById('aqGrade').value = quiz.grade || '1';
       document.getElementById('aqSubject').value = quiz.subject || '';
       document.getElementById('aqTime').value = quiz.time || '60';
-      document.getElementById('aqPassingGrade').value = quiz.averageGrade || quiz.passingGrade || '50';
+      document.getElementById('aqPassingGrade').value = quiz.passingGrade || '50';
+      document.getElementById('aqStartDate').value = quiz.startDate || '';
+      document.getElementById('aqEndDate').value = quiz.endDate || '';
+      document.getElementById('aqStatus').value = quiz.status || 'published';
+      
       if (Array.isArray(quiz.questionsList)) {
         quiz.questionsList.forEach(q => addQuizQuestionField(q));
       }
@@ -3348,11 +3373,11 @@ function openAddQuizModal(quizId = null) {
   } else {
     modalTitle.textContent = 'إنشاء اختبار جديد 📝';
     document.getElementById('aqQuizId').value = getNextQuizId();
+    // إضافة سؤال افتراضي واحد على الأقل لتسهيل العمل
     addQuizQuestionField();
   }
   
   updateQuizStats();
-  refreshQuizQuestionNumbers();
   modal.classList.add('open');
 }
 
@@ -3360,172 +3385,96 @@ function addQuizQuestionField(qData = null) {
   const container = document.getElementById('aqQuestionsList');
   const qId = qData ? qData.id : 'q_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
   const qType = qData ? qData.type : 'mcq';
-  const imgWidth = qData ? (qData.imageWidth || 360) : 360;
-  const imgHeight = qData ? (qData.imageHeight || '') : '';
-  const imageUrl = qData ? (qData.mediaUrl || qData.imageData || qData.media || '') : '';
   
   const card = document.createElement('div');
   card.className = 'question-editor-card';
   card.dataset.id = qId;
-  card.dataset.imageUrl = imageUrl || '';
-  card.style.cssText = 'background:var(--card-bg); border:1.5px solid var(--border); border-radius:14px; padding:18px; position:relative; box-shadow:0 8px 22px rgba(0,0,0,0.04);';
+  card.style.cssText = 'background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:16px; position:relative;';
   
   card.innerHTML = `
-    <button type="button" class="btn-delete" onclick="this.parentElement.remove(); updateQuizStats(); refreshQuizQuestionNumbers();" style="position:absolute; left:14px; top:14px; padding:5px 10px; font-size:12px; min-width:auto;">✕ حذف</button>
-    <div class="question-editor-title" style="font-weight:900; font-size:15px; color:var(--primary-dark); margin-bottom:16px; padding-left:70px;">السؤال رقم <span class="question-number">1</span></div>
+    <button type="button" class="btn-delete" onclick="this.parentElement.remove(); updateQuizStats();" style="position:absolute; left:12px; top:12px; padding:4px 8px; font-size:12px; min-width:auto;">✕ حذف</button>
+    <div style="font-weight:800; font-size:13px; color:var(--text2); margin-bottom:10px;">سؤال جديد</div>
     
-    <div class="form-group" style="margin-bottom:14px;">
-      <label>نص السؤال:</label>
-      <textarea class="q-text-input" placeholder="اكتب نص السؤال هنا..." rows="3" oninput="updateQuestionStudentPreview(this.closest('.question-editor-card'))" style="width:100%; resize:vertical; min-height:78px;">${escHtml(qData ? qData.q || qData.text : '')}</textarea>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label style="font-size:12px;">نص السؤال</label>
+      <input type="text" class="q-text-input" placeholder="اكتب نص السؤال هنا..." value="${escHtml(qData ? qData.q || qData.text : '')}" style="width:100%;" required>
     </div>
     
-    <div style="display:grid; grid-template-columns:1fr 180px 160px; gap:12px; margin-bottom:14px; align-items:end;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
       <div class="form-group">
-        <label>نوع السؤال:</label>
+        <label style="font-size:12px;">نوع السؤال</label>
         <select class="q-type-select" onchange="toggleQuestionOptionsType(this)" style="width:100%;">
           <option value="mcq" ${qType === 'mcq' ? 'selected' : ''}>اختيار من متعدد</option>
           <option value="tf" ${qType === 'tf' ? 'selected' : ''}>صح وخطأ</option>
         </select>
       </div>
       <div class="form-group">
-        <label>الإجابة الصحيحة:</label>
-        <select class="q-correct-select" onchange="updateQuestionStudentPreview(this.closest('.question-editor-card'))" style="width:100%;"></select>
-      </div>
-      <div class="form-group">
-        <label>درجة السؤال:</label>
-        <input type="number" class="q-points-input" value="${qData ? qData.points || 1 : '1'}" min="1" onchange="updateQuizStats()" style="width:100%;">
+        <label style="font-size:12px;">درجة السؤال</label>
+        <input type="number" class="q-points-input" value="${qData ? qData.points : '1'}" min="1" onchange="updateQuizStats()" style="width:100%;">
       </div>
     </div>
 
-    <div class="options-container" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"></div>
-
-    <div style="border-top:1px solid var(--border); padding-top:14px; display:grid; grid-template-columns:minmax(260px,1fr) minmax(260px,1fr); gap:16px; align-items:start;">
-      <div>
-        <label style="font-weight:800; display:block; margin-bottom:8px;">صورة السؤال (اختياري):</label>
-        <input type="file" class="q-image-file-input" accept="image/*" onchange="readQuestionImageInput(this)" style="width:100%;">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <button type="button" class="btn-mini" onclick="adjustQuestionImageSize(this.closest('.question-editor-card'), 1.1)" style="background:var(--primary); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">تكبير</button>
-          <button type="button" class="btn-mini" onclick="adjustQuestionImageSize(this.closest('.question-editor-card'), 0.9)" style="background:var(--primary-dark); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">تصغير</button>
-          <label style="font-size:12px; font-weight:800;">العرض</label>
-          <input type="number" class="q-image-width" value="${imgWidth}" min="80" max="900" onchange="updateQuestionImagePreview(this.closest('.question-editor-card'))" style="width:82px; padding:6px 8px;">
-          <label style="font-size:12px; font-weight:800;">الارتفاع</label>
-          <input type="number" class="q-image-height" value="${imgHeight}" min="60" max="700" placeholder="تلقائي" onchange="updateQuestionImagePreview(this.closest('.question-editor-card'))" style="width:82px; padding:6px 8px;">
-          <button type="button" class="btn-mini" onclick="this.closest('.question-editor-card').dataset.imageUrl=''; this.closest('.question-editor-card').querySelector('.q-image-file-input').value=''; updateQuestionImagePreview(this.closest('.question-editor-card'));" style="background:var(--danger); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">حذف الصورة</button>
-        </div>
-        <div class="q-image-preview-wrap" style="margin-top:12px; min-height:44px; border:1px dashed var(--border); border-radius:10px; background:var(--bg); padding:10px; text-align:center;"></div>
+    <!-- Media (Image / Video) Links -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group">
+        <label style="font-size:12px;">رابط صورة مدمجة (اختياري)</label>
+        <input type="text" class="q-image-input" placeholder="https://example.com/image.png" value="${escHtml(qData ? qData.mediaUrl || qData.media : '')}" style="width:100%;">
       </div>
-      <div>
-        <label style="font-weight:800; display:block; margin-bottom:8px;">معاينة السؤال للطالب:</label>
-        <div class="q-student-preview" style="background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:14px; min-height:150px;"></div>
+      <div class="form-group">
+        <label style="font-size:12px;">رابط فيديو مدمج (اختياري)</label>
+        <input type="text" class="q-video-input" placeholder="رابط يوتيوب أو Bunny" value="${escHtml(qData ? qData.videoUrl || '' : '')}" style="width:100%;">
+      </div>
+    </div>
+    
+    <div class="options-container">
+      <label style="font-size:12px; font-weight:800; display:block; margin-bottom:6px;">الخيارات والإجابة الصحيحة:</label>
+      <div class="options-grid" style="display:flex; flex-direction:column; gap:8px;">
+        <!-- Option fields will be rendered here dynamically -->
       </div>
     </div>
   `;
   
   container.appendChild(card);
-  renderQuestionOptionFields(card, qType, qData);
-  updateQuestionImagePreview(card);
-  updateQuestionStudentPreview(card);
+  
+  // توليد الخيارات حسب نوع السؤال
+  renderQuestionOptionFields(card.querySelector('.options-grid'), qType, qData);
   updateQuizStats();
-  refreshQuizQuestionNumbers();
-}
-
-function refreshQuizQuestionNumbers() {
-  document.querySelectorAll('#aqQuestionsList .question-editor-card').forEach((card, idx) => {
-    const lbl = card.querySelector('.question-number');
-    if (lbl) lbl.textContent = idx + 1;
-  });
-}
-
-function readQuestionImageInput(input) {
-  const file = input.files && input.files[0];
-  const card = input.closest('.question-editor-card');
-  if (!file || !card) return;
-  if (!file.type.startsWith('image/')) {
-    alert('برجاء اختيار ملف صورة فقط.');
-    input.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = () => {
-    card.dataset.imageUrl = reader.result;
-    updateQuestionImagePreview(card);
-  };
-  reader.readAsDataURL(file);
-}
-
-function adjustQuestionImageSize(card, factor) {
-  const widthInput = card.querySelector('.q-image-width');
-  const current = parseInt(widthInput.value, 10) || 360;
-  widthInput.value = Math.max(80, Math.min(900, Math.round(current * factor)));
-  updateQuestionImagePreview(card);
-}
-
-function updateQuestionImagePreview(card) {
-  if (!card) return;
-  const wrap = card.querySelector('.q-image-preview-wrap');
-  const imageUrl = card.dataset.imageUrl || '';
-  const width = parseInt(card.querySelector('.q-image-width')?.value, 10) || 360;
-  const heightVal = card.querySelector('.q-image-height')?.value;
-  const height = heightVal ? parseInt(heightVal, 10) : null;
-  if (!wrap) return;
-  if (!imageUrl) {
-    wrap.innerHTML = '<span style="font-size:13px; color:var(--text2);">لم يتم رفع صورة لهذا السؤال</span>';
-  } else {
-    wrap.innerHTML = `<img src="${imageUrl}" style="width:${width}px; ${height ? `height:${height}px;` : ''} max-width:100%; object-fit:contain; border-radius:10px; border:1px solid var(--border); background:#fff;">`;
-  }
-  updateQuestionStudentPreview(card);
 }
 
 function toggleQuestionOptionsType(select) {
   const card = select.closest('.question-editor-card');
-  renderQuestionOptionFields(card, select.value);
-  updateQuestionStudentPreview(card);
+  const grid = card.querySelector('.options-grid');
+  renderQuestionOptionFields(grid, select.value);
 }
 
-function renderQuestionOptionFields(card, type, qData = null) {
-  const grid = card.querySelector('.options-container');
-  const correctSelect = card.querySelector('.q-correct-select');
-  const correctIdx = qData ? (qData.correctOpt !== undefined ? qData.correctOpt : 0) : 0;
+function renderQuestionOptionFields(grid, type, qData = null) {
   grid.innerHTML = '';
-  correctSelect.innerHTML = '';
+  const correctIdx = qData ? (qData.correctOpt !== undefined ? qData.correctOpt : 0) : 0;
   
-  const makeOptionRow = (idx, label, value, readonly = false) => {
-    grid.insertAdjacentHTML('beforeend', `
-      <div class="form-group" style="margin:0;">
-        <label>${label}:</label>
-        <input type="text" class="q-option-val" data-index="${idx}" placeholder="اكتب ${label}" value="${escHtml(value || '')}" ${readonly ? 'readonly' : ''} oninput="updateQuestionStudentPreview(this.closest('.question-editor-card'))" style="width:100%; ${readonly ? 'background:#f3f4f6;' : ''}">
-      </div>
-    `);
-    correctSelect.insertAdjacentHTML('beforeend', `<option value="${idx}" ${correctIdx === idx ? 'selected' : ''}>${label}</option>`);
-  };
-  
-  if (type === 'tf') {
-    makeOptionRow(0, 'صح', 'صح', true);
-    makeOptionRow(1, 'خطأ', 'خطأ', true);
-  } else {
+  if (type === 'mcq') {
     const opts = qData ? (Array.isArray(qData.opts) ? qData.opts : ['', '', '', '']) : ['', '', '', ''];
-    ['الاختيار الأول','الاختيار الثاني','الاختيار الثالث','الاختيار الرابع'].forEach((label, idx) => makeOptionRow(idx, label, opts[idx] || ''));
+    for (let i = 0; i < 4; i++) {
+      const val = opts[i] || '';
+      grid.innerHTML += `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="radio" name="correct_${grid.closest('.question-editor-card').dataset.id}" value="${i}" ${correctIdx === i ? 'checked' : ''} style="width:auto; cursor:pointer;" title="تحديد كإجابة صحيحة">
+          <input type="text" class="q-option-val" placeholder="الخيار ${i + 1}" value="${escHtml(val)}" style="flex:1; padding:6px 10px; font-size:13px;" required>
+        </div>
+      `;
+    }
+  } else {
+    // صح وخطأ
+    grid.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="radio" name="correct_${grid.closest('.question-editor-card').dataset.id}" value="0" ${correctIdx === 0 ? 'checked' : ''} style="width:auto; cursor:pointer;" title="تحديد كإجابة صحيحة">
+        <input type="text" class="q-option-val" value="صح" readonly style="flex:1; padding:6px 10px; font-size:13px; background:#f3f4f6;">
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="radio" name="correct_${grid.closest('.question-editor-card').dataset.id}" value="1" ${correctIdx === 1 ? 'checked' : ''} style="width:auto; cursor:pointer;" title="تحديد كإجابة صحيحة">
+        <input type="text" class="q-option-val" value="خطأ" readonly style="flex:1; padding:6px 10px; font-size:13px; background:#f3f4f6;">
+      </div>
+    `;
   }
-}
-
-function updateQuestionStudentPreview(card) {
-  if (!card) return;
-  const preview = card.querySelector('.q-student-preview');
-  if (!preview) return;
-  const text = card.querySelector('.q-text-input')?.value.trim() || 'نص السؤال سيظهر هنا';
-  const imageUrl = card.dataset.imageUrl || '';
-  const width = parseInt(card.querySelector('.q-image-width')?.value, 10) || 360;
-  const heightVal = card.querySelector('.q-image-height')?.value;
-  const height = heightVal ? parseInt(heightVal, 10) : null;
-  const opts = Array.from(card.querySelectorAll('.q-option-val')).map(opt => opt.value.trim()).filter(Boolean);
-  const imageHtml = imageUrl ? `<div style="text-align:center; margin:10px 0 14px;"><img src="${imageUrl}" style="width:${width}px; ${height ? `height:${height}px;` : ''} max-width:100%; object-fit:contain; border-radius:10px; border:1px solid var(--border); background:#fff;"></div>` : '';
-  preview.innerHTML = `
-    <div style="font-weight:900; line-height:1.7; margin-bottom:10px;">${escHtml(text)}</div>
-    ${imageHtml}
-    <div style="display:flex; flex-direction:column; gap:7px;">
-      ${opts.map((opt, idx) => `<div style="background:var(--card-bg); border:1px solid var(--border); border-radius:9px; padding:8px 10px; font-size:13px;"><strong>${['أ','ب','ج','د'][idx] || idx + 1}.</strong> ${escHtml(opt)}</div>`).join('') || '<div style="font-size:13px; color:var(--text2);">الاختيارات ستظهر هنا</div>'}
-    </div>
-  `;
 }
 
 function updateQuizStats() {
@@ -3549,24 +3498,25 @@ function collectQuizQuestions() {
     const text = c.querySelector('.q-text-input').value.trim();
     const type = c.querySelector('.q-type-select').value;
     const points = parseInt(c.querySelector('.q-points-input').value, 10) || 1;
-    const mediaUrl = c.dataset.imageUrl || null;
-    const imageWidth = parseInt(c.querySelector('.q-image-width')?.value, 10) || 360;
-    const heightRaw = c.querySelector('.q-image-height')?.value;
-    const imageHeight = heightRaw ? parseInt(heightRaw, 10) : null;
-    const opts = Array.from(c.querySelectorAll('.q-option-val')).map(opt => opt.value.trim());
-    const correctOpt = parseInt(c.querySelector('.q-correct-select')?.value, 10) || 0;
+    const mediaUrl = c.querySelector('.q-image-input').value.trim();
+    const videoUrl = c.querySelector('.q-video-input').value.trim();
+    
+    const optionInputs = c.querySelectorAll('.q-option-val');
+    const opts = Array.from(optionInputs).map(opt => opt.value.trim());
+    
+    const correctRadio = c.querySelector(`input[name="correct_${qId}"]:checked`);
+    const correctOpt = correctRadio ? parseInt(correctRadio.value, 10) : 0;
     
     if (text) {
       questions.push({
         id: qId,
         q: text,
-        type,
-        points,
-        mediaUrl,
-        imageWidth,
-        imageHeight,
-        opts,
-        correctOpt
+        type: type,
+        points: points,
+        mediaUrl: mediaUrl || null,
+        videoUrl: videoUrl || null,
+        opts: opts,
+        correctOpt: correctOpt
       });
     }
   });
@@ -3575,12 +3525,15 @@ function collectQuizQuestions() {
 }
 
 async function saveNewQuiz() {
-  const quizId = document.getElementById('aqQuizId').value || getNextQuizId();
+  const quizId = document.getElementById('aqQuizId').value;
   const title = document.getElementById('aqTitle').value.trim();
   const grade = document.getElementById('aqGrade').value;
   const subject = document.getElementById('aqSubject').value.trim();
   const time = parseInt(document.getElementById('aqTime').value, 10) || 60;
-  const averageGrade = parseInt(document.getElementById('aqPassingGrade').value, 10) || 50;
+  const passingGrade = parseInt(document.getElementById('aqPassingGrade').value, 10) || 50;
+  const startDate = document.getElementById('aqStartDate').value;
+  const endDate = document.getElementById('aqEndDate').value;
+  const status = document.getElementById('aqStatus').value;
   
   if (!title) { alert('برجاء إدخال اسم الاختبار أولاً'); return; }
   
@@ -3589,25 +3542,23 @@ async function saveNewQuiz() {
   
   let totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
   
-  const previousQuiz = quizzesData.find(q => String(q.id) === String(quizId));
   const quizData = {
-    ...(previousQuiz || {}),
     id: quizId,
-    title,
-    grade,
+    title: title,
+    grade: grade,
     subject: subject || 'عام',
-    time,
+    time: time,
     questionsCount: questions.length,
-    totalPoints,
-    averageGrade,
-    passingGrade: averageGrade,
+    totalPoints: totalPoints,
+    passingGrade: passingGrade,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    status: status,
     questionsList: questions,
     updatedAt: new Date().toISOString()
   };
-  delete quizData.startDate;
-  delete quizData.endDate;
-  delete quizData.status;
   
+  // حفظ محلي
   const idx = quizzesData.findIndex(q => String(q.id) === String(quizId));
   if (idx > -1) {
     quizzesData[idx] = quizData;
@@ -3618,6 +3569,7 @@ async function saveNewQuiz() {
   
   localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesData));
   
+  // حفظ الأسئلة في بنك الأسئلة تلقائياً
   questions.forEach(q => {
     if (!questionBankData.some(qb => qb.q === q.q)) {
       questionBankData.push({
@@ -3627,32 +3579,35 @@ async function saveNewQuiz() {
         opts: q.opts,
         correctOpt: q.correctOpt,
         points: q.points,
-        grade,
+        grade: grade,
         mediaUrl: q.mediaUrl,
-        imageWidth: q.imageWidth,
-        imageHeight: q.imageHeight
+        videoUrl: q.videoUrl
       });
     }
   });
   localStorage.setItem('alamin_question_bank', JSON.stringify(questionBankData));
   
+  // رفع لـ Firebase
   if (window.db) {
     try {
       await window.db.collection('quizzes').doc(String(quizId)).set(quizData);
+      
+      // حفظ في بنك الأسئلة على الفايربيس
       for (const q of questions) {
         const hashId = btoa(unescape(encodeURIComponent(q.q))).slice(0, 30);
         await window.db.collection('question_bank').doc(hashId).set({
           id: q.id, q: q.q, type: q.type, opts: q.opts, correctOpt: q.correctOpt,
-          points: q.points, grade, mediaUrl: q.mediaUrl, imageWidth: q.imageWidth, imageHeight: q.imageHeight
+          points: q.points, grade: grade, mediaUrl: q.mediaUrl, videoUrl: q.videoUrl
         }, { merge: true });
       }
-      alert(`تم حفظ الاختبار بنجاح ✅\nID الاختبار: ${quizId}\nاسم الاختبار: ${title}`);
+      
+      alert('تم حفظ ونشر الاختبار ومزامنة الأسئلة بنجاح! ✅');
     } catch(e) {
       console.warn('Firebase sync failed:', e);
-      alert(`تم الحفظ محلياً بنجاح ⏳\nID الاختبار: ${quizId}\nاسم الاختبار: ${title}`);
+      alert('تم الحفظ محلياً بنجاح (سيتم الرفع عند الاتصال بالإنترنت) ⏳');
     }
   } else {
-    alert(`تم الحفظ محلياً بنجاح ✅\nID الاختبار: ${quizId}\nاسم الاختبار: ${title}`);
+    alert('تم الحفظ محلياً بنجاح! ✅');
   }
   
   closeModal('addQuizModal');
@@ -3661,6 +3616,7 @@ async function saveNewQuiz() {
     renderResultsTable();
   }
 }
+
 async function duplicateQuiz(quizId) {
   const quiz = quizzesData.find(q => String(q.id) === String(quizId));
   if (!quiz) return;
@@ -3707,16 +3663,17 @@ async function deleteQuiz(id) {
 function renderQuizzesTable() {
   const tbody = document.getElementById('quizzesTableBody');
   if (!quizzesData.length) {
-    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📝</div><p>لا يوجد اختبارات مضافة</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📝</div><p>لا يوجد اختبارات مضافة</p></div></td></tr>';
     return;
   }
   
   tbody.innerHTML = quizzesData.map(q => `
     <tr>
-      <td><div style="font-weight:900;color:var(--primary-dark);direction:ltr;text-align:right;">${escHtml(q.id)}</div><button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('${q.id}')" style="margin-top:4px;border:0;background:var(--bg);color:var(--primary);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">نسخ ID</button></td>
-      <td><strong>${escHtml(q.title)}</strong><br><span style="font-size:11px;color:var(--text2);">ID: <code style="direction:ltr;unicode-bidi:bidi-override;">${escHtml(q.id)}</code> | ${escHtml(q.subject || 'عام')}</span></td>
+      <td><strong style="color:var(--primary)">#${q.id.replace('Q_','')}</strong></td>
+      <td>${escHtml(q.title)} <br><span style="font-size:11px;color:var(--text2);">${escHtml(q.subject || 'عام')}</span></td>
       <td><span class="badge ${gradeClass(q.grade)}">${gradeLabel(q.grade)}</span></td>
       <td>${q.questionsCount || 0} أسئلة (${q.totalPoints || 0} درجة)</td>
+      <td><span class="badge ${q.status === 'published' ? 'active' : 'inactive'}">${q.status === 'published' ? 'منشور' : q.status === 'hidden' ? 'مخفي' : 'مؤرشف'}</span></td>
       <td>
         <div class="action-btns" style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="btn-view" onclick="openAddQuizModal('${q.id}')" style="background:#0077b6;color:#fff;padding:6px 10px;border-radius:6px;">✏️ تعديل</button>
@@ -3785,8 +3742,7 @@ function importSelectedQuestions() {
         correctOpt: qData.correctOpt,
         points: qData.points,
         mediaUrl: qData.mediaUrl,
-        imageWidth: qData.imageWidth,
-        imageHeight: qData.imageHeight
+        videoUrl: qData.videoUrl
       });
     }
   });
@@ -4087,7 +4043,7 @@ function renderResultsTable() {
   const term = document.getElementById('searchResults')?.value.toLowerCase() || '';
   
   // فلترة حسب الاسم
-  const filteredQuizzes = quizzesData.filter(q => (q.title || '').toLowerCase().includes(term) || String(q.id || '').toLowerCase().includes(term));
+  const filteredQuizzes = quizzesData.filter(q => q.title.toLowerCase().includes(term));
   
   if (!filteredQuizzes.length) {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📊</div><p>لا توجد اختبارات للمراقبة</p></div></td></tr>';
@@ -4118,7 +4074,7 @@ function renderResultsTable() {
         <td><span style="font-weight:800;color:var(--primary)">${total} طالب</span></td>
         <td><span style="font-weight:800;color:var(--success)">${passed}</span></td>
         <td><span style="font-weight:800;color:var(--danger)">${failed}</span></td>
-        <td><span class="badge active">${avg}%</span><br><span style="font-size:11px;color:var(--text2);">متوسط مرجعي: ${q.averageGrade || q.passingGrade || 50}%</span></td>
+        <td><span class="badge active">${avg}%</span></td>
         <td>
           <button class="btn-view" onclick="openQuizDetailedResults('${q.id}')" style="background:#7c3aed;color:#fff;padding:6px 10px;border-radius:6px;">📊 عرض التفاصيل والتقارير</button>
         </td>
@@ -5301,30 +5257,17 @@ ${trimQuizSourceText(context)}
     
     if(!generatedQuiz.questions || !generatedQuiz.questions.length) {
       throw new Error('لم يقم الذكاء الاصطناعي بتوليد أي أسئلة بشكل متطابق!');
-    }    const normalizedQuestions = generatedQuiz.questions.map((q, idx) => ({
-      id: q.id || `q_ai_${Date.now()}_${idx}`,
-      q: q.q || q.text || '',
-      type: 'mcq',
-      opts: Array.isArray(q.opts) ? q.opts : [],
-      correctOpt: q.correctOpt !== undefined ? q.correctOpt : 0,
-      points: q.points || 1,
-      mediaUrl: null,
-      imageWidth: 360,
-      imageHeight: null
-    })).filter(q => q.q && q.opts.length);
-
+    }
+    
     // Save quiz to localStorage
     const newQuiz = {
       id: getNextQuizId(),
       title: generatedQuiz.title || title,
       grade: grade,
-      subject: 'عام',
-      questionsCount: normalizedQuestions.length,
-      totalPoints: normalizedQuestions.reduce((sum, q) => sum + (q.points || 1), 0),
-      averageGrade: 50,
-      passingGrade: 50,
-      time: normalizedQuestions.length * 2, // 2 minutes per question
-      questionsList: normalizedQuestions
+      questionsCount: generatedQuiz.questions.length,
+      time: generatedQuiz.questions.length * 2, // 2 minutes per question
+      status: 'نشط',
+      questionsList: generatedQuiz.questions // custom questions list!
     };
     
     quizzesData.push(newQuiz);

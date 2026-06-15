@@ -359,25 +359,17 @@ async function loadQuizzesAndAttempts() {
   }
   
   // تصفية الاختبارات حسب الصف الدراسي للطالب
-  testsData = localQuizzes.filter(q => {    // فلترة الصف
+  testsData = localQuizzes.filter(q => {
+    // إخفاء المحذوف أو المخفي
+    if (q.status === 'hidden' || q.status === 'archived') return false;
+    
+    // فلترة الصف
     if (!q.grade || q.grade === 'all') return true;
     return String(q.grade) === String(user.grade);
   });
   
   renderTests();
   renderOverallStats();
-
-  // فتح الاختبار مباشرة لو جاي من رابط lessons.html (?quiz=ID) أو من alamin_selected_quiz
-  const urlParams = new URLSearchParams(window.location.search);
-  let targetQuizId = urlParams.get('quiz') || localStorage.getItem('alamin_selected_quiz');
-  if (targetQuizId) {
-    localStorage.removeItem('alamin_selected_quiz');
-    if (testsData.find(q => String(q.id) === String(targetQuizId))) {
-      openQuizModal(targetQuizId);
-    } else {
-      alert('⚠️ هذا الاختبار غير متاح لصفك الدراسي أو غير موجود.');
-    }
-  }
 }
 
 function renderOverallStats() {
@@ -406,7 +398,16 @@ function renderTests() {
   container.innerHTML = testsData.map(t => {
     const key = getQuizAttemptKey(t.id);
     const attempt = attemptsData[key];
-    const status = attempt ? attempt.status : 'notstart';    let badgeText = 'لم يبدأ';
+    const status = attempt ? attempt.status : 'notstart';
+    const now = new Date();
+    
+    // فحص الفترة الزمنية للاختبار
+    const startDate = t.startDate ? new Date(t.startDate) : null;
+    const endDate = t.endDate ? new Date(t.endDate) : null;
+    const isUpcoming = startDate && now < startDate;
+    const isExpired = endDate && now > endDate && status !== 'submitted';
+    
+    let badgeText = 'لم يبدأ';
     let badgeClass = 'status-notstart';
     let actionBtnText = 'ابدأ الآن';
     let actionBtnClass = 'btn-start';
@@ -418,13 +419,34 @@ function renderTests() {
       badgeClass = 'status-done';
       actionBtnText = 'عرض ومراجعة الإجابات';
       actionBtnClass = 'btn-review';
-      progress = 100;    } else if (status === 'started' || status === 'autosaved') {
+      progress = 100;
+    } else if (isUpcoming) {
+      badgeText = '🔜 لم يبدأ بعد';
+      badgeClass = 'status-future';
+      actionBtnText = 'يبدأ في: ' + startDate.toLocaleDateString('ar-EG', {month:'short',day:'numeric'});
+      actionBtnClass = '';
+      actionDisabled = 'disabled';
+    } else if (isExpired) {
+      badgeText = '🔒 انتهت المهلة';
+      badgeClass = 'status-locked';
+      actionBtnText = 'انتهت مهلة الاختبار';
+      actionBtnClass = '';
+      actionDisabled = 'disabled';
+    } else if (status === 'started' || status === 'autosaved') {
       badgeText = '⏳ قيد الإجراء';
       badgeClass = 'status-pending';
       actionBtnText = 'استكمال الاختبار';
       progress = 50;
     }
-    const averageGrade = t.averageGrade || t.passingGrade || 50;
+    
+    // شريط التواريخ
+    let dateLine = '';
+    if (startDate || endDate) {
+      const startFmt = startDate ? startDate.toLocaleDateString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'الآن';
+      const endFmt = endDate ? endDate.toLocaleDateString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'مفتوح';
+      dateLine = `<div class="test-date-bar">📅 من ${startFmt} إلى ${endFmt}</div>`;
+    }
+    
     return `
       <div class="test-card">
         <div>
@@ -437,9 +459,9 @@ function renderTests() {
             <span>📚 ${escHtml(t.subject || 'عام')}</span>
             <span>❓ ${t.questionsCount || 0} أسئلة</span>
             <span>⏱️ ${t.time || 30} دقيقة</span>
-            <span>🎯 ${averageGrade}% درجة متوسطة</span>
+            <span>🎯 ${t.passingGrade || 50}% للنجاح</span>
           </div>
-
+          ${dateLine}
           ${status === 'submitted' ? `<p style="font-size:14px; color:var(--text2); margin-bottom:12px;">درجتك: <strong style="color:var(--primary-dark)">${attempt.score} / ${attempt.totalPoints || t.totalPoints} (${attempt.percentage}%)</strong></p>` : ''}
         </div>
         <div>
@@ -603,10 +625,14 @@ function showQuestion(idx) {
   // إعداد الوسائط (صورة/فيديو)
   let mediaHtml = '';
   if (q.mediaUrl) {
-    const imgWidth = q.imageWidth || 360;
-    const imgHeight = q.imageHeight ? `height:${q.imageHeight}px;` : '';
-    mediaHtml = `<div style="text-align:center; margin-bottom:16px;"><img src="${q.mediaUrl}" style="width:${imgWidth}px; ${imgHeight} max-width:100%; border-radius:10px; object-fit:contain; border:1.5px solid var(--border);"></div>`;
+    mediaHtml = `<div style="text-align:center; margin-bottom:16px;"><img src="${q.mediaUrl}" style="max-width:100%; max-height:220px; border-radius:10px; object-fit:contain; border:1.5px solid var(--border);"></div>`;
   }
+  if (q.videoUrl) {
+    mediaHtml += `<div style="margin-bottom:16px; aspect-ratio:16/9; background:#000; border-radius:10px; overflow:hidden;">
+      <iframe src="${q.videoUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+    </div>`;
+  }
+  
   // خلط وترتيب الخيارات
   container.innerHTML = `
     <div class="question-box">
@@ -767,7 +793,7 @@ async function submitQuizGameplay() {
   });
   
   const percentage = totalPoints ? Math.round((score / totalPoints) * 100) : 0;
-  const passed = percentage >= (currentQuiz.averageGrade || currentQuiz.passingGrade || 50);
+  const passed = percentage >= (currentQuiz.passingGrade || 50);
   
   const finalAttempt = {
     id: `ATT_${userId}_${currentQuiz.id}`,
@@ -827,7 +853,7 @@ function showQuizReview(attempt) {
   
   const totalPoints = attempt.totalPoints || currentQuiz.totalPoints;
   const pct = attempt.percentage || 0;
-  const passingScore = totalPoints * ((currentQuiz.averageGrade || currentQuiz.passingGrade || 50) / 100);
+  const passingScore = totalPoints * ((currentQuiz.passingGrade || 50) / 100);
   const isPassed = attempt.score >= passingScore;
   
   // عنوان المراجعة
@@ -889,9 +915,7 @@ function showQuizReview(attempt) {
     // إعداد الوسائط
     let mediaHtml = '';
     if (q.mediaUrl) {
-      const imgWidth = q.imageWidth || 320;
-      const imgHeight = q.imageHeight ? `height:${q.imageHeight}px;` : '';
-      mediaHtml = `<div style="text-align:center; margin-top:10px;"><img src="${q.mediaUrl}" style="width:${imgWidth}px; ${imgHeight} max-width:100%; border-radius:8px; object-fit:contain;"></div>`;
+      mediaHtml = `<div style="text-align:center; margin-top:10px;"><img src="${q.mediaUrl}" style="max-width:100%; max-height:180px; border-radius:8px; object-fit:contain;"></div>`;
     }
     
     return `

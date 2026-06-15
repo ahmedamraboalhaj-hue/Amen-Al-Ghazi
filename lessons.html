@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الدروس - الأمين في اللغة العربية</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/player.js/0.1.0/player.min.js"></script>
 <style>
 :root{
   --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --success:#2ed573;
@@ -34,8 +35,21 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 /* Video Player Container */
 .video-container-wrapper { display: none; background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 32px; }
-.video-player { background: #000; border-radius: 12px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; margin-bottom: 16px; overflow: hidden; }
-.video-title-bar { font-size: 18px; font-weight: 800; color: var(--text); padding: 0 8px; }
+.video-player { background: #000; border-radius: 12px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; margin-bottom: 0; overflow: hidden; position:relative; }
+.video-title-bar { font-size: 18px; font-weight: 800; color: var(--text); padding: 0 8px 10px; }
+
+/* Custom Video Controls */
+.vp-controls { display:flex; align-items:center; gap:10px; padding:10px 4px 4px; flex-wrap:wrap; }
+.vp-btn { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:7px 14px; cursor:pointer; font-size:14px; font-family:'Cairo',sans-serif; font-weight:700; transition:background .2s; display:flex;align-items:center;gap:5px; }
+.vp-btn:hover { background:var(--primary-dark); }
+.vp-btn.secondary { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
+.vp-btn.secondary:hover { border-color:var(--primary); color:var(--primary); }
+.vp-time { font-size:13px; font-weight:700; color:var(--text2); min-width:80px; text-align:center; }
+.vp-progress-wrap { flex:1; min-width:120px; cursor:pointer; }
+.vp-progress-track { height:6px; background:var(--border); border-radius:4px; overflow:hidden; }
+.vp-progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); width:0%; border-radius:4px; transition:width .5s linear; }
+.vp-resume-bar { background:rgba(0,180,216,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text2); }
+.vp-resume-bar button { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:700; font-size:13px; }
 
 /* Lectures Layout */
 .lectures-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
@@ -256,8 +270,27 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
   <!-- Video Player (Hidden initially) -->
   <div class="video-container-wrapper" id="videoWrapper">
     <div class="video-title-bar" id="currentSegmentTitle">الفيديو</div>
+    <!-- شريط استئناف المشاهدة -->
+    <div class="vp-resume-bar" id="vpResumeBar" style="display:none">
+      <span id="vpResumeText">يمكنك الاستمرار من حيث توقفت</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="resumeFromSavedPos()" id="vpResumeBtn">▶️ استمر</button>
+        <button onclick="document.getElementById('vpResumeBar').style.display='none'" style="background:var(--border);color:var(--text)">تجاهل</button>
+      </div>
+    </div>
     <div class="video-player" id="vpElement">
       <div style="padding:40px;text-align:center;color:var(--text2)">اختر درساً للتشغيل</div>
+    </div>
+    <!-- أزرار التحكم -->
+    <div class="vp-controls" id="vpControls" style="display:none">
+      <button class="vp-btn secondary" onclick="vpSeek(-10)" title="رجوع 10 ثوانٍ">⏪ 10ث</button>
+      <button class="vp-btn secondary" onclick="vpSeek(10)" title="تقديم 10 ثوانٍ">10ث ⏩</button>
+      <div class="vp-progress-wrap" title="شريط التقدم">
+        <div class="vp-progress-track">
+          <div class="vp-progress-fill" id="vpProgressFill"></div>
+        </div>
+      </div>
+      <span class="vp-time" id="vpTimeDisplay">0:00 / --:--</span>
     </div>
   </div>
 
@@ -362,29 +395,37 @@ async function checkCenterSubscription(user, courseId) {
   try {
     const code = String(user.qrCode || user.id || '');
     if (!code) return false;
+    const cId = String(courseId);
 
-    // طريقة 1: من مجموعة platform_subscriptions باستخدام studentCode
+    // طريقة 1: سجلات السيستم بـ course_id (التفعيل المباشر من السيستم - paid قد تكون 0)
     const snap = await window.db.collection('platform_subscriptions')
       .where('studentCode', '==', code)
-      .where('courseId', '==', String(courseId))
-      .where('paid', '==', true)
+      .where('course_id', '==', cId)
       .limit(1).get();
     if (!snap.empty) return true;
 
-    // طريقة 2: من مجموعة subscribers داخل الكورس
+    // طريقة 2: سجلات قديمة بـ courseId مع paid===true
+    const snap2 = await window.db.collection('platform_subscriptions')
+      .where('studentCode', '==', code)
+      .where('courseId', '==', cId)
+      .where('paid', '==', true)
+      .limit(1).get();
+    if (!snap2.empty) return true;
+
+    // طريقة 3: من مجموعة subscribers داخل الكورس
     const subDoc = await window.db
-      .collection('platform_courses').doc(String(courseId))
+      .collection('platform_courses').doc(cId)
       .collection('subscribers').doc(code).get();
     if (subDoc.exists && subDoc.data() && subDoc.data().paid === true) return true;
 
-    // طريقة 3: بحث برقم student id مباشرةً كاحتياط إضافي
+    // طريقة 4: بحث بـ student_id أو studentId كاحتياط إضافي
     if (user.id) {
-      const snap2 = await window.db.collection('platform_subscriptions')
-        .where('studentId', '==', String(user.id))
-        .where('courseId', '==', String(courseId))
-        .where('paid', '==', true)
+      const uId = String(user.id);
+      const snap3 = await window.db.collection('platform_subscriptions')
+        .where('student_id', '==', uId)
+        .where('course_id', '==', cId)
         .limit(1).get();
-      if (!snap2.empty) return true;
+      if (!snap3.empty) return true;
     }
 
     return false;
@@ -393,6 +434,7 @@ async function checkCenterSubscription(user, courseId) {
     return false;
   }
 }
+
 
 function grantCourseAccessToCurrentUser(courseId){
   const user = getCurrentUser();
@@ -990,18 +1032,73 @@ function renderVideo(url, segment){
   const vpElement = document.querySelector('.video-player');
   const v = url || '';
 
+  // إخفاء شريط الاستئناف مبدئياً
+  const resumeBar = document.getElementById('vpResumeBar');
+  if(resumeBar) resumeBar.style.display='none';
+
+  // حفظ videoId الحالي للتحكم
+  window._vpCurrentVideoId = (segment && segment.bunnyVideoId) || '';
+  window._vpCurrentIframe  = null;
+  window._vpDuration       = 0;
+  window._vpCurrentTime    = 0;
+
+  // إظهار أزرار التحكم
+  const vpControls = document.getElementById('vpControls');
+  if(vpControls) vpControls.style.display = v ? 'flex' : 'none';
+
   // 1) Bunny.net embed
   if(v.includes('mediadelivery.net') || v.includes('iframe.mediadelivery') || (segment && segment.bunnyVideoId)){
     const libraryId = (segment && segment.bunnyLibraryId) || '666877';
     const videoId   = (segment && segment.bunnyVideoId) || '';
     const bunnyUrl  = v || `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`;
+
+    // تحقق من وجود موضع محفوظ
+    const savedPos = videoId ? (parseFloat(localStorage.getItem(`vpos_${videoId}`)) || 0) : 0;
+    if(savedPos > 10 && resumeBar){
+      const mins = Math.floor(savedPos/60), secs = Math.floor(savedPos%60);
+      document.getElementById('vpResumeText').textContent = `⏯️ كنت في الدقيقة ${mins}:${String(secs).padStart(2,'0')} — تريد الاستمرار؟`;
+      resumeBar.style.display = 'flex';
+      window._vpSavedPos = savedPos;
+    } else {
+      window._vpSavedPos = 0;
+    }
+
     vpElement.innerHTML = `<iframe
-      src="${bunnyUrl}"
+      id="bunnyIframe"
+      src="${bunnyUrl}?responsive=true"
       style="width:100%;height:100%;border:none;border-radius:12px"
       allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen"
       allowfullscreen
       referrerpolicy="origin"
       loading="lazy"></iframe>`;
+
+    window._vpCurrentIframe = document.getElementById('bunnyIframe');
+    window._bunnyPlayer = null;
+
+    if (window.playerjs && window._vpCurrentIframe) {
+      try {
+        const player = new playerjs.Player(window._vpCurrentIframe);
+        window._bunnyPlayer = player;
+        player.on('ready', () => {
+          player.on('timeupdate', (data) => {
+            if (data) {
+              window._vpCurrentTime = data.seconds || 0;
+              window._vpDuration = data.duration || 0;
+              const pct = data.duration ? (data.seconds / data.duration * 100) : 0;
+              updateVpProgress(pct, data.seconds, data.duration);
+              if (videoId && data.seconds > 5) {
+                localStorage.setItem(`vpos_${videoId}`, data.seconds);
+              }
+            }
+          });
+        });
+      } catch(e) {
+        console.warn("Failed to initialize Player.js", e);
+        startVpTimeTracking(videoId);
+      }
+    } else {
+      startVpTimeTracking(videoId);
+    }
 
   // 2) YouTube
   } else if(v.includes('youtube') || v.includes('youtu.be')){
@@ -1017,13 +1114,139 @@ function renderVideo(url, segment){
 
   // 3) Direct video file
   } else if(v){
-    vpElement.innerHTML = `<video width="100%" height="100%" controls src="${v}" style="border-radius:12px">متصفحك لا يدعم عرض الفيديو</video>`;
+    const vid = document.createElement('video');
+    vid.src = v; vid.controls = true;
+    vid.style.cssText = 'width:100%;height:100%;border-radius:12px';
+    // استئناف من موضع محفوظ
+    const savedPos = parseFloat(localStorage.getItem(`vpos_url_${btoa(v).slice(0,20)}`)) || 0;
+    vid.addEventListener('loadedmetadata',()=>{
+      if(savedPos > 10){
+        vid.currentTime = savedPos;
+        if(resumeBar){
+          const mins=Math.floor(savedPos/60),secs=Math.floor(savedPos%60);
+          document.getElementById('vpResumeText').textContent=`⏯️ استُؤنف من الدقيقة ${mins}:${String(secs).padStart(2,'0')}`;
+          resumeBar.style.display='flex';
+        }
+      }
+      window._vpDuration = vid.duration;
+    });
+    vid.addEventListener('timeupdate',()=>{
+      window._vpCurrentTime = vid.currentTime;
+      window._vpDuration    = vid.duration;
+      const pct = vid.duration ? (vid.currentTime/vid.duration*100) : 0;
+      updateVpProgress(pct, vid.currentTime, vid.duration);
+      if(vid.currentTime > 5) localStorage.setItem(`vpos_url_${btoa(v).slice(0,20)}`, vid.currentTime);
+    });
+    window._vpDirectVideo = vid;
+    vpElement.innerHTML = '';
+    vpElement.appendChild(vid);
 
   // 4) No video
   } else {
     vpElement.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">⏳ الفيديو جاري الترميز، سيظهر قريباً</div>';
+    if(vpControls) vpControls.style.display='none';
   }
 }
+
+// === أزرار التحكم في الفيديو ===
+let _vpTrackInterval = null;
+
+function startVpTimeTracking(videoId){
+  clearInterval(_vpTrackInterval);
+  let elapsed = window._vpSavedPos || 0;
+  const fill = document.getElementById('vpProgressFill');
+  const timeDisplay = document.getElementById('vpTimeDisplay');
+  // نحدّث الوقت كل 3 ثوانٍ (تقدير لعدم وجود API مباشر مع Bunny iframe)
+  _vpTrackInterval = setInterval(()=>{
+    elapsed += 3;
+    window._vpCurrentTime = elapsed;
+    if(videoId && elapsed > 5) localStorage.setItem(`vpos_${videoId}`, elapsed);
+    // عرض الوقت
+    const m=Math.floor(elapsed/60), s=Math.floor(elapsed%60);
+    if(timeDisplay) timeDisplay.textContent = `${m}:${String(s).padStart(2,'0')} / --:--`;
+    if(fill) fill.style.width = '0%'; // لا نعرف المدة الكلية من Bunny iframe بدون SDK
+  }, 3000);
+}
+
+function updateVpProgress(pct, current, total){
+  const fill = document.getElementById('vpProgressFill');
+  const timeDisplay = document.getElementById('vpTimeDisplay');
+  if(fill) fill.style.width = Math.min(100,pct) + '%';
+  if(timeDisplay){
+    const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+    timeDisplay.textContent = `${fmt(current)} / ${total?fmt(total):'--:--'}`;
+  }
+}
+
+function vpSeek(seconds){
+  // للفيديو المباشر (video element)
+  if(window._vpDirectVideo){
+    window._vpDirectVideo.currentTime = Math.max(0, window._vpDirectVideo.currentTime + seconds);
+    return;
+  }
+  // لـ Bunny iframe عبر Player.js SDK
+  if(window._bunnyPlayer){
+    try {
+      window._bunnyPlayer.getCurrentTime((curr) => {
+        const target = Math.max(0, (curr || 0) + seconds);
+        window._bunnyPlayer.setCurrentTime(target);
+        showNotification(seconds>0?`⏩ تقديم ${seconds} ثانية`:`⏪ رجوع ${Math.abs(seconds)} ثانية`,'info');
+      });
+    } catch(e) {
+      console.warn("Player.js seek failed, using postMessage fallback:", e);
+      postMessageSeekFallback(seconds);
+    }
+    return;
+  }
+  
+  postMessageSeekFallback(seconds);
+}
+
+function postMessageSeekFallback(seconds) {
+  window._vpCurrentTime = Math.max(0, (window._vpCurrentTime||0) + seconds);
+  const iframe = document.getElementById('bunnyIframe');
+  if(iframe && iframe.contentWindow){
+    try {
+      iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func: seconds>0?'seekForward':'seekBackward', args:[Math.abs(seconds)] }), '*');
+    } catch(e){}
+  }
+  // تحديث المؤقت المحلي
+  const m=Math.floor(window._vpCurrentTime/60),s=Math.floor(window._vpCurrentTime%60);
+  const td=document.getElementById('vpTimeDisplay');
+  if(td) td.textContent=`${m}:${String(s).padStart(2,'0')} / --:--`;
+  showNotification(seconds>0?`⏩ تقديم ${seconds} ثانية`:`⏪ رجوع ${Math.abs(seconds)} ثانية`,'info');
+}
+
+function resumeFromSavedPos(){
+  document.getElementById('vpResumeBar').style.display='none';
+  // للفيديو المباشر
+  if(window._vpDirectVideo && window._vpSavedPos){
+    window._vpDirectVideo.currentTime = window._vpSavedPos;
+    return;
+  }
+  // لـ Bunny iframe عبر Player.js SDK
+  if(window._bunnyPlayer && window._vpSavedPos){
+    try {
+      window._bunnyPlayer.setCurrentTime(window._vpSavedPos);
+      showNotification('▶️ يتم الاستمرار من حيث توقفت...','info');
+      return;
+    } catch(e) {
+      console.warn("Player.js resume failed, reloading iframe:", e);
+    }
+  }
+  
+  // لـ Bunny iframe — نُعيد تحميل الـ iframe مع timestamp كخطة بديلة
+  const videoId = window._vpCurrentVideoId;
+  if(videoId){
+    const iframe = document.getElementById('bunnyIframe');
+    if(iframe){
+      const t = Math.floor(window._vpSavedPos||0);
+      iframe.src = iframe.src.split('?')[0] + `?responsive=true&t=${t}`;
+    }
+  }
+  showNotification('▶️ يتم الاستمرار من حيث توقفت...','info');
+}
+
 
 function startQuiz(quizId){
   if(hasQuizAttempt(quizId)){
