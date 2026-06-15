@@ -1,0 +1,31 @@
+نظام 1\app.js:30: const tables = ['attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:192: platformCourses: [],
+نظام 1\app.js:225: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:299: this.platformCourses = await StorageEngine.getAll('platformCourses');
+نظام 1\app.js:327: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:377: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:599: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:5531: const course = (db.platformCourses || []).find(c => String(c.courseId) === String(courseId));
+نظام 1\app.js:6565: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:7528: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'settings', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\app.js:7557: const tables = ['students', 'attendance', 'exams', 'scores', 'expenses', 'handouts', 'studentHandouts', 'materials', 'quizzes', 'rewards', 'payments', 'waQueue', 'groups', 'settings', 'cycles', 'absenceSessions', 'dailyTreasuryArchives', 'staff', 'shifts', 'courseCodes', 'platformCourses', 'platformSubscriptions'];
+نظام 1\platform-subscriptions.js:36: return (db.platformCourses || []).filter(c => {
+نظام 1\platform-subscriptions.js:53: *  1. يجرب Collection  'platform_courses'  (المسار الأصلي).
+نظام 1\platform-subscriptions.js:71: db.platformCourses = built;
+نظام 1\platform-subscriptions.js:72: await StorageEngine.save('platformCourses', built);
+نظام 1\platform-subscriptions.js:89: // ─── المحاولة 1: platform_courses ───────────────────────────
+نظام 1\platform-subscriptions.js:91: const snap1 = await window.db.collection('platform_courses').get();
+نظام 1\platform-subscriptions.js:104: sourceUsed = 'platform_courses';
+نظام 1\platform-subscriptions.js:105: console.log('[COURSES] platform_courses ✅', courses.length);
+نظام 1\platform-subscriptions.js:107: console.warn('[COURSES] platform_courses فارغة — جاري تجربة مسار بديل...');
+نظام 1\platform-subscriptions.js:110: console.warn('[COURSES] platform_courses خطأ:', e.message);
+نظام 1\platform-subscriptions.js:160: db.platformCourses = courses;
+نظام 1\platform-subscriptions.js:161: await StorageEngine.save('platformCourses', courses);
+نظام 1\platform-subscriptions.js:251: * من الكورسات المحفوظة محلياً (db.platformCourses) للصف الحالي.
+نظام 1\platform-subscriptions.js:264: let courses = db.platformCourses || [];
+نظام 1\platform-subscriptions.js:270: db.platformCourses = courses;
+نظام 1\platform-subscriptions.js:271: StorageEngine.save('platformCourses', courses);
+نظام 1\platform-subscriptions.js:624: await window.db.collection('platform_courses').doc(String(record.course_id))
+نظام 1\platform-subscriptions.js:698: * يعرض في نافذة منبثقة كل الكورسات المحفوظة محلياً في db.platformCourses
+نظام 1\platform-subscriptions.js:728: let courses = db.platformCourses || [];
+نظام 1\platform-subscriptions.js:810: const count = (db.platformCourses || []).length;

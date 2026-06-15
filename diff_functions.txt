@@ -1,0 +1,447 @@
+========================================
+DIFF FOR FUNCTION: refreshPlatformCourses
+========================================
+--- System 1: refreshPlatformCourses
++++ System 2: refreshPlatformCourses
+@@ -3,15 +3,6 @@
+     try {
+         const online = await isReallyOnline();
+         if (!online) {
+-            // offline: حاول البناء من course_codes المحلية
+-            const built = _buildCoursesFromCourseCodes();
+-            if (built.length) {
+-                db.platformCourses = built;
+-                await StorageEngine.save('platformCourses', built);
+-                showNotification(`لا يوجد إنترنت — تم بناء ${built.length} كورس من الأكواد المحلية.`, 'warning');
+-                if (typeof populateCycleCourseSelect === 'function') populateCycleCourseSelect();
+-                return true;
+-            }
+             showNotification('لا يوجد اتصال بالإنترنت. سيتم استخدام آخر نسخة محفوظة من الكورسات.', 'warning');
+             return false;
+         }
+@@ -21,98 +12,25 @@
+             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تحديث الكورسات...';
+         }
+ 
+-        let courses = [];
+-        let sourceUsed = '';
+-
+-        // ─── المحاولة 1: platform_courses ───────────────────────────
+-        try {
+-            const snap1 = await window.db.collection('platform_courses').get();
+-            if (!snap1.empty) {
+-                snap1.forEach(doc => {
+-                    const d = doc.data();
+-                    courses.push({
+-                        id: doc.id,
+-                        courseId: d.courseId || d.id || doc.id,
+-                        courseTitle: d.courseTitle || d.title || d.name || 'كورس بدون اسم',
+-                        grade: d.grade || d.gradeId || '',
+-                        price: Number(d.price || d.unitPrice || d.cost || 0),
+-                        status: d.status || 'active'
+-                    });
+-                });
+-                sourceUsed = 'platform_courses';
+-                console.log('[COURSES] platform_courses ✅', courses.length);
+-            } else {
+-                console.warn('[COURSES] platform_courses فارغة — جاري تجربة مسار بديل...');
+-            }
+-        } catch (e) {
+-            console.warn('[COURSES] platform_courses خطأ:', e.message);
+-        }
+-
+-        // ─── المحاولة 2: courses ─────────────────────────────────────
+-        if (!courses.length) {
+-            try {
+-                const snap2 = await window.db.collection('courses').get();
+-                if (!snap2.empty) {
+-                    snap2.forEach(doc => {
+-                        const d = doc.data();
+-                        courses.push({
+-                            id: doc.id,
+-                            courseId: d.courseId || d.id || doc.id,
+-                            courseTitle: d.courseTitle || d.title || d.name || 'كورس بدون اسم',
+-                            grade: d.grade || d.gradeId || '',
+-                            price: Number(d.price || d.unitPrice || d.cost || 0),
+-                            status: d.status || 'active'
+-                        });
+-                    });
+-                    sourceUsed = 'courses';
+-                    console.log('[COURSES] courses ✅', courses.length);
+-                } else {
+-                    console.warn('[COURSES] courses فارغة أيضاً.');
+-                }
+-            } catch (e) {
+-                console.warn('[COURSES] courses خطأ:', e.message);
+-            }
+-        }
+-
+-        // ─── Fallback: بناء من course_codes ──────────────────────────
+-        if (!courses.length) {
+-            console.warn('[COURSES] لا توجد كورسات من Firebase — سيتم البناء من course_codes.');
+-            // تحديث course_codes من Firebase أولاً
+-            try {
+-                const codesSnap = await window.db.collection('course_codes').get();
+-                if (!codesSnap.empty) {
+-                    const freshCodes = [];
+-                    codesSnap.forEach(doc => freshCodes.push({ id: doc.id, ...doc.data() }));
+-                    db.courseCodes = freshCodes;
+-                    await StorageEngine.save('courseCodes', freshCodes);
+-                    console.log('[COURSES] course_codes محدّثة:', freshCodes.length);
+-                }
+-            } catch (e) {
+-                console.warn('[COURSES] تعذّر تحديث course_codes:', e.message);
+-            }
+-            courses = _buildCoursesFromCourseCodes();
+-            sourceUsed = 'course_codes (fallback)';
+-            console.log('[COURSES] courses مبنية من course_codes:', courses.length);
+-        }
++        const snapshot = await window.db.collection('platform_courses').get();
++        const courses = [];
++        snapshot.forEach(doc => {
++            const data = doc.data();
++            courses.push({
++                id: doc.id,
++                courseId: data.courseId || doc.id,
++                courseTitle: data.courseTitle || data.title || 'كورس بدون اسم',
++                grade: data.grade || '',
++                price: Number(data.price) || 0,
++                status: data.status || 'active'
++            });
++        });
+ 
+         db.platformCourses = courses;
+         await StorageEngine.save('platformCourses', courses);
+ 
+-        if (courses.length) {
+-            showNotification(
+-                `✅ تم تحديث ${courses.length} كورس من (${sourceUsed}). يمكنك الاختيار الآن.`,
+-                'success'
+-            );
+-        } else {
+-            showNotification(
+-                '⚠️ لا توجد كورسات في قاعدة البيانات. تأكد من إضافة الكورسات على المنصة.',
+-                'warning'
+-            );
+-        }
+-
+-        if (typeof populateCycleCourseSelect === 'function') populateCycleCourseSelect();
++        showNotification(`✅ تم تحديث وحفظ ${courses.length} كورس محلياً. يمكنك الآن البيع بدون إنترنت.`, 'success');
+         return true;
+-
+     } catch (err) {
+         console.error('refreshPlatformCourses failed', err);
+         showNotification('حدث خطأ أثناء تحديث الكورسات: ' + err.message, 'error');
+
+
+========================================
+DIFF FOR FUNCTION: openSubscriptionTypeModal
+========================================
+--- System 1: openSubscriptionTypeModal
++++ System 2: openSubscriptionTypeModal
+@@ -8,11 +8,6 @@
+     currentGroupId = localStorage.getItem('edu_active_group') || currentGroupId;
+ 
+     const lessonFee = db.settings.monthlyFee || 0;
+-    const cycleType = db.settings.cycleSubscriptionType || 'lesson';
+-    const platformCourse = db.settings.activePlatformCourse || null;
+-
+-    const showLessonOption = cycleType === 'lesson' || cycleType === 'both';
+-    const showPlatformOption = (cycleType === 'platform' || cycleType === 'both') && !!platformCourse;
+ 
+     const hasLessonPaid = db.payments.some(p =>
+         p.studentId == s.id &&
+@@ -20,25 +15,14 @@
+         p.cycleId == db.settings.activeCycle
+     );
+ 
+-    const hasPlatformSubThisCycle = (db.platformSubscriptions || []).some(ps =>
++    const hasPlatformSubThisMonth = (db.platformSubscriptions || []).some(ps =>
+         String(ps.student_id) == String(s.id) &&
+-        platformCourse &&
+-        String(ps.course_id) === String(platformCourse.courseId) &&
+-        ps.cycleId == db.settings.activeCycle
++        new Date(ps.created_at).getMonth() === new Date().getMonth() &&
++        new Date(ps.created_at).getFullYear() === new Date().getFullYear()
+     );
+ 
+     const container = document.getElementById('subscription-type-content');
+     if (!container) return;
+-
+-    if (!showLessonOption && !showPlatformOption) {
+-        container.innerHTML = `
+-            <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+-                <i class="fas fa-exclamation-circle" style="font-size:2rem; margin-bottom:0.5rem; display:block;"></i>
+-                لا يوجد نوع اشتراك مفعّل لهذه الدورة. يرجى ضبط "نوع الاشتراك" من الخزنة والمالية → بدء الاشتراك.
+-            </div>`;
+-        toggleModal('subscription-type-modal', true);
+-        return;
+-    }
+ 
+     container.innerHTML = `
+         <div style="text-align:center; margin-bottom:1.5rem;">
+@@ -47,7 +31,6 @@
+         </div>
+ 
+         <div style="display:flex; flex-direction:column; gap:0.75rem;">
+-            ${showLessonOption ? `
+             <label class="sub-type-option">
+                 <input type="checkbox" id="sub-type-lesson" ${hasLessonPaid ? 'disabled checked' : ''}>
+                 <div class="sub-type-box">
+@@ -57,20 +40,21 @@
+                     </div>
+                     <div class="sub-type-price">${lessonFee} ج.م</div>
+                 </div>
+-            </label>` : ''}
++            </label>
+ 
+-            ${showPlatformOption ? `
+             <label class="sub-type-option">
+-                <input type="checkbox" id="sub-type-platform" ${hasPlatformSubThisCycle ? 'disabled checked' : ''}>
++                <input type="checkbox" id="sub-type-platform" ${hasPlatformSubThisMonth ? 'checked' : ''}>
+                 <div class="sub-type-box">
+                     <div class="sub-type-title">
+-                        <i class="fas fa-laptop-code"></i> اشتراك المنصة: ${platformCourse.courseTitle}
+-                        ${hasPlatformSubThisCycle ? '<span class="status-badge" style="background:#dbeafe; color:#1e40af;">مشترك بالفعل ✅</span>' : ''}
++                        <i class="fas fa-laptop-code"></i> اشتراك المنصة
++                        ${hasPlatformSubThisMonth ? '<span class="status-badge" style="background:#dbeafe; color:#1e40af;">لديه اشتراك هذا الشهر</span>' : ''}
+                     </div>
+-                    <div class="sub-type-price">${platformCourse.price} ج.م</div>
++                    <div class="sub-type-price" id="platform-price-preview">حدد الكورسات لمعرفة السعر</div>
+                 </div>
+-            </label>` : ''}
++            </label>
+         </div>
++
++        <div id="platform-selected-summary" style="display:none; margin-top:1rem; padding:0.75rem 1rem; background:var(--bg-light); border-radius:12px; font-size:0.9rem;"></div>
+ 
+         <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+             <strong>الإجمالي</strong>
+@@ -83,11 +67,24 @@
+         </button>
+     `;
+ 
++    // Reset selected courses each time the modal opens
++    platformSubSelectedCourses = [];
++    document.getElementById('platform-selected-summary').style.display = 'none';
++
+     const lessonCheckbox = document.getElementById('sub-type-lesson');
+     const platformCheckbox = document.getElementById('sub-type-platform');
+ 
+-    if (lessonCheckbox) lessonCheckbox.addEventListener('change', updateSubscriptionTotal);
+-    if (platformCheckbox) platformCheckbox.addEventListener('change', updateSubscriptionTotal);
++    lessonCheckbox.addEventListener('change', updateSubscriptionTotal);
++    platformCheckbox.addEventListener('change', () => {
++        if (platformCheckbox.checked) {
++            openPlatformCourseModal();
++        } else {
++            platformSubSelectedCourses = [];
++            document.getElementById('platform-selected-summary').style.display = 'none';
++            document.getElementById('platform-price-preview').innerText = 'حدد الكورسات لمعرفة السعر';
++        }
++        updateSubscriptionTotal();
++    });
+ 
+     updateSubscriptionTotal();
+     toggleModal('subscription-type-modal', true);
+
+
+========================================
+DIFF FOR FUNCTION: updateSubscriptionTotal
+========================================
+--- System 1: updateSubscriptionTotal
++++ System 2: updateSubscriptionTotal
+@@ -3,8 +3,8 @@
+     const platformChecked = document.getElementById('sub-type-platform')?.checked;
+ 
+     const lessonFee = lessonChecked ? (db.settings.monthlyFee || 0) : 0;
+-    const platformFee = platformChecked && db.settings.activePlatformCourse
+-        ? (Number(db.settings.activePlatformCourse.price) || 0)
++    const platformFee = platformChecked
++        ? platformSubSelectedCourses.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
+         : 0;
+ 
+     const total = lessonFee + platformFee;
+
+
+========================================
+DIFF FOR FUNCTION: confirmSubscriptionSelection
+========================================
+--- System 1: confirmSubscriptionSelection
++++ System 2: confirmSubscriptionSelection
+@@ -2,25 +2,22 @@
+     const s = db.students.find(x => x.id == studentId);
+     if (!s) return;
+ 
+-    const lessonCheckbox = document.getElementById('sub-type-lesson');
+-    const platformCheckbox = document.getElementById('sub-type-platform');
+-    const lessonChecked = lessonCheckbox ? lessonCheckbox.checked : false;
+-    const platformChecked = platformCheckbox ? platformCheckbox.checked : false;
++    const lessonChecked = document.getElementById('sub-type-lesson')?.checked;
++    const platformChecked = document.getElementById('sub-type-platform')?.checked;
+ 
+     if (!lessonChecked && !platformChecked) {
+         return showNotification('يرجى تحديد نوع اشتراك واحد على الأقل', 'warning');
+     }
+ 
+-    const platformCourse = db.settings.activePlatformCourse;
+-    if (platformChecked && !platformCourse) {
+-        return showNotification('لا يوجد كورس منصة محدد لهذه الدورة. يرجى ضبطه من الخزنة والمالية', 'error');
++    if (platformChecked && platformSubSelectedCourses.length === 0) {
++        return showNotification('يرجى اختيار كورس واحد على الأقل لاشتراك المنصة', 'warning');
+     }
+ 
+     let lessonResult = null;
+     let platformResult = null;
+ 
+     // --- 1. اشتراك الدرس ---
+-    if (lessonChecked && !lessonCheckbox.disabled) {
++    if (lessonChecked) {
+         const alreadyPaid = db.payments.some(p =>
+             p.studentId == s.id &&
+             p.category === 'اشتراك شهري' &&
+@@ -47,9 +44,9 @@
+         }
+     }
+ 
+-    // --- 2. اشتراك المنصة (الكورس محدد تلقائياً من إعدادات الدورة) ---
+-    if (platformChecked && platformCourse && !(platformCheckbox && platformCheckbox.disabled)) {
+-        platformResult = await recordPlatformSubscription(s, platformCourse);
++    // --- 2. اشتراك المنصة ---
++    if (platformChecked && platformSubSelectedCourses.length > 0) {
++        platformResult = await recordPlatformSubscription(s, platformSubSelectedCourses);
+     }
+ 
+     await db.save();
+@@ -57,14 +54,11 @@
+     // --- إشعار ---
+     const parts = [];
+     if (lessonResult) parts.push(`اشتراك الدرس (${lessonResult.amount} ج.م)`);
+-    if (platformResult) parts.push(`اشتراك المنصة - ${platformCourse.courseTitle} (${platformResult.totalAmount} ج.م)`);
++    if (platformResult) parts.push(`اشتراك المنصة (${platformResult.totalAmount} ج.م)`);
+ 
+     if (parts.length) {
+         showNotification(`✅ تم تسجيل: ${parts.join(' + ')} لـ ${s.name}`, 'success');
+         playSound('success');
+-        if (platformResult) {
+-            showNotification(`✅ تم اشتراك الطالب في كورس "${platformCourse.courseTitle}"`, 'success');
+-        }
+     } else {
+         showNotification('الطالب مدفوع بالفعل لكل ما تم تحديده', 'warning');
+     }
+
+
+========================================
+DIFF FOR FUNCTION: recordPlatformSubscription
+========================================
+--- System 1: recordPlatformSubscription
++++ System 2: recordPlatformSubscription
+@@ -1,44 +1,47 @@
+-async function recordPlatformSubscription(student, course) {
++async function recordPlatformSubscription(student, selectedCourses) {
+     const online = await isReallyOnline();
+     const now = new Date().toISOString();
+-    const amount = Number(course.price) || 0;
++    const totalAmount = selectedCourses.reduce((sum, c) => sum + (Number(c.price) || 0), 0);
+ 
+-    const record = {
+-        id: `PSUB_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+-        student_id: student.id,
+-        studentCode: student.qrCode,
+-        course_id: course.courseId,
+-        course_title: course.courseTitle,
+-        amount: amount,
+-        payment_date: now,
+-        sync_status: 0, // 0 = لم تتم المزامنة, 1 = تمت المزامنة
+-        created_at: now,
+-        cycleId: db.settings.activeCycle || 'misc'
+-    };
++    const newRecords = [];
++
++    for (const course of selectedCourses) {
++        const record = {
++            id: `PSUB_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
++            student_id: student.id,
++            studentCode: student.qrCode,
++            course_id: course.courseId,
++            course_title: course.courseTitle,
++            amount: Number(course.price) || 0,
++            payment_date: now,
++            sync_status: 0, // 0 = لم تتم المزامنة, 1 = تمت المزامنة
++            created_at: now
++        };
++        newRecords.push(record);
++    }
+ 
+     // 1. الحفظ المحلي دائماً أولاً
+     db.platformSubscriptions = db.platformSubscriptions || [];
+-    db.platformSubscriptions.push(record);
+-    await StorageEngine.save('platformSubscriptions', [record]);
++    db.platformSubscriptions.push(...newRecords);
++    await StorageEngine.save('platformSubscriptions', newRecords);
+ 
+     // 2. تسجيل عملية دفع داخلية لإظهارها في الخزينة والمالية
+     const financePayment = {
+         id: Date.now() + 2,
+         studentId: student.id,
+-        amount: amount,
++        amount: totalAmount,
+         date: now,
+         category: 'اشتراك المنصة',
+         cycleId: db.settings.activeCycle || 'misc',
+-        platformCourseId: course.courseId,
+-        platformCourseTitle: course.courseTitle
++        platformCourses: selectedCourses.map(c => c.courseTitle)
+     };
+     db.payments.push(financePayment);
+ 
+     // 3. لو متصل بالإنترنت: نحاول المزامنة فوراً
+     if (online) {
+-        const syncResult = await syncPlatformSubscriptionRecords([record]);
++        const syncResult = await syncPlatformSubscriptionRecords(newRecords);
+         if (syncResult.success) {
+-            showNotification(`🌐 تم ربط ${student.name} بكورس "${course.courseTitle}" على المنصة فوراً`, 'success');
++            showNotification(`🌐 تم ربط ${student.name} بالكورس(ات) على المنصة فوراً`, 'success');
+         } else {
+             showNotification('⚠️ تم الحفظ محلياً، وسيتم رفع الاشتراك تلقائياً عند تحسن الاتصال', 'warning');
+         }
+@@ -46,5 +49,5 @@
+         showNotification(`📴 تم تسجيل اشتراك المنصة محلياً لـ ${student.name}. سيتم رفعه تلقائياً عند توفر الإنترنت`, 'warning');
+     }
+ 
+-    return { records: [record], totalAmount: amount, online };
++    return { records: newRecords, totalAmount, online };
+ }
+
+========================================
+DIFF FOR FUNCTION: syncPlatformSubscriptionRecords
+========================================
+--- System 1: syncPlatformSubscriptionRecords
++++ System 2: syncPlatformSubscriptionRecords
+@@ -7,11 +7,14 @@
+         for (const record of records) {
+             try {
+                 await window.db.collection('platform_subscriptions').doc(record.id).set({
++                    studentId: String(record.student_id),
+                     studentCode: record.studentCode,
+                     courseId: record.course_id,
+                     courseTitle: record.course_title,
+                     amount: record.amount,
+                     subscriptionDate: record.payment_date.split('T')[0],
++                    subscriptionSource: 'center',
++                    paymentStatus: 'paid',
+                     paid: true,
+                     offlineStudentId: record.student_id,
+                     createdAt: record.created_at
+@@ -21,7 +24,9 @@
+                 await window.db.collection('platform_courses').doc(String(record.course_id))
+                     .collection('subscribers').doc(String(record.studentCode)).set({
+                         studentCode: record.studentCode,
++                        studentId: String(record.student_id),
+                         subscriptionDate: record.payment_date.split('T')[0],
++                        subscriptionSource: 'center',
+                         paid: true
+                     }, { merge: true });
+ 
+
+

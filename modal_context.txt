@@ -1,0 +1,43 @@
+=== System 1 context ===
+div>
+    </div>
+
+    <!-- Subscription Type Selection Modal (Lesson / Platform / Both) -->
+    <div id="subscription-type-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 480px; border-radius: 24px;">
+            <button class="modal-close-btn" onclick="toggleModal('subscription-type-modal', false)">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 style="margin-bottom:1rem; text-align:center;"><i class="fas fa-receipt"></i> دفع الاشتراك</h3>
+            <div id="subscription-type-content">
+                <!-- Filled via JS -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Professional Student Report Modal -->
+    <div id="report-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content"
+            style="max-width: 900px; padding: 0; background: #fff; box-s
+
+=== System 2 context ===
+div>
+    </div>
+
+    <!-- Subscription Type Selection Modal (Lesson / Platform / Both) -->
+    <div id="subscription-type-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 480px; border-radius: 24px;">
+            <button class="modal-close-btn" onclick="toggleModal('subscription-type-modal', false)">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 style="margin-bottom:1rem; text-align:center;"><i class="fas fa-receipt"></i> Ø¯ÙØ¹ Ø§Ù„Ø§Ø´ØªØ±Ø§Ùƒ</h3>
+            <div id="subscription-type-content">
+                <!-- Filled via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Course Selection Modal -->
+    <div id="platform-course-select-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 520px; border-radius: 24px;">
