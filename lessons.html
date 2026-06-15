@@ -352,6 +352,48 @@ function hasCourseAccess(courseId){
   return Array.isArray(user.enrolledCourses) && user.enrolledCourses.some(id => String(id) === String(courseId));
 }
 
+/**
+ * يفحص Firebase عن سجل دفع من المركز (من السيستم) لهذا الطالب والكورس.
+ * إذا وُجد سجل paid=true يمنح صلاحية الوصول تلقائياً دون كود تفعيل.
+ * يعتمد على: studentCode (qrCode) أو user.id كاحتياط إضافي.
+ */
+async function checkCenterSubscription(user, courseId) {
+  if (!window.db || !user) return false;
+  try {
+    const code = String(user.qrCode || user.id || '');
+    if (!code) return false;
+
+    // طريقة 1: من مجموعة platform_subscriptions باستخدام studentCode
+    const snap = await window.db.collection('platform_subscriptions')
+      .where('studentCode', '==', code)
+      .where('courseId', '==', String(courseId))
+      .where('paid', '==', true)
+      .limit(1).get();
+    if (!snap.empty) return true;
+
+    // طريقة 2: من مجموعة subscribers داخل الكورس
+    const subDoc = await window.db
+      .collection('platform_courses').doc(String(courseId))
+      .collection('subscribers').doc(code).get();
+    if (subDoc.exists && subDoc.data() && subDoc.data().paid === true) return true;
+
+    // طريقة 3: بحث برقم student id مباشرةً كاحتياط إضافي
+    if (user.id) {
+      const snap2 = await window.db.collection('platform_subscriptions')
+        .where('studentId', '==', String(user.id))
+        .where('courseId', '==', String(courseId))
+        .where('paid', '==', true)
+        .limit(1).get();
+      if (!snap2.empty) return true;
+    }
+
+    return false;
+  } catch(e) {
+    console.warn('[checkCenterSubscription] error:', e);
+    return false;
+  }
+}
+
 function grantCourseAccessToCurrentUser(courseId){
   const user = getCurrentUser();
   if(!user) return false;
@@ -613,21 +655,39 @@ async function renderCoursePage(){
   // Handle Access Gate
   const hasAccess = hasCourseAccess(courseId);
   const gate = document.getElementById('accessGate');
-  if(!hasAccess){
-    gate.style.display = 'block';
-    gate.innerHTML = `
-      <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
-        <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
-        <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
-          ${course.type==='paid' 
-            ? `هذا الكورس مدفوع وقيمته <strong>${course.price || 'غير محدد'} ج.م</strong>. لتفعيل الكورس، يرجى إدخال كود التفعيل أو إرسال تفاصيل التحويل.` 
-            : 'هذا الكورس مجاني، اضغط على زر الاشتراك بالأسفل للبدء فوراً.'}
-        </p>
 
-        ${course.type==='free' ? `
-          <button id="subscribeBtn" class="btn-submit-action" style="background:linear-gradient(135deg,#2ed573,#1ea760);box-shadow:0 4px 14px rgba(46,213,115,0.25);">اشترك مجاناً الآن 🆓</button>
-        ` : `
+  if (!hasAccess && course.type === 'paid') {
+    // أولاً: اعرض مؤشر تحميل مؤقت أثناء فحص Firebase عن اشتراك المركز
+    gate.style.display = 'block';
+    gate.innerHTML = `<div style="text-align:center;padding:32px 24px;border-radius:24px;background:var(--card);border:1.5px solid var(--border);">
+      <div style="font-size:42px;margin-bottom:12px;">🔄</div>
+      <p style="color:var(--text2);font-size:14px;">جاري التحقق من بيانات الاشتراك...</p>
+    </div>`;
+
+    const centerPaid = await checkCenterSubscription(user, courseId);
+
+    if (centerPaid) {
+      // ✅ مدفوع من السنتر — افتح الكورس تلقائياً بدون أي إجراء من الطالب
+      grantCourseAccessToCurrentUser(String(courseId));
+      await syncStudentCourseAccess(user, String(courseId));
+      gate.style.display = 'none';
+      // شارة نجاح خضراء تختفي بعد 6 ثوانٍ
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:14px 20px;border-radius:14px;margin-bottom:18px;font-size:15px;font-weight:700;text-align:center;box-shadow:0 4px 18px rgba(22,163,74,0.35);';
+      banner.innerHTML = '✅ تم تفعيل الكورس تلقائياً &mdash; مدفوع من السنتر 🏫';
+      gate.parentNode.insertBefore(banner, gate);
+      setTimeout(() => banner.remove(), 6000);
+
+    } else {
+      // ❌ لا يوجد سجل دفع من المركز — اعرض بوابة الدفع العادية
+      gate.innerHTML = `
+        <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
+          <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
+          <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
+            هذا الكورس مدفوع وقيمته <strong>${course.price || 'غير محدد'} ج.م</strong>. لتفعيل الكورس، يرجى إدخال كود التفعيل أو إرسال تفاصيل التحويل.
+          </p>
+
           <!-- Tabs -->
           <div class="activation-tabs">
             <button class="activation-tab active" id="tabBtnCode" onclick="switchActivationTab('code')">🔑 كود التفعيل</button>
@@ -672,13 +732,30 @@ async function renderCoursePage(){
 
             <button id="submitPaymentBtn" class="btn-submit-action">إرسال طلب التفعيل 🚀</button>
           </div>
-        `}
+        </div>`;
+
+      // Attach events
+      setTimeout(()=>{
+        document.getElementById('checkVoucherBtn')?.addEventListener('click', ()=>verifyCourseCode(courseId));
+        document.getElementById('submitPaymentBtn')?.addEventListener('click', ()=>submitCoursePaymentRequest(courseId));
+      }, 50);
+    }
+
+  } else if (!hasAccess && course.type === 'free') {
+    gate.style.display = 'block';
+    gate.innerHTML = `
+      <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
+        <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
+        <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
+          هذا الكورس مجاني، اضغط على زر الاشتراك بالأسفل للبدء فوراً.
+        </p>
+        <button id="subscribeBtn" class="btn-submit-action" style="background:linear-gradient(135deg,#2ed573,#1ea760);box-shadow:0 4px 14px rgba(46,213,115,0.25);">اشترك مجاناً الآن 🆓</button>
       </div>`;
-    
-    // Attach events
+
     setTimeout(()=>{
       const subBtn = document.getElementById('subscribeBtn');
-      if(subBtn && course.type === 'free'){
+      if(subBtn){
         subBtn.addEventListener('click', ()=>{
           const user = getCurrentUser();
           if(!user.enrolledCourses) user.enrolledCourses = [];
@@ -691,9 +768,8 @@ async function renderCoursePage(){
           alert('تم الاشتراك بنجاح! ✅'); location.reload();
         });
       }
-      document.getElementById('checkVoucherBtn')?.addEventListener('click', ()=>verifyCourseCode(courseId));
-      document.getElementById('submitPaymentBtn')?.addEventListener('click', ()=>submitCoursePaymentRequest(courseId));
     }, 50);
+
   } else {
     gate.style.display = 'none';
   }
