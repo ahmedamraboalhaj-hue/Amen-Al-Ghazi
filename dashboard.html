@@ -1260,19 +1260,19 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
       <!-- منتقي الألوان -->
       <div class="form-group">
-        <label>اختر لون العنوان الثابت 🎨</label>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="colorPaletteContainer">
-          <!-- Color swatches will be rendered by JS -->
+        <label>اختر لون خلفية البطاقة 🎨</label>
+        <div id="colorPreview" style="width:100%;height:80px;border-radius:14px;background:linear-gradient(135deg,#8B6F47,#A0826D);margin-bottom:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:background .3s">
+          <span style="color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.4)">معاينة اللون</span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <input type="color" id="acCustomColor" value="#8B6F47" style="width:50px;height:50px;border:none;border-radius:10px;cursor:pointer">
-          <span style="font-size:12px;color:#888">أو اختر لون مخصص</span>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="colorPaletteContainer"></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;border:2px dashed var(--border);border-radius:12px">
+          <input type="color" id="acCustomColor" value="#8B6F47"
+            style="width:46px;height:46px;border:none;border-radius:10px;cursor:pointer;padding:2px"
+            oninput="if(window._applyColor){var g='linear-gradient(135deg,'+this.value+','+this.value+'bb)';window._applyColor(g);}"
+            onchange="if(window._applyColor){var g='linear-gradient(135deg,'+this.value+','+this.value+'bb)';window._applyColor(g);}">
+          <span style="font-size:13px;color:#888">أو اختر لون مخصص من هنا</span>
         </div>
         <input type="hidden" id="acHeaderColor" value="linear-gradient(135deg,#8B6F47,#A0826D)">
-        <div style="margin-top:10px;padding:12px;border-radius:10px;background:var(--bg);display:flex;align-items:center;gap:10px;height:60px">
-          <div id="colorPreview" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#8B6F47,#A0826D);box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
-          <span style="font-size:13px;font-weight:700;color:var(--text)">معاينة اللون</span>
-        </div>
       </div>
 
       <div class="form-group"><label>وصف الكورس</label><textarea id="acDesc" rows="3" style="resize:vertical"></textarea></div>
@@ -2339,6 +2339,7 @@ function openEditCourse(id){
   document.getElementById('acHeaderColor').value = savedColor;
   const colorPreview = document.getElementById('colorPreview');
   if(colorPreview) colorPreview.style.background = savedColor;
+  if(window._renderColorPalette) window._renderColorPalette(savedColor);
 
   // تحميل قيم تموضع الصورة وصورة التغطية
   document.getElementById('acThumbnail').value = c.thumbnail || '';
@@ -2393,6 +2394,7 @@ function openAddCourseModal(){
   document.getElementById('acHeaderColor').value='linear-gradient(135deg,#8B6F47,#A0826D)';
   const colorPreview = document.getElementById('colorPreview');
   if(colorPreview) colorPreview.style.background = 'linear-gradient(135deg,#8B6F47,#A0826D)';
+  if(window._renderColorPalette) window._renderColorPalette('linear-gradient(135deg,#8B6F47,#A0826D)');
   clearCourseThumbnail();
   document.getElementById('acSaveButton').textContent = 'إضافة الكورس ✅';
   document.getElementById('addCourseModal').classList.add('open');
@@ -5451,7 +5453,71 @@ if(currentUser && currentUser.role === 'student') {
   renderPaymentsTable();
 
   // ─── تهيئة قوائم الصفوف الدراسية من grade-mapping.js ───
-  (function initGradeSelects() {
+  // ===== Color Picker =====
+  (function() {
+    var PALETTE = [
+      'linear-gradient(135deg,#1a1a2e,#0077b6)',
+      'linear-gradient(135deg,#1b4332,#2d6a4f)',
+      'linear-gradient(135deg,#3d0000,#c00000)',
+      'linear-gradient(135deg,#2c1654,#7b2ff7)',
+      'linear-gradient(135deg,#8B6F47,#A0826D)',
+      'linear-gradient(135deg,#0f3460,#533483)',
+      'linear-gradient(135deg,#b5451b,#e07b39)',
+      'linear-gradient(135deg,#004d40,#00897b)',
+      'linear-gradient(135deg,#212121,#616161)',
+      'linear-gradient(135deg,#880e4f,#e91e63)',
+      'linear-gradient(135deg,#01579b,#0288d1)',
+      'linear-gradient(135deg,#e65100,#ff9800)'
+    ];
+    function applyColor(g) {
+      var h = document.getElementById('acHeaderColor');
+      var p = document.getElementById('colorPreview');
+      if (h) h.value = g;
+      if (p) p.style.background = g;
+      document.querySelectorAll('.ac-sw').forEach(function(s) {
+        var sel = s.getAttribute('data-g') === g;
+        s.style.outline = sel ? '3px solid #fff' : 'none';
+        s.style.outlineOffset = sel ? '2px' : '0';
+        s.style.transform = sel ? 'scale(1.1)' : 'scale(1)';
+      });
+    }
+    function renderPalette(selected) {
+      var c = document.getElementById('colorPaletteContainer');
+      if (!c) return;
+      c.innerHTML = '';
+      PALETTE.forEach(function(g) {
+        var d = document.createElement('div');
+        d.className = 'ac-sw';
+        d.setAttribute('data-g', g);
+        d.style.cssText = 'height:44px;border-radius:10px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.2);background:' + g;
+        if (g === selected) {
+          d.style.outline = '3px solid #fff';
+          d.style.outlineOffset = '2px';
+          d.style.transform = 'scale(1.1)';
+        }
+        d.addEventListener('click', function() { applyColor(g); });
+        d.addEventListener('mouseenter', function() { if (g !== document.getElementById('acHeaderColor').value) this.style.transform = 'scale(1.06)'; });
+        d.addEventListener('mouseleave', function() { if (g !== document.getElementById('acHeaderColor').value) this.style.transform = 'scale(1)'; });
+        c.appendChild(d);
+      });
+    }
+    window._renderColorPalette = renderPalette;
+    window._applyColor = applyColor;
+    // Custom color input
+    document.addEventListener('DOMContentLoaded', function() {
+      var picker = document.getElementById('acCustomColor');
+      if (picker) {
+        function onColorChange() {
+          var g = 'linear-gradient(135deg,' + picker.value + ',' + picker.value + 'bb)';
+          applyColor(g);
+        }
+        picker.addEventListener('input', onColorChange);
+        picker.addEventListener('change', onColorChange);
+      }
+    });
+  })();
+
+    (function initGradeSelects() {
     // دالة بناء الخيارات (من grade-mapping.js أو fallback داخلي)
     const buildOpts = typeof buildGradeOptions === 'function'
       ? buildGradeOptions
