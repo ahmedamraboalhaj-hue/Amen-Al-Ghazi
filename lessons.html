@@ -664,6 +664,24 @@ async function renderCoursePage(){
   const lessonsList = course.lessons && course.lessons.length ? course.lessons : [];
   console.log('[Alamin] Lessons to render:', lessonsList.length);
 
+  // تحميل أسماء الاختبارات من Firebase (لعرض اسم الاختبار بدل ID)
+  if(window.db){
+    try{
+      const needsQuizzes = lessonsList.some(ls => ls.quizId);
+      if(needsQuizzes){
+        const quizSnap = await window.db.collection('quizzes').get();
+        if(!quizSnap.empty){
+          const quizzesList = [];
+          quizSnap.forEach(doc => quizzesList.push(doc.data()));
+          localStorage.setItem('alamin_quizzes', JSON.stringify(quizzesList));
+          console.log('[Alamin] Loaded quizzes from Firebase:', quizzesList.length);
+        }
+      }
+    }catch(e){
+      console.warn('[Alamin] Failed to load quizzes from Firebase:', e);
+    }
+  }
+
   if(listContainer){
     if(!lessonsList.length){
       listContainer.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text2)">
@@ -873,9 +891,9 @@ function getLessonContentItems(lesson){
     items.push({
       id:`${lesson.id}_quiz_${lesson.quizId}`,
       type:'quiz',
-      title: quiz ? quiz.title : `اختبار الدرس #${lesson.quizId}`,
+      title: quiz ? quiz.title : 'اختبار الدرس',
       quizId: lesson.quizId,
-      duration: attempted ? 'تم الدخول' : `ID ${lesson.quizId}`,
+      duration: attempted ? 'تم الدخول' : 'اختبار',
       locked: attempted
     });
   }
@@ -905,7 +923,8 @@ function renderCourseContentItem(lessonId, item){
   }
   if(item.type === 'quiz'){
     const cls = item.locked ? 'segment-btn type-quiz locked' : 'segment-btn type-quiz';
-    const action = item.locked ? `alert('أنت دخلت الاختبار ده قبل كده، ومتاح مرة واحدة فقط.')` : `startQuiz(${item.quizId})`;
+    const safeQuizId = String(item.quizId).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const action = item.locked ? `alert('أنت دخلت الاختبار ده قبل كده، ومتاح مرة واحدة فقط.')` : `startQuiz('${safeQuizId}')`;
     return `<div class="${cls}" data-lesson="${lessonId}" data-content="${escapeHTML(item.id)}" onclick="${action}">
       <div class="segment-icon">
         <span style="font-size:20px;">📝</span>

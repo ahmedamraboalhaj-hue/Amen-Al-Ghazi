@@ -1311,7 +1311,7 @@ async function renderStudentPanel() {
     myGrid.innerHTML = myCourses.map(c => `
       <div class="course-card fade-up">
         <div class="teacher-chip">الأستاذ الأمين</div>
-        <div class="course-thumb" style="background:${c.bg || c.color || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
+        <div class="course-thumb" style="background:${c.headerColor || c.color || c.bg || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
           ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:60px;z-index:2">${c.emoji||'📚'}</span>`}
         </div>
         <div class="course-body">
@@ -1364,7 +1364,7 @@ async function renderCourses() {
     return `
     <div class="course-card fade-up">
       <div class="teacher-chip">الأستاذ الأمين</div>
-      <div class="course-thumb" style="background:${c.bg || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
+      <div class="course-thumb" style="background:${c.headerColor || c.color || c.bg || 'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">
         ${c.thumbnail ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;display:block">` : `<span style="font-size:80px;z-index:2">${c.emoji || '📚'}</span>`}
         <div class="course-badge-pin">كورس مثبّت</div>
       </div>

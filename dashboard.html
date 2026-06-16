@@ -2333,6 +2333,13 @@ function openEditCourse(id){
   document.getElementById('acType').value = c.type || 'free';
   document.getElementById('acPrice').value = c.price != null ? c.price : '';
 
+  // ✅ FIX: تحميل العنوان الثابت واللون الملون
+  const savedColor = c.headerColor || c.color || c.bg || 'linear-gradient(135deg,#8B6F47,#A0826D)';
+  document.getElementById('acHeaderTitle').value = c.headerTitle || '';
+  document.getElementById('acHeaderColor').value = savedColor;
+  const colorPreview = document.getElementById('colorPreview');
+  if(colorPreview) colorPreview.style.background = savedColor;
+
   // تحميل قيم تموضع الصورة وصورة التغطية
   document.getElementById('acThumbnail').value = c.thumbnail || '';
   document.getElementById('acThumbnailX').value = c.thumbnailX != null ? c.thumbnailX : 50;
@@ -2382,6 +2389,10 @@ function openAddCourseModal(){
   document.getElementById('acGrade').value='1';
   document.getElementById('acType').value='free';
   document.getElementById('acPrice').value='';
+  document.getElementById('acHeaderTitle').value='';
+  document.getElementById('acHeaderColor').value='linear-gradient(135deg,#8B6F47,#A0826D)';
+  const colorPreview = document.getElementById('colorPreview');
+  if(colorPreview) colorPreview.style.background = 'linear-gradient(135deg,#8B6F47,#A0826D)';
   clearCourseThumbnail();
   document.getElementById('acSaveButton').textContent = 'إضافة الكورس ✅';
   document.getElementById('addCourseModal').classList.add('open');
@@ -2399,6 +2410,10 @@ function saveNewCourse(){
   const thumbnailX = parseInt(document.getElementById('acThumbnailX').value, 10) || 50;
   const thumbnailY = parseInt(document.getElementById('acThumbnailY').value, 10) || 50;
 
+  // ✅ FIX: قراءة العنوان الثابت واللون من المودال
+  const headerTitle = document.getElementById('acHeaderTitle').value.trim();
+  const headerColor = document.getElementById('acHeaderColor').value || 'linear-gradient(135deg,#8B6F47,#A0826D)';
+
   if(!title){alert('ادخل اسم الكورس');return;}
   const emojis=['📖','🌿','🔥','⭐','🎯','💡','🚀','📝'];
   const colors=['linear-gradient(135deg,#1a1a2e,#0077b6)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
@@ -2415,6 +2430,10 @@ function saveNewCourse(){
         thumbnail,
         thumbnailX,
         thumbnailY,
+        headerTitle,
+        headerColor,
+        color: headerColor,
+        bg: headerColor,
       };
       saveCourses(courses);
       
@@ -2444,8 +2463,11 @@ function saveNewCourse(){
     thumbnail,
     thumbnailX,
     thumbnailY,
+    headerTitle,
+    headerColor,
+    color: headerColor || colors[Math.floor(Math.random()*colors.length)],
+    bg: headerColor || colors[Math.floor(Math.random()*colors.length)],
     emoji:emojis[Math.floor(Math.random()*emojis.length)],
-    color:colors[Math.floor(Math.random()*colors.length)],
     created:new Date().toLocaleDateString('ar-EG'),
     lessons:[]
   };
