@@ -1430,6 +1430,33 @@ function normalizePaymentPhone(phone) {
   return value;
 }
 
+// مزامنة الكورسات المفعلة للطالب من Firestore لتحديث localStorage فوراً
+async function syncStudentDataFromFirestore() {
+  const user = JSON.parse(localStorage.getItem('alamin_current') || 'null');
+  if (!user || user.role === 'admin' || !user.id || !window.db) return;
+  try {
+    const doc = await window.db.collection('students').doc(String(user.id)).get();
+    if (doc.exists) {
+      const dbUser = doc.data();
+      const localCourses = user.enrolledCourses || [];
+      const dbCourses = dbUser.enrolledCourses || [];
+      
+      const hasDifference = localCourses.length !== dbCourses.length || 
+                            !localCourses.every(c => dbCourses.includes(c));
+                            
+      if (hasDifference) {
+        user.enrolledCourses = dbCourses;
+        localStorage.setItem('alamin_current', JSON.stringify(user));
+        console.log('Synchronized enrolled courses from Firestore. Reloading...');
+        location.reload();
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to sync student data from Firestore:', e);
+  }
+}
+
+
 async function createFirebasePaymentRequest(user, courseId, phone, amount) {
   if (!window.db || !window.firebase) return null;
   const amountNumber = Number(String(amount || '').replace(',', '.'));
@@ -1506,6 +1533,9 @@ window.addEventListener('scroll', () => {
 (async () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+  if (typeof syncStudentDataFromFirestore === 'function') {
+    await syncStudentDataFromFirestore();
   }
   await renderStudentPanel();
   await renderCourses();
