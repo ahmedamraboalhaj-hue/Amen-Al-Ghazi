@@ -22,19 +22,16 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
 
 /* LEFT PANEL */
 .left-panel {
-  background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 50%,#D4A843 100%);
-  padding:60px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden;
+  position:relative; overflow:hidden; padding:0;
 }
-.left-panel::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.07); }
-.left-panel::after { content:''; position:absolute; bottom:-80px; left:-80px; width:250px; height:250px; border-radius:50%; background:rgba(255,255,255,0.05); }
-.panel-icon { font-size:80px; margin-bottom:24px; position:relative; z-index:1; animation:floatY 4s ease-in-out infinite; }
-@keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-.panel-title { font-family:'Tajawal',sans-serif; font-size:34px; font-weight:900; color:white; margin-bottom:14px; position:relative; z-index:1; }
-.panel-sub { font-size:16px; color:rgba(255,255,255,.8); line-height:1.8; position:relative; z-index:1; margin-bottom:36px; }
-.panel-feats { display:flex; flex-direction:column; gap:14px; text-align:right; position:relative; z-index:1; width:100%; }
-.panel-feat { background:rgba(255,255,255,0.12); border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:12px; }
-.panel-feat .ico { font-size:22px; }
-.panel-feat .txt { color:white; font-size:14px; font-weight:600; }
+.left-panel-img {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.left-panel::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:30%;
+  background:linear-gradient(to top, rgba(0,0,0,0.25), transparent);
+  pointer-events:none;
+}
 
 /* RIGHT PANEL */
 .right-panel { display:flex; align-items:center; justify-content:center; padding:48px 60px; }
@@ -120,15 +117,7 @@ nav { padding:0 48px; height:72px; background:var(--card); border-bottom:2px sol
 <div class="page-wrap">
   <!-- LEFT -->
   <div class="left-panel">
-    <div class="panel-icon">👨‍🏫</div>
-    <div class="panel-title">أهلاً بك مرة تانية!</div>
-    <div class="panel-sub">سجّل دخولك وادخل على كورساتك وملفاتك ومراجعاتك في أي وقت</div>
-    <div class="panel-feats">
-      <div class="panel-feat"><span class="ico">📚</span><span class="txt">+٥٠ كورس متاح في اللغة العربية</span></div>
-      <div class="panel-feat"><span class="ico">🎥</span><span class="txt">فيديوهات شرح وملفات PDF</span></div>
-      <div class="panel-feat"><span class="ico">🆓</span><span class="txt">مراجعات نهائية مجانية للكل</span></div>
-      <div class="panel-feat"><span class="ico">💬</span><span class="txt">دعم مستمر من الأستاذ الأمين</span></div>
-    </div>
+    <img class="left-panel-img" src="صورة بداية الموقع.jpg.jpeg" alt="أمين الغازي - منصة التعليم الذكي">
   </div>
 
   <!-- RIGHT -->
