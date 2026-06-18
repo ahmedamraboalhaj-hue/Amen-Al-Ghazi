@@ -8,13 +8,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{
-  --primary:#00b4d8;--primary-dark:#0077b6;--accent:#f5a623;--accent2:#ff6b9d;
+  --primary:#C8A96E;--primary-dark:#8B6914;--accent:#f5a623;--accent2:#ff6b9d;
   --success:#2ed573;--danger:#ff4757;--warning:#ffa502;
   --bg:#f0f7ff;--sidebar-bg:#0f172a;--card-bg:#fff;--text:#1a1a2e;
   --border:#e3f4f9;--sidebar-text:#94a3b8;--sidebar-active:#fff;
 }
 [data-theme="dark"]{
-  --bg:#0a0e1a;--card-bg:#111827;--text:#e2e8f0;--border:#1e293b;
+  --bg:#1a1209;--card-bg:#111827;--text:#e2e8f0;--border:#1e293b;
   --sidebar-bg:#020617;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -30,7 +30,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);displ
 .sidebar-section{padding:20px 12px 8px;font-size:11px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:1px;font-weight:700;}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 8px;border-radius:10px;cursor:pointer;color:var(--sidebar-text);font-size:14px;font-weight:600;transition:all .2s;text-decoration:none;}
 .nav-item:hover{background:rgba(255,255,255,.07);color:white;}
-.nav-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 14px rgba(0,180,216,.3);}
+.nav-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 14px rgba(200,169,110,.3);}
 .nav-item .icon{font-size:18px;width:22px;text-align:center;}
 .nav-badge{margin-right:auto;background:var(--accent2);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;}
 
@@ -47,7 +47,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);displ
 .topbar-actions{display:flex;align-items:center;gap:14px;}
 .topbar-actions button{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:14px;font-family:'Cairo',sans-serif;color:var(--text);transition:all .2s;}
 .topbar-actions button:hover{border-color:var(--primary);color:var(--primary);}
-.theme-toggle{background:#f0f9ff;border:2px solid var(--primary);border-radius:30px;padding:6px 12px;cursor:pointer;font-size:14px;}
+.theme-toggle{background:#FDF8F0;border:2px solid var(--primary);border-radius:30px;padding:6px 12px;cursor:pointer;font-size:14px;}
 [data-theme="dark"] .theme-toggle{background:#1e293b;}
 
 .content{padding:28px 32px;flex:1;}
@@ -78,7 +78,7 @@ table{width:100%;border-collapse:collapse;}
 th{background:var(--bg);padding:13px 20px;text-align:right;font-size:13px;color:#888;font-weight:700;border-bottom:2px solid var(--border);}
 td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(0,180,216,.03);}
+tr:hover td{background:rgba(200,169,110,.03);}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
 .badge.active{background:#e8fff3;color:#27ae60;}
 .badge.inactive{background:#fff0f3;color:#c0392b;}
@@ -112,7 +112,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 /* STUDENT COURSE CARDS - rich design like reference screenshots */
 .student-courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
 .student-course-card{background:var(--card-bg);border-radius:18px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);transition:all .3s;cursor:pointer;position:relative;}
-.student-course-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(0,119,182,.15);border-color:var(--primary);}
+.student-course-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(139,105,20,.15);border-color:var(--primary);}
 .scc-cover{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:72px;}
 .scc-cover-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
 .scc-badge{position:absolute;top:14px;right:14px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;z-index:2;}
@@ -131,7 +131,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .scc-price-free{font-size:13px;font-weight:800;color:#2ed573;background:#e8fff3;padding:4px 12px;border-radius:8px;}
 .scc-actions{display:flex;gap:8px;}
 .scc-btn-enter{flex:1;padding:11px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
-.scc-btn-enter:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,119,182,.3);}
+.scc-btn-enter:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(139,105,20,.3);}
 .scc-btn-pay{flex:1;padding:11px;background:linear-gradient(135deg,#ff6b9d,#e91e8c);color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
 .scc-btn-free{flex:1;padding:11px;background:linear-gradient(135deg,#2ed573,#1ea760);color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;}
 .scc-btn-code{padding:11px 14px;background:var(--bg);color:var(--primary);border:2px solid var(--primary);border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
@@ -181,7 +181,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 
 /* ---- BUNNY VIDEO UPLOAD ---- */
 .bunny-upload-area{border:3px dashed var(--border);border-radius:16px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;}
-.bunny-upload-area:hover,.bunny-upload-area.drag-over{border-color:var(--primary);background:rgba(0,180,216,.04);}
+.bunny-upload-area:hover,.bunny-upload-area.drag-over{border-color:var(--primary);background:rgba(200,169,110,.04);}
 .bunny-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .bunny-upload-icon{font-size:40px;margin-bottom:10px;}
 .bunny-upload-text{font-size:14px;color:var(--text2);font-weight:600;}
@@ -191,7 +191,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .bunny-progress-text{font-size:13px;font-weight:700;color:var(--primary);}
 .bunny-status-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px;}
 .bunny-status-badge.queued{background:#fff3cd;color:#856404;}
-.bunny-status-badge.encoding{background:#cff4fc;color:#055160;}
+.bunny-status-badge.encoding{background:#cff4fc;color:#3D2E0A;}
 .bunny-status-badge.ready{background:#d1e7dd;color:#0f5132;}
 .bunny-status-badge.error{background:#f8d7da;color:#842029;}
 .segment-bunny-id{display:none;}
@@ -206,7 +206,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
 .chart-card{background:var(--card-bg);border-radius:18px;border:1px solid var(--border);padding:24px;box-shadow:0 4px 16px rgba(0,0,0,.04);}
 .chart-card h3{font-size:17px;font-weight:800;margin-bottom:20px;}
 .bar-chart{display:flex;align-items:flex-end;gap:8px;height:160px;}
-.bar{flex:1;background:linear-gradient(to top,var(--primary),rgba(0,180,216,.4));border-radius:8px 8px 0 0;position:relative;transition:all .3s;cursor:pointer;}
+.bar{flex:1;background:linear-gradient(to top,var(--primary),rgba(200,169,110,.4));border-radius:8px 8px 0 0;position:relative;transition:all .3s;cursor:pointer;}
 .bar:hover{opacity:.8;}
 .bar-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:11px;color:#888;white-space:nowrap;}
 .bar-val{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--primary);}
@@ -1048,7 +1048,7 @@ tr:hover td{background:rgba(0,180,216,.03);}
           </div>
 
           <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-            <button onclick="generateVouchers()" style="padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,119,182,.3)">🎟️ توليد الأكواد الآن</button>
+            <button onclick="generateVouchers()" style="padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(139,105,20,.3)">🎟️ توليد الأكواد الآن</button>
             <button onclick="generateMissingCenterCourseCodes()" style="padding:13px 24px;background:#e8fff3;color:#0f5132;border:2px solid #b7f0cc;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer">توليد أكواد طلاب السيستم الناقصين</button>
             <button onclick="exportPlatformCourseCodesToSystem()" style="padding:13px 24px;background:#fff8e8;color:#8a5a00;border:2px solid #f3d79a;border-radius:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer">تصدير الأكواد للسيستم</button>
             <button onclick="gotoPrintFromGenerate()" style="padding:13px 24px;background:var(--bg);border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-weight:700;font-size:15px;cursor:pointer;color:var(--text)">🖨️ اذهب للطباعة</button>
@@ -1220,9 +1220,9 @@ tr:hover td{background:rgba(0,180,216,.03);}
       <!-- صورة الكورس مع Drag & Drop -->
       <div class="form-group">
         <label>صورة الكورس 🖼️</label>
-        <div id="courseThumbnailContainer" style="border:3px dashed #00b4d8;border-radius:14px;padding:28px;text-align:center;cursor:pointer;background:var(--bg);position:relative;min-height:180px;display:flex;align-items:center;justify-content:center;transition:all .3s"
+        <div id="courseThumbnailContainer" style="border:3px dashed #C8A96E;border-radius:14px;padding:28px;text-align:center;cursor:pointer;background:var(--bg);position:relative;min-height:180px;display:flex;align-items:center;justify-content:center;transition:all .3s"
              onclick="document.getElementById('acThumbnailInput').click()"
-             ondrop="handleCourseThumbnailDrop(event)" ondragover="event.preventDefault();event.target.style.borderColor='#0077b6';event.target.style.background='rgba(0,180,216,.1)'" ondragleave="event.target.style.borderColor='#00b4d8';event.target.style.background='var(--bg)'">
+             ondrop="handleCourseThumbnailDrop(event)" ondragover="event.preventDefault();event.target.style.borderColor='#8B6914';event.target.style.background='rgba(200,169,110,.1)'" ondragleave="event.target.style.borderColor='#C8A96E';event.target.style.background='var(--bg)'">
           <div style="text-align:center">
             <div style="font-size:48px;margin-bottom:10px">📁</div>
             <div style="font-weight:700;font-size:14px;color:var(--primary)">اسحب الصورة هنا أو اضغط للاختيار</div>
@@ -1646,7 +1646,7 @@ if(!currentUser) {
 let courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]');
 if(!courses.length) {
   courses = [
-    {id:1,title:'المراجعة النهائية الصف الأول الثانوي',desc:'المراجعة النهائية لطلاب أولى تانوي',grade:'1',type:'free',emoji:'📖',color:'linear-gradient(135deg,#1a1a2e,#0077b6)',created:'٩ مايو ٢٠٢٦',lessons:[]},
+    {id:1,title:'المراجعة النهائية الصف الأول الثانوي',desc:'المراجعة النهائية لطلاب أولى تانوي',grade:'1',type:'free',emoji:'📖',color:'linear-gradient(135deg,#1a1a2e,#8B6914)',created:'٩ مايو ٢٠٢٦',lessons:[]},
     {id:2,title:'المراجعة النهائية الصف الثاني الثانوي',desc:'مراجعة ليالي الامتحان لطلاب تانية تانوي',grade:'2',type:'free',emoji:'🌿',color:'linear-gradient(135deg,#1b4332,#2d6a4f)',created:'٩ مايو ٢٠٢٦',lessons:[]},
     {id:3,title:'مراجعة التربية الدينية الصف الثالث',desc:'ملفات مراجعة التربية الدينية',grade:'3',type:'free',emoji:'🔥',color:'linear-gradient(135deg,#3d0000,#c00000)',created:'٨ مايو ٢٠٢٦',lessons:[]},
   ];
@@ -1873,7 +1873,7 @@ function openManageLessonsModal(courseId){
           <div style="font-size:12px;color:var(--text2);margin-top:4px">${segCount} مقطع فيديو${l.description ? ' · ' + escapeHtml(l.description.substring(0,50)) : ''}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="openEditLessonModal(${courseId},${l.id})" style="background:#0077b6;color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px">✏️ تعديل</button>
+          <button onclick="openEditLessonModal(${courseId},${l.id})" style="background:#8B6914;color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px">✏️ تعديل</button>
           <button onclick="deleteLessonFromCourse(${courseId},${l.id})" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px">🗑️ حذف</button>
         </div>
       </div>`;
@@ -2418,7 +2418,7 @@ function saveNewCourse(){
 
   if(!title){alert('ادخل اسم الكورس');return;}
   const emojis=['📖','🌿','🔥','⭐','🎯','💡','🚀','📝'];
-  const colors=['linear-gradient(135deg,#1a1a2e,#0077b6)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
+  const colors=['linear-gradient(135deg,#1a1a2e,#8B6914)','linear-gradient(135deg,#1b4332,#2d6a4f)','linear-gradient(135deg,#3d0000,#c00000)','linear-gradient(135deg,#2c1654,#7b2ff7)'];
   if(courseId){
     const idx = courses.findIndex(c=>c.id===parseInt(courseId,10));
     if(idx !== -1){
@@ -3111,7 +3111,7 @@ function buildStudentCourseCard(c, enrolled) {
   const settings = JSON.parse(localStorage.getItem('alamin_settings')||'{}');
   const teacherName = settings.teacherName || 'الأستاذ الأمين';
   const coverEmoji = c.emoji || '📚';
-  const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#0077b6)';
+  const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#8B6914)';
   const createdDate = c.created || today;
   
   const coverHTML = c.thumbnail
@@ -3743,7 +3743,7 @@ function renderQuizzesTable() {
       <td>${q.questionsCount || 0} أسئلة (${q.totalPoints || 0} درجة)</td>
       <td>
         <div class="action-btns" style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn-view" onclick="openAddQuizModal('${q.id}')" style="background:#0077b6;color:#fff;padding:6px 10px;border-radius:6px;">✏️ تعديل</button>
+          <button class="btn-view" onclick="openAddQuizModal('${q.id}')" style="background:#8B6914;color:#fff;padding:6px 10px;border-radius:6px;">✏️ تعديل</button>
           <button class="btn-view" onclick="duplicateQuiz('${q.id}')" style="background:var(--success);color:#fff;padding:6px 10px;border-radius:6px;">📥 نسخ</button>
           <button class="btn-view" onclick="openQuizDetailedResults('${q.id}')" style="background:#7c3aed;color:#fff;padding:6px 10px;border-radius:6px;">📊 النتائج</button>
           <button class="btn-delete" onclick="deleteQuiz('${q.id}')" style="padding:6px 10px;border-radius:6px;">🗑️ حذف</button>
@@ -5456,17 +5456,17 @@ if(currentUser && currentUser.role === 'student') {
   // ===== Color Picker =====
   (function() {
     var PALETTE = [
-      'linear-gradient(135deg,#1a1a2e,#0077b6)',
+      'linear-gradient(135deg,#1a1a2e,#8B6914)',
       'linear-gradient(135deg,#1b4332,#2d6a4f)',
       'linear-gradient(135deg,#3d0000,#c00000)',
       'linear-gradient(135deg,#2c1654,#7b2ff7)',
       'linear-gradient(135deg,#8B6F47,#A0826D)',
-      'linear-gradient(135deg,#0f3460,#533483)',
+      'linear-gradient(135deg,#3A2A08,#533483)',
       'linear-gradient(135deg,#b5451b,#e07b39)',
       'linear-gradient(135deg,#004d40,#00897b)',
       'linear-gradient(135deg,#212121,#616161)',
       'linear-gradient(135deg,#880e4f,#e91e63)',
-      'linear-gradient(135deg,#01579b,#0288d1)',
+      'linear-gradient(135deg,#6B4F0A,#B8860B)',
       'linear-gradient(135deg,#e65100,#ff9800)'
     ];
     function applyColor(g) {

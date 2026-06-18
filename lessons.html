@@ -8,10 +8,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/player.js/0.1.0/player.min.js"></script>
 <style>
 :root{
-  --primary:#00b4d8; --primary-dark:#0077b6; --accent:#f5a623; --success:#2ed573;
+  --primary:#C8A96E; --primary-dark:#8B6914; --accent:#f5a623; --success:#2ed573;
   --bg:#f0f7ff; --card:#fff; --text:#1a1a2e; --text2:#475569; --border:#e3f4f9;
 }
-[data-theme="dark"]{ --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --text2:#8ba3c0; --border:#1e293b; }
+[data-theme="dark"]{ --bg:#1a1209; --card:#111827; --text:#e2e8f0; --text2:#b89a6a; --border:#1e293b; }
 *{ margin:0; padding:0; box-sizing:border-box; }
 body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
@@ -22,7 +22,7 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .topbar-right{ display:flex; align-items:center; gap:14px; }
 .topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
 .topbar-right button:hover{ border-color:var(--primary); color:var(--primary); }
-.theme-toggle{ background:#f0f9ff; border:2px solid var(--primary); border-radius:30px; padding:6px 12px; cursor:pointer; font-size:14px; }
+.theme-toggle{ background:#FDF8F0; border:2px solid var(--primary); border-radius:30px; padding:6px 12px; cursor:pointer; font-size:14px; }
 [data-theme="dark"] .theme-toggle{ background:#1e293b; }
 .logout-btn{ background:#fff0f3; color:#c0392b; border:none; }
 .logout-btn:hover{ background:#ffc0d0; }
@@ -48,13 +48,13 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .vp-progress-wrap { flex:1; min-width:120px; cursor:pointer; }
 .vp-progress-track { height:6px; background:var(--border); border-radius:4px; overflow:hidden; }
 .vp-progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); width:0%; border-radius:4px; transition:width .5s linear; }
-.vp-resume-bar { background:rgba(0,180,216,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text2); }
+.vp-resume-bar { background:rgba(200,169,110,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text2); }
 .vp-resume-bar button { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:700; font-size:13px; }
 
 /* Lectures Layout */
 .lectures-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 .lecture-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden; transition: all .3s; }
-.lecture-card:hover { border-color: var(--primary); box-shadow: 0 8px 24px rgba(0,180,216,0.1); }
+.lecture-card:hover { border-color: var(--primary); box-shadow: 0 8px 24px rgba(200,169,110,0.1); }
 .lecture-header { padding: 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
 .lecture-info { flex: 1; text-align: center; }
 .lecture-title { font-size: 24px; font-weight: 900; font-family: 'Tajawal',sans-serif; color: #1e293b; margin-bottom: 12px; }
@@ -82,7 +82,7 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .segment-btn.type-video.active { border-color: #db2777; border-width: 2px; box-shadow: 0 0 10px rgba(219,39,119,0.2); }
 [data-theme="dark"] .segment-btn.type-video.active { border-color: #f472b6; box-shadow: 0 0 10px rgba(244,114,182,0.3); }
 
-.segment-btn.type-pdf { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.segment-btn.type-pdf { background: #eff6ff; border-color: #bfdbfe; color: #C8A96E; }
 [data-theme="dark"] .segment-btn.type-pdf { background: rgba(37,99,235,0.1); border-color: rgba(37,99,235,0.2); color: #60a5fa; }
 .segment-btn.type-pdf:hover { background: #dbeafe; }
 
@@ -768,7 +768,7 @@ async function renderCoursePage(){
     } else {
       // ❌ لا يوجد سجل دفع من المركز — اعرض بوابة الدفع العادية
       gate.innerHTML = `
-        <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
+        <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(200,169,110,0.08);max-width:540px;margin:0 auto;">
           <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
           <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
           <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
@@ -831,7 +831,7 @@ async function renderCoursePage(){
   } else if (!hasAccess && course.type === 'free') {
     gate.style.display = 'block';
     gate.innerHTML = `
-      <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(0,180,216,0.08);max-width:540px;margin:0 auto;">
+      <div style="background:var(--card);border:1.5px solid var(--border);padding:32px 24px;border-radius:24px;box-shadow:0 12px 36px rgba(200,169,110,0.08);max-width:540px;margin:0 auto;">
         <div style="font-size:48px;margin-bottom:16px;text-align:center">🔒</div>
         <h3 style="font-size:22px;font-weight:900;margin-bottom:10px;text-align:center;color:var(--text)">محتوى الكورس مغلق</h3>
         <p style="color:var(--text2);font-size:14px;margin-bottom:24px;text-align:center;line-height:1.6">
