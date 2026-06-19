@@ -1103,12 +1103,21 @@ footer {
   .pwa-install-text { display: none; }
   .pwa-install-action { min-height: 36px; padding: 0 12px; font-size: 12px; }
   .nav-menu-dropdown { top: 64px; }
-  .hero { flex-direction:column-reverse; padding:40px 24px; text-align:center; min-height:auto; padding-top:60px; }
-  .hero-title { font-size:42px; }
+  .hero { flex-direction:column; padding:32px 20px 40px; text-align:center; min-height:auto; }
+  .hero-text { order:1; }
+  .hero-visual { order:2; margin-top:32px; margin-bottom:0; }
+  .hero-title { font-size:38px; }
   .hero-stats { justify-content:center; }
   .hero-btns { justify-content:center; }
-  .hero-visual { margin-bottom:32px; }
-  .hero-blob-wrap { width:300px; height:300px; }
+  
+  .hero-blob-wrap { width:340px; height:380px; }
+  .hero-float { padding:8px 10px; gap:7px; border-radius:10px; }
+  .hero-float:nth-child(2) { top:20px; right:-8px; }
+  .hero-float:nth-child(3) { bottom:50px; left:-8px; }
+  .hero-float:nth-child(4) { top:120px; left:-8px; }
+  .float-icon { font-size:18px; }
+  .float-text .t { font-size:11px; }
+  .float-text .s { font-size:10px; }
   .section { padding:48px 24px; }
   .courses-grid, .features-grid, .testimonials-grid, .student-overview { grid-template-columns:1fr; }
   .cta-section { margin:0 16px 48px; padding:48px 24px; }
@@ -1314,7 +1323,7 @@ footer {
       <span aria-hidden="true">&#x2B07;</span>
       <span class="install-label">&#x62A;&#x62B;&#x628;&#x64A;&#x62A; &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642;</span>
     </button>
-    <button class="nav-search-btn" onclick="alert('البحث سيكون متاحاً قريباً 🔍')" aria-label="بحث">🔍</button>
+    <button class="nav-search-btn" onclick="openSearch()" aria-label="بحث">🔍</button>
     <div class="theme-switch" onclick="toggleTheme()" title="تغيير المظهر">
       <div class="theme-switch-bg-icons">
         <span>☀️</span>
@@ -1349,6 +1358,22 @@ footer {
     <a href="login.html" class="dropdown-btn">
       <span class="dropdown-btn-text">سجل الدخول ل حسابك</span>
       <span class="dropdown-btn-icon">👤</span>
+    </a>
+    <a href="#courses" class="dropdown-btn" onclick="closeMenu()">
+      <span class="dropdown-btn-text">📚 الكورسات</span>
+      <span class="dropdown-btn-icon">📚</span>
+    </a>
+    <a href="#features" class="dropdown-btn" onclick="closeMenu()">
+      <span class="dropdown-btn-text">⭐ المميزات</span>
+      <span class="dropdown-btn-icon">⭐</span>
+    </a>
+    <a href="#testimonials" class="dropdown-btn" onclick="closeMenu()">
+      <span class="dropdown-btn-text">💬 آراء الطلاب</span>
+      <span class="dropdown-btn-icon">💬</span>
+    </a>
+    <a href="#contact" class="dropdown-btn" onclick="closeMenu()">
+      <span class="dropdown-btn-text">📞 تواصل معنا</span>
+      <span class="dropdown-btn-icon">📞</span>
     </a>
   </div>
 </div>
@@ -1604,6 +1629,19 @@ footer {
   </div>
 </div>
 
+
+<!-- SEARCH MODAL -->
+<div id="searchModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:flex-start;justify-content:center;padding-top:80px;">
+  <div style="background:var(--card);border-radius:20px;padding:24px;width:90%;max-width:520px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
+    <button onclick="closeSearch()" style="position:absolute;top:14px;left:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2)">✕</button>
+    <div style="font-family:Tajawal,sans-serif;font-size:18px;font-weight:900;margin-bottom:16px;color:var(--primary)">🔍 بحث في الكورسات</div>
+    <input type="text" id="searchInput" placeholder="اكتب اسم الكورس أو الصف..." 
+      style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:13px;font-family:Cairo,sans-serif;font-size:15px;background:var(--bg);color:var(--text);outline:none;"
+      oninput="doSearch(this.value)">
+    <div id="searchResults" style="margin-top:16px;display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;"></div>
+  </div>
+</div>
+
 <script>
 // ---- THEME ----
 function toggleTheme() {
@@ -1683,7 +1721,7 @@ async function renderStudentPanel() {
   
   if (nav) {
     nav.innerHTML = `
-      <button class="nav-search-btn" onclick="alert('البحث سيكون متاحاً قريباً 🔍')" aria-label="بحث">🔍</button>
+      <button class="nav-search-btn" onclick="openSearch()" aria-label="بحث">🔍</button>
       <div class="theme-switch" onclick="toggleTheme()" title="تغيير المظهر">
         <div class="theme-switch-bg-icons">
           <span>☀️</span>
@@ -2129,6 +2167,62 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(init3DTilt, 200);
 }
+
+function closeMenu() {
+  const menuToggle = document.getElementById('menuToggle');
+  const navDropdown = document.getElementById('navDropdown');
+  if (menuToggle) menuToggle.classList.remove('open');
+  if (navDropdown) navDropdown.classList.remove('open');
+}
+
+function openSearch() {
+  closeMenu();
+  const modal = document.getElementById('searchModal');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+}
+
+function closeSearch() {
+  document.getElementById('searchModal').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+}
+
+function doSearch(query) {
+  const resultsEl = document.getElementById('searchResults');
+  if (!query.trim()) { resultsEl.innerHTML = ''; return; }
+  const courses = JSON.parse(localStorage.getItem('alamin_courses') || '[]').concat(
+    typeof defaultCourses !== 'undefined' ? defaultCourses : []
+  );
+  const unique = [...new Map(courses.map(c => [c.id, c])).values()];
+  const filtered = unique.filter(c =>
+    (c.title || '').includes(query) ||
+    (c.desc || '').includes(query) ||
+    String(c.grade).includes(query)
+  );
+  if (!filtered.length) {
+    resultsEl.innerHTML = '<div style="color:var(--text2);padding:12px;text-align:center">لا توجد نتائج 😕</div>';
+    return;
+  }
+  resultsEl.innerHTML = filtered.map(c => `
+    <div onclick="closeSearch(); document.getElementById('courses').scrollIntoView({behavior:'smooth'});"
+      style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;"
+      onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:28px">${c.emoji || '📚'}</div>
+      <div>
+        <div style="font-weight:800;font-size:14px;color:var(--text)">${c.title}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${c.type === 'free' ? '🟢 مجاني' : '💳 مدفوع'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// إغلاق search modal لو ضغط برّه
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('searchModal');
+  if (modal && modal.style.display === 'flex' && e.target === modal) closeSearch();
+});
+
 </script>
 </body>
 </html>
