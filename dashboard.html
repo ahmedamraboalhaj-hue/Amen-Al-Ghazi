@@ -690,6 +690,10 @@ tr:hover td{background:rgba(200,169,110,.03);}
 
       <h3 style="font-size:20px;font-weight:900;margin:40px 0 20px">الكورسات المتاحة لصفك 🚀</h3>
       <div class="student-courses-grid" id="availableCoursesGrid"></div>
+
+      <!-- إحصائياتك العامة -->
+      <h3 style="font-size:20px;font-weight:900;margin:40px 0 20px">📊 إحصائياتك</h3>
+      <div id="studentGlobalStats"></div>
     </div>
 
     <!-- MESSAGES PAGE -->
@@ -2706,12 +2710,22 @@ async function uploadSegmentVideo(input, segId){
         const info = await sr.json();
         if(info.status === 3){
           clearInterval(poll);
-          readyBadge.textContent = '✅ الفيديو جاهز للمشاهدة';
-          progressText.textContent = '✅ الفيديو جاهز!';
+          // ✅ جلب مدة الفيديو تلقائيًا من Bunny
+          const videoDurationSec = info.length || 0;
+          const durationFormatted = formatBunnyDuration(videoDurationSec);
+          // تحديث حقل المدة في الـ row
+          const durationInput = row.querySelector('.segment-duration');
+          if(durationInput && !durationInput.value && durationFormatted) {
+            durationInput.value = durationFormatted;
+          }
+          readyBadge.textContent = `✅ جاهز${durationFormatted ? ' • ' + durationFormatted : ''}`;
+          progressText.textContent = `✅ الفيديو جاهز!${durationFormatted ? ' المدة: ' + durationFormatted : ''}`;
           if(window.db){
             window.db.collection('videos').doc(videoId).update({
               status:'Ready', statusAr:'جاهز', statusCode:3, isReady:true,
               playUrl: embedUrl,
+              duration: videoDurationSec,
+              durationFormatted: durationFormatted,
               thumbnailUrl: `https://${BUNNY_CDN_HOST}/${videoId}/thumbnail.jpg`,
               readyAt: new Date().toISOString()
             });
@@ -2932,8 +2946,14 @@ async function startBunnyUpload(file){
         setBunnyStatusBadge(info.status);
         if(info.status === 3){
           clearInterval(_bunnyStatusInterval);
-          setBunnyProgress(100, '🎉 الفيديو جاهز للمشاهدة!');
+          // ✅ جلب مدة الفيديو تلقائيًا
+          const videoDurationSec = info.length || 0;
+          const durationFmt = formatBunnyDuration(videoDurationSec);
+          setBunnyProgress(100, `🎉 الفيديو جاهز!${durationFmt ? ' المدة: ' + durationFmt : ''}`);
           showBunnyPreview(videoId);
+          // حفظ المدة في hidden input عشان تتضمن في الـ lesson
+          document.getElementById('bunnyUploadedVideoId').dataset.duration = durationFmt;
+          document.getElementById('bunnyUploadedVideoId').dataset.durationSec = videoDurationSec;
           // Update Firebase
           if(window.db){
             await window.db.collection('videos').doc(videoId).update({
@@ -2941,6 +2961,8 @@ async function startBunnyUpload(file){
               statusAr:   'جاهز',
               statusCode: 3,
               isReady:    true,
+              duration:   videoDurationSec,
+              durationFormatted: durationFmt,
               playUrl:    `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${videoId}`,
               thumbnailUrl: `https://${BUNNY_CDN_HOST}/${videoId}/thumbnail.jpg`,
               readyAt:    new Date().toISOString()
@@ -2991,8 +3013,10 @@ async function saveNewLesson(){
 
   // Build segments: Bunny segment first if uploaded
   let allSegments = [];
+  const bunnyDurationFmt = document.getElementById('bunnyUploadedVideoId').dataset.duration || '';
+  const bunnyDurationSec = parseInt(document.getElementById('bunnyUploadedVideoId').dataset.durationSec || '0', 10);
   if(bunnyVideoId){
-    allSegments.push({ title: title || 'الدرس', videoUrl: bunnyVideoUrl, bunnyVideoId, duration: '', position: 1, source: 'bunny' });
+    allSegments.push({ title: title || 'الدرس', videoUrl: bunnyVideoUrl, bunnyVideoId, duration: bunnyDurationFmt, durationSec: bunnyDurationSec, position: 1, source: 'bunny' });
     // add manual segments after
     segments.forEach((s,i) => allSegments.push({...s, position: i+2}));
   } else {
@@ -3234,6 +3258,8 @@ async function renderStudentCourses() {
   } else {
     availGrid.innerHTML = available.map(c => buildStudentCourseCard(c, false)).join('');
   }
+  // ✅ تحديث إحصائيات الطالب
+  if(typeof renderStudentStatsPage === 'function') renderStudentStatsPage();
 }
 
 function enrollCourse(courseId){
@@ -5611,6 +5637,339 @@ if(currentUser && currentUser.role === 'student') {
     <button onclick="closeCodeModal()" style="width:100%; padding:12px; background:var(--bg); color:var(--text); border:1.5px solid var(--border); border-radius:12px; font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">إلغاء</button>
   </div>
 </div>
+
+<!-- ========================================================
+     ✅ COURSE STATS & STUDENT PROGRESS ENGINE
+     ======================================================== -->
+<script>
+// ─── تحويل ثواني لصيغة "1:30:00" أو "5:30" ──────────────────
+function formatBunnyDuration(totalSeconds) {
+  if(!totalSeconds || isNaN(totalSeconds)) return '';
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+  if(h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// تحويل ثواني لنص عربي مقروء
+function formatSecondsAr(totalSeconds) {
+  if(!totalSeconds || isNaN(totalSeconds)) return '0 دقيقة';
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  if(h > 0 && m > 0) return `${h} ساعة و${m} دقيقة`;
+  if(h > 0) return `${h} ساعة`;
+  return `${m} دقيقة`;
+}
+
+// تحويل نص المدة "1:30:00" أو "5:30" لثواني
+function parseDurationToSeconds(str) {
+  if(!str) return 0;
+  const parts = str.trim().split(':').map(Number);
+  if(parts.length === 3) return (parts[0]*3600) + (parts[1]*60) + parts[2];
+  if(parts.length === 2) return (parts[0]*60) + parts[1];
+  return parseInt(str) || 0;
+}
+
+// ─── حساب إحصائيات كورس واحد تلقائيًا ──────────────────────
+function calcCourseStats(course) {
+  const lessons = course.lessons || [];
+  let totalDurationSec = 0;
+  let videoCount = 0;
+  let quizCount = 0;
+  lessons.forEach(lesson => {
+    const segs = Array.isArray(lesson.segments) ? lesson.segments : [];
+    segs.forEach(seg => {
+      if(seg.videoUrl || seg.bunnyVideoId) {
+        videoCount++;
+        if(seg.durationSec && seg.durationSec > 0) {
+          totalDurationSec += Number(seg.durationSec);
+        } else if(seg.duration) {
+          totalDurationSec += parseDurationToSeconds(seg.duration);
+        }
+      }
+    });
+    if(!segs.length && lesson.videoUrl) {
+      videoCount++;
+      if(lesson.durationSec) totalDurationSec += Number(lesson.durationSec);
+    }
+    if(lesson.quizId) quizCount++;
+  });
+  return {
+    lessonCount: lessons.length,
+    videoCount,
+    quizCount,
+    totalDurationSec,
+    totalDurationFormatted: formatSecondsAr(totalDurationSec)
+  };
+}
+
+// ─── تقدم الطالب في كورس ────────────────────────────────────
+function getStudentProgress(studentId, courseId) {
+  const key = `progress_${studentId}_${courseId}`;
+  return JSON.parse(localStorage.getItem(key) || '{"watchedVideos":[],"solvedQuizzes":[],"watchedSec":0}');
+}
+function saveStudentProgress(studentId, courseId, progress) {
+  const key = `progress_${studentId}_${courseId}`;
+  localStorage.setItem(key, JSON.stringify(progress));
+  if(window.db) {
+    window.db.collection('student_progress').doc(`${studentId}_${courseId}`).set(
+      { studentId, courseId, ...progress, updatedAt: new Date().toISOString() }, { merge: true }
+    ).catch(e => console.warn('progress sync:', e));
+  }
+}
+
+// ✅ تسجيل مشاهدة فيديو - تُستدعى من lessons.html
+window.markVideoWatched = function(studentId, courseId, videoId, durationSec) {
+  const prog = getStudentProgress(studentId, courseId);
+  if(!prog.watchedVideos.includes(videoId)) {
+    prog.watchedVideos.push(videoId);
+    prog.watchedSec = (prog.watchedSec || 0) + (Number(durationSec) || 0);
+    prog.lastActivity = new Date().toISOString();
+    saveStudentProgress(studentId, courseId, prog);
+  }
+};
+
+// ✅ تسجيل حل اختبار - تُستدعى من tests.html
+window.markQuizSolved = function(studentId, courseId, quizId, score) {
+  const prog = getStudentProgress(studentId, courseId);
+  if(!prog.solvedQuizzes.find(q => q.id == quizId)) {
+    prog.solvedQuizzes.push({ id: quizId, score, date: new Date().toISOString() });
+    prog.lastActivity = new Date().toISOString();
+    saveStudentProgress(studentId, courseId, prog);
+  }
+};
+
+// ─── إحصائيات الطالب العامة (كل الكورسات) ──────────────────
+window.calcStudentGlobalStats = function(studentId) {
+  const allCourses = typeof getCourses === 'function' ? getCourses() : [];
+  const current = JSON.parse(localStorage.getItem('alamin_current') || '{}');
+  const enrolledIds = (current.enrolledCourses || []).map(String);
+  const myCourses = allCourses.filter(c => enrolledIds.includes(String(c.id)));
+  let totalWatchedSec = 0, totalWatchedVideos = 0, totalSolvedQuizzes = 0;
+  let totalVideos = 0, totalQuizzes = 0, totalCourseDurationSec = 0;
+  const thisYear = new Date().getFullYear();
+  const courseDetails = myCourses.map(course => {
+    const stats = calcCourseStats(course);
+    const prog = getStudentProgress(studentId, course.id);
+    totalWatchedSec += prog.watchedSec || 0;
+    totalWatchedVideos += (prog.watchedVideos || []).length;
+    const yearQuizzes = (prog.solvedQuizzes || []).filter(q => q.date && new Date(q.date).getFullYear() === thisYear);
+    totalSolvedQuizzes += yearQuizzes.length;
+    totalVideos += stats.videoCount;
+    totalQuizzes += stats.quizCount;
+    totalCourseDurationSec += stats.totalDurationSec;
+    const progressPct = stats.totalDurationSec > 0
+      ? Math.min(100, Math.round((prog.watchedSec||0) / stats.totalDurationSec * 100))
+      : (stats.videoCount > 0 ? Math.min(100, Math.round((prog.watchedVideos||[]).length / stats.videoCount * 100)) : 0);
+    return { id: course.id, title: course.title, stats, progress: prog, progressPct,
+      watchedFormatted: formatSecondsAr(prog.watchedSec || 0) };
+  });
+  return { totalCoursesEnrolled: myCourses.length, totalWatchedSec,
+    totalWatchedFormatted: formatSecondsAr(totalWatchedSec), totalWatchedVideos,
+    totalSolvedQuizzes, totalVideos, totalQuizzes, totalCourseDurationSec,
+    totalCourseDurationFormatted: formatSecondsAr(totalCourseDurationSec), courseDetails };
+};
+
+// ─── عرض كروت الكورسات للأدمين مع إحصائيات ─────────────────
+function renderCoursesAdminWithStats() {
+  const grid = document.getElementById('coursesAdminGrid');
+  if(!grid) return;
+  const allCourses = typeof getCourses === 'function' ? getCourses() : [];
+  if(!allCourses.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">📚</div><p>لا توجد كورسات بعد</p></div>';
+    return;
+  }
+  grid.innerHTML = allCourses.map(c => {
+    const stats = calcCourseStats(c);
+    const thumbHTML = c.thumbnail
+      ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX||50}% ${c.thumbnailY||50}%;display:block">`
+      : `<span style="font-size:48px">${c.emoji||'📚'}</span>`;
+    const typeBadge = c.type === 'free'
+      ? `<span style="background:rgba(46,213,115,0.12);color:#2ed573;padding:4px 10px;border-radius:8px;font-weight:700;font-size:12px;display:inline-block;margin-top:4px;">مجاني 🆓</span>`
+      : `<span style="background:rgba(245,166,35,0.12);color:#f5a623;padding:4px 10px;border-radius:8px;font-weight:700;font-size:12px;display:inline-block;margin-top:4px;">مدفوع 💰 ${c.price||'0'} ج.م</span>`;
+    const statsBadges = `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        <span style="background:#e8f4ff;color:#0077b6;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:800;">📚 ${stats.lessonCount} درس</span>
+        <span style="background:#fff8e8;color:#e67e22;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:800;">🎬 ${stats.videoCount} فيديو</span>
+        <span style="background:#fce8ff;color:#8e44ad;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:800;">📝 ${stats.quizCount} اختبار</span>
+        ${stats.totalDurationSec > 0 ? `<span style="background:#e8fff3;color:#1ea760;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:800;">⏱️ ${stats.totalDurationFormatted}</span>` : ''}
+      </div>`;
+    return `
+    <div class="course-admin-card">
+      <div class="course-admin-thumb" style="background:${c.color||'linear-gradient(135deg,var(--primary),var(--primary-dark))'}">${thumbHTML}</div>
+      <div class="course-admin-body">
+        <div class="course-admin-title">${c.title}</div>
+        <div class="course-admin-meta">${c.desc||''}<br>الصف: ${gradeLabel(c.grade)} ${typeBadge}${statsBadges}</div>
+        <div class="course-admin-footer">
+          <button class="btn-view" onclick="openEditCourse(${c.id})">تعديل</button>
+          <button class="btn-view" onclick="openAddLessonModal(${c.id})">➕ درس</button>
+          <button class="btn-view" onclick="openManageLessonsModal(${c.id})" style="background:#7c3aed;color:#fff;border-color:#7c3aed">📋 إدارة</button>
+          <button class="btn-view" onclick="window.location='lessons.html?course=${c.id}'">عرض</button>
+          <button class="btn-delete" onclick="deleteCourse(${c.id})">حذف</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── كرت الكورس للطالب مع بار التقدم ────────────────────────
+function buildStudentCourseCardWithProgress(c, enrolled) {
+  const current = JSON.parse(localStorage.getItem('alamin_current') || '{}');
+  const today = new Date().toLocaleDateString('ar-EG');
+  const gradeText = typeof gradeLabel === 'function' ? gradeLabel(c.grade) : c.grade;
+  const settings = JSON.parse(localStorage.getItem('alamin_settings') || '{}');
+  const teacherName = settings.teacherName || 'الأستاذ الأمين';
+  const coverEmoji = c.emoji || '📚';
+  const coverBg = c.color || 'linear-gradient(135deg,#1a1a2e,#8B6914)';
+  const createdDate = c.created || today;
+  const coverHTML = c.thumbnail
+    ? `<img src="${c.thumbnail}" class="scc-cover-img" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX||50}% ${c.thumbnailY||50}%;position:absolute;inset:0;">`
+    : `<span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>`;
+  const stats = calcCourseStats(c);
+
+  if(enrolled) {
+    const prog = getStudentProgress(current.id, c.id);
+    const progressPct = stats.totalDurationSec > 0
+      ? Math.min(100, Math.round((prog.watchedSec||0) / stats.totalDurationSec * 100))
+      : (stats.videoCount > 0 ? Math.min(100, Math.round((prog.watchedVideos||[]).length / stats.videoCount * 100)) : 0);
+
+    return `
+    <div class="student-course-card">
+      <div class="scc-cover" style="background:${coverBg}">
+        ${coverHTML}
+        <div class="scc-badge enrolled">مشترك ✅</div>
+        <div class="scc-teacher">${teacherName}</div>
+        <div class="scc-grade-tag">${gradeText}</div>
+      </div>
+      <div class="scc-body">
+        <div class="scc-title">${c.title}</div>
+        <div class="scc-desc">${c.desc||'كورس شامل لتعلم اللغة العربية باحترافية'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+          <span style="background:#e8f4ff;color:#0077b6;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">📚 ${stats.lessonCount} درس</span>
+          <span style="background:#fff8e8;color:#e67e22;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">🎬 ${stats.videoCount} فيديو</span>
+          <span style="background:#fce8ff;color:#8e44ad;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">📝 ${stats.quizCount} اختبار</span>
+          ${stats.totalDurationSec > 0 ? `<span style="background:#e8fff3;color:#1ea760;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">⏱️ ${stats.totalDurationFormatted}</span>` : ''}
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:5px;">
+            <span>🎯 تقدمك في الكورس</span>
+            <span style="color:#0077b6;">${progressPct}%</span>
+          </div>
+          <div style="height:7px;background:#e3f4f9;border-radius:6px;overflow:hidden;">
+            <div style="height:100%;width:${progressPct}%;background:linear-gradient(90deg,#00b4d8,#f5a623);border-radius:6px;transition:width .5s;"></div>
+          </div>
+          ${prog.watchedSec > 0 ? `<div style="font-size:11px;color:#888;margin-top:4px;">شاهدت ${formatSecondsAr(prog.watchedSec)} من ${stats.totalDurationFormatted||'—'}</div>` : ''}
+        </div>
+        <div class="scc-actions">
+          <button class="scc-btn-enter" onclick="window.location='lessons.html?course=${c.id}'">الدخول للمحتوى 🚀</button>
+        </div>
+      </div>
+      <div class="scc-enrolled-bar">✅ أنت مشترك في هذا الكورس</div>
+    </div>`;
+  } else {
+    const isFree = c.type === 'free';
+    const priceHTML = isFree ? '<span class="scc-price-free">مجاني! 🆓</span>' : `<span class="scc-price-tag">${c.price||'؟'} ج.م 💰</span>`;
+    const badgeHTML = isFree ? '<div class="scc-badge free">كورس مجاني!</div>' : '<div class="scc-badge paid">كورس مدفوع</div>';
+    const actionHTML = isFree
+      ? `<button class="scc-btn-free" onclick="enrollCourse(${c.id})">الدخول للكورس 🆓</button>`
+      : `<button class="scc-btn-pay" onclick="showPaymentForCourse(${c.id})">اشترك الآن 💳</button><button class="scc-btn-code" onclick="openCodeModal(${c.id})">كود تفعيل 🔑</button>`;
+    return `
+    <div class="student-course-card">
+      <div class="scc-cover" style="background:${coverBg}">
+        ${coverHTML}
+        ${badgeHTML}
+        <div class="scc-teacher">${teacherName}</div>
+        <div class="scc-grade-tag">${gradeText}</div>
+      </div>
+      <div class="scc-body">
+        <div class="scc-title">${c.title}</div>
+        <div class="scc-desc">${c.desc||'كورس شامل لتعلم اللغة العربية باحترافية'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+          <span style="background:#e8f4ff;color:#0077b6;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">📚 ${stats.lessonCount} درس</span>
+          <span style="background:#fff8e8;color:#e67e22;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">🎬 ${stats.videoCount} فيديو</span>
+          ${stats.totalDurationSec > 0 ? `<span style="background:#e8fff3;color:#1ea760;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;">⏱️ ${stats.totalDurationFormatted}</span>` : ''}
+        </div>
+        <div class="scc-meta-row">
+          <div class="scc-dates"><span>📅 ${createdDate}</span></div>
+          ${priceHTML}
+        </div>
+        <div class="scc-actions">${actionHTML}</div>
+      </div>
+    </div>`;
+  }
+}
+
+// ─── تفعيل الـ override بعد تحميل الصفحة ──────────────────
+window.addEventListener('load', () => {
+  // override دالة عرض كروت الأدمين
+  window.renderCoursesAdmin = renderCoursesAdminWithStats;
+  // override دالة كرت الكورس للطالب
+  window.buildStudentCourseCard = buildStudentCourseCardWithProgress;
+  // تفعيل إحصائيات الطالب لو موجود عنصر
+  if(document.getElementById('studentGlobalStats')) {
+    const current = JSON.parse(localStorage.getItem('alamin_current') || '{}');
+    if(current.id) renderStudentStatsPage();
+  }
+});
+
+// عرض إحصائيات الطالب لو العنصر موجود
+function renderStudentStatsPage() {
+  const current = JSON.parse(localStorage.getItem('alamin_current') || '{}');
+  if(!current.id) return;
+  const gs = calcStudentGlobalStats(current.id);
+  const el = document.getElementById('studentGlobalStats');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:28px;">
+      <div class="stat-card"><div class="stat-icon" style="background:#e8fff3">⏱️</div><div>
+        <div class="stat-label">إجمالي ساعات المشاهدة</div>
+        <div class="stat-val" style="font-size:20px">${gs.totalWatchedFormatted||'0 دقيقة'}</div>
+        <div class="stat-change">من ${gs.totalCourseDurationFormatted}</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#e8f4ff">🎬</div><div>
+        <div class="stat-label">فيديوهات مشاهدة</div>
+        <div class="stat-val">${gs.totalWatchedVideos}</div>
+        <div class="stat-change">من ${gs.totalVideos} فيديو</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fce8ff">📝</div><div>
+        <div class="stat-label">اختبارات حُلّت هذه السنة</div>
+        <div class="stat-val">${gs.totalSolvedQuizzes}</div>
+        <div class="stat-change">من ${gs.totalQuizzes} اختبار</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fff8e8">📚</div><div>
+        <div class="stat-label">كورسات مشترك بها</div>
+        <div class="stat-val">${gs.totalCoursesEnrolled}</div>
+      </div></div>
+    </div>
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;">
+      <div style="font-size:17px;font-weight:900;margin-bottom:20px;">📊 تفاصيل التقدم لكل كورس</div>
+      ${gs.courseDetails.length ? gs.courseDetails.map(cd => `
+        <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-weight:800;font-size:15px;">${cd.title}</div>
+            <div style="font-size:13px;font-weight:700;color:#0077b6;">${cd.progressPct}%</div>
+          </div>
+          <div style="height:8px;background:#e3f4f9;border-radius:6px;overflow:hidden;margin-bottom:8px;">
+            <div style="height:100%;width:${cd.progressPct}%;background:linear-gradient(90deg,#00b4d8,#f5a623);border-radius:6px;"></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#888;">
+            <span>📚 ${cd.stats.lessonCount} درس</span>
+            <span>🎬 ${(cd.progress.watchedVideos||[]).length}/${cd.stats.videoCount} فيديو</span>
+            <span>📝 ${(cd.progress.solvedQuizzes||[]).length}/${cd.stats.quizCount} اختبار</span>
+            ${cd.progress.watchedSec > 0 ? `<span style="color:#1ea760;">⏱️ ${cd.watchedFormatted}</span>` : ''}
+          </div>
+        </div>`).join('') : '<div style="color:#888;text-align:center;padding:20px;">لا توجد كورسات مسجلة بعد</div>'}
+    </div>`;
+}
+
+// expose globally
+window.calcCourseStats = calcCourseStats;
+window.getStudentProgress = getStudentProgress;
+window.formatBunnyDuration = formatBunnyDuration;
+window.formatSecondsAr = formatSecondsAr;
+window.parseDurationToSeconds = parseDurationToSeconds;
+</script>
 
 </body>
 </html>
