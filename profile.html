@@ -13,7 +13,8 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 .topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; }
 .logo{ display:flex; align-items:center; gap:12px; text-decoration:none; }
-.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; overflow:hidden; }
+.logo-icon img { width:100%; height:100%; object-fit:cover; display:block; }
 .logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
 .topbar-right{ display:flex; align-items:center; gap:14px; }
 .topbar-right button{ background:var(--bg); border:2px solid var(--border); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:14px; transition:all .2s; }
@@ -40,8 +41,13 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .profile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
 .form-group{ margin-bottom:20px; }
 .form-group label{ display:block; font-weight:700; margin-bottom:8px; font-size:14px; }
-.form-group input, .form-group textarea{ width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:14px; font-family:'Cairo',sans-serif; }
-.form-group input:focus, .form-group textarea:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(200,169,110,.1); }
+.form-group .readonly-field{
+  width:100%; padding:12px; border:1px solid var(--border); border-radius:10px;
+  background:rgba(0,0,0,.04); color:var(--text); font-size:14px;
+  font-family:'Cairo',sans-serif; cursor:not-allowed; opacity:.85;
+}
+[data-theme="dark"] .form-group .readonly-field{ background:rgba(255,255,255,.04); }
+.field-note{ font-size:12px; color:var(--text2); margin-top:4px; }
 
 .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:32px; }
 .stat-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; }
@@ -66,8 +72,22 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .toggle::after{ content:''; position:absolute; width:24px; height:24px; background:white; border-radius:50%; top:2px; right:2px; transition:right .3s; }
 .toggle.active::after{ right:24px; }
 
-.btn-save{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:14px 32px; border-radius:12px; font-weight:900; cursor:pointer; font-size:14px; transition:all .2s; }
-.btn-save:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,105,20,.3); }
+/* Password change modal */
+.modal-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.open{ display:flex; }
+.modal-box{ background:var(--card); border-radius:20px; padding:32px; width:90%; max-width:420px; }
+.modal-title{ font-size:18px; font-weight:900; margin-bottom:20px; }
+.modal-box .form-group input{ width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-size:14px; font-family:'Cairo',sans-serif; }
+.modal-box .form-group input:focus{ outline:none; border-color:var(--primary); }
+.modal-actions{ display:flex; gap:12px; margin-top:20px; }
+.btn-primary{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:12px 24px; border-radius:10px; font-weight:900; cursor:pointer; font-size:14px; flex:1; }
+.btn-cancel{ background:var(--bg); border:2px solid var(--border); color:var(--text2); padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px; flex:1; }
+.alert-msg{ padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:12px; display:none; }
+.alert-msg.ok{ background:#f0fff6; color:#27ae60; border:1px solid #b3f5d1; display:block; }
+.alert-msg.err{ background:#fff0f3; color:#c0392b; border:1px solid #ffd0d8; display:block; }
+
+.empty-state{ text-align:center; padding:40px; color:var(--text2); }
+.empty-icon{ font-size:48px; margin-bottom:12px; }
 
 @media(max-width:768px){ .profile-grid{ grid-template-columns:1fr; } .profile-header{ flex-direction:column; text-align:center; } }
 </style>
@@ -76,12 +96,14 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 <div class="topbar">
   <a href="index.html" class="logo">
-    <div class="logo-icon">أ</div>
+    <div class="logo-icon">
+      <img src="ايقونة الواجهه.jpeg" alt="الأمين">
+    </div>
     <div class="logo-text">الأمين</div>
   </a>
   <div class="topbar-right">
-    <button onclick="window.location='dashboard.html'">📊 لوحة التحكم</button>
     <button onclick="toggleTheme()">🌙</button>
+    <button onclick="doLogout()" style="color:#c0392b;">🚪 خروج</button>
   </div>
 </div>
 
@@ -90,12 +112,11 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
     <div class="profile-header">
       <div class="avatar">👨‍🎓</div>
       <div class="profile-info">
-        <div class="profile-name" id="heroName">أحمد محمد</div>
-        <div class="profile-email">ahmed@example.com</div>
+        <div class="profile-name" id="heroName">---</div>
+        <div class="profile-email" id="heroPhone">---</div>
         <div class="profile-badges">
-          <div class="badge">🌟 متعلم نشط</div>
-          <div class="badge">🏆 صاحب شهادات</div>
-          <div class="badge">💪 الأفضل</div>
+          <div class="badge" id="heroBadgeGrade">📚 ---</div>
+          <div class="badge">🌟 طالب مسجّل</div>
         </div>
       </div>
     </div>
@@ -108,94 +129,54 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
     <button class="tab-btn" onclick="switchTab(3)">⚙️ الإعدادات</button>
   </div>
 
-  <!-- TAB 1: PROFILE DATA -->
+  <!-- TAB 1: PROFILE DATA (read-only) -->
   <div class="tab-content active" id="tab-0">
     <div class="profile-grid">
       <div class="form-group">
         <label>الاسم الأول</label>
-        <input type="text" value="أحمد" id="firstName">
+        <div class="readonly-field" id="dispFirstName">---</div>
+        <div class="field-note">لا يمكن تعديل الاسم. تواصل مع الإدارة إذا كان هناك خطأ.</div>
       </div>
       <div class="form-group">
         <label>الاسم الأخير</label>
-        <input type="text" value="محمد" id="lastName">
+        <div class="readonly-field" id="dispLastName">---</div>
       </div>
       <div class="form-group">
         <label>رقم الهاتف</label>
-        <input type="tel" value="0123456789" id="phone">
+        <div class="readonly-field" id="dispPhone">---</div>
+        <div class="field-note">لا يمكن تعديل رقم الهاتف.</div>
       </div>
       <div class="form-group">
         <label>الصف الدراسي</label>
-        <input type="text" value="الصف الثاني الثانوي" id="grade">
-      </div>
-      <div class="form-group" style="grid-column:1/3;">
-        <label>النبذة الشخصية</label>
-        <textarea rows="4">مهتم بتعلم اللغة العربية وتحسين مهاراتي في الكتابة والتعبير</textarea>
+        <div class="readonly-field" id="dispGrade">---</div>
+        <div class="field-note">تم تحديده عند إنشاء الحساب.</div>
       </div>
     </div>
-    <button class="btn-save" onclick="saveProfile()">💾 حفظ البيانات</button>
   </div>
 
   <!-- TAB 2: STATISTICS -->
   <div class="tab-content" id="tab-1">
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-val">24</div>
-        <div class="stat-label">ساعات التعلم</div>
+        <div class="stat-val" id="statHours">0</div>
+        <div class="stat-label">ساعات المشاهدة</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">8</div>
-        <div class="stat-label">دورات مكتملة</div>
+        <div class="stat-val" id="statCourses">0</div>
+        <div class="stat-label">الكورسات المشترَكة</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">42</div>
-        <div class="stat-label">دروس مكتملة</div>
+        <div class="stat-val" id="statDone">0</div>
+        <div class="stat-label">الدورات المكتملة</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">88%</div>
+        <div class="stat-val" id="statAvg">--</div>
         <div class="stat-label">متوسط النتيجة</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-val">156</div>
-        <div class="stat-label">نقاط مكتسبة</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">3</div>
-        <div class="stat-label">شهادات حصلت عليها</div>
-      </div>
     </div>
-
     <div class="activity-section">
-      <div class="activity-title">تقدمك الأسبوعي 📊</div>
-      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:20px;">
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">📚</div>
-          <div style="font-size:12px; color:var(--text2);">السبت: 3 ساعات</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">📚</div>
-          <div style="font-size:12px; color:var(--text2);">الأحد: 2 ساعات</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">🎓</div>
-          <div style="font-size:12px; color:var(--text2);">الإثنين: 4 ساعات</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">📚</div>
-          <div style="font-size:12px; color:var(--text2);">الثلاثاء: 3 ساعات</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px; opacity:.6;">
-          <div style="font-size:24px; margin-bottom:8px;">❌</div>
-          <div style="font-size:12px; color:var(--text2);">الأربعاء: راحة</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">🎓</div>
-          <div style="font-size:12px; color:var(--text2);">الخميس: 5 ساعات</div>
-        </div>
-        <div style="text-align:center; padding:16px; background:var(--bg); border-radius:10px;">
-          <div style="font-size:24px; margin-bottom:8px;">🔥</div>
-          <div style="font-size:12px; color:var(--text2);">الجمعة: 6 ساعات</div>
-        </div>
-      </div>
+      <div class="activity-title">نشاطك الأسبوعي 📊</div>
+      <div id="weeklyActivity" style="padding:20px 0;"></div>
     </div>
   </div>
 
@@ -203,45 +184,14 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
   <div class="tab-content" id="tab-2">
     <div class="activity-section">
       <div class="activity-title">آخر الأنشطة 🎯</div>
-      <div class="activity-item">
-        <div class="activity-icon">🎓</div>
-        <div class="activity-text">
-          <div style="font-weight:700;">أكملت دورة القواعس النحوية</div>
-          <div class="activity-desc">حصلت على 92% وشهادة معترف بها</div>
-          <div class="activity-time">منذ يومين</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-icon">⭐</div>
-        <div class="activity-text">
-          <div style="font-weight:700;">حصلت على إنجاز جديد</div>
-          <div class="activity-desc">الطالب النجيب - حصلت على 90% أو أكثر</div>
-          <div class="activity-time">منذ 4 أيام</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-icon">📝</div>
-        <div class="activity-text">
-          <div style="font-weight:700;">أكملت اختبار التعبير الكتابي</div>
-          <div class="activity-desc">النتيجة: 85% - جيد جداً</div>
-          <div class="activity-time">منذ أسبوع</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-icon">🏆</div>
-        <div class="activity-text">
-          <div style="font-weight:700;">حصلت على شهادة جديدة</div>
-          <div class="activity-desc">شهادة أساسيات اللغة العربية - ممتاز</div>
-          <div class="activity-time">منذ أسبوعين</div>
-        </div>
-      </div>
+      <div id="activityList"></div>
     </div>
   </div>
 
   <!-- TAB 4: SETTINGS -->
   <div class="tab-content" id="tab-3">
     <div class="settings-section">
-      <div class="settings-title">التنبيهات والإشعارات 🔔</div>
+      <div class="settings-title">التنبيهات 🔔</div>
       <div class="setting-item">
         <span>إشعارات الدروس الجديدة</span>
         <div class="toggle active" onclick="toggleSwitch(this)"></div>
@@ -250,64 +200,62 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
         <span>إشعارات الاختبارات</span>
         <div class="toggle active" onclick="toggleSwitch(this)"></div>
       </div>
-      <div class="setting-item">
-        <span>إشعارات التحديثات</span>
-        <div class="toggle" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="setting-item">
-        <span>إشعارات البريد الإلكتروني</span>
-        <div class="toggle active" onclick="toggleSwitch(this)"></div>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-title">الخصوصية والأمان 🔐</div>
-      <div class="setting-item">
-        <span>جعل ملفي الشخصي عام</span>
-        <div class="toggle" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="setting-item">
-        <span>السماح بالبحث عني</span>
-        <div class="toggle active" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="setting-item">
-        <span>إظهار معدلاتي العلمية</span>
-        <div class="toggle active" onclick="toggleSwitch(this)"></div>
-      </div>
     </div>
 
     <div class="settings-section">
       <div class="settings-title">حساب وأمان 🛡️</div>
-      <div class="setting-item" style="cursor:pointer;" onclick="alert('تم تغيير كلمة المرور بنجاح')">
+      <div class="setting-item" style="cursor:pointer;" onclick="openChangePwd()">
         <span>تغيير كلمة المرور</span>
-        <span>→</span>
+        <span>←</span>
       </div>
-      <div class="setting-item" style="cursor:pointer;" onclick="alert('تفعيل التحقق الثنائي')">
-        <span>التحقق الثنائي</span>
-        <span>→</span>
-      </div>
-      <div class="setting-item" style="cursor:pointer;" onclick="if(confirm('هل تريد تنزيل بيانات حسابك؟')){alert('جاري التنزيل...')}">
-        <span>تنزيل البيانات</span>
-        <span>→</span>
-      </div>
-      <div class="setting-item" style="cursor:pointer; color:#ff4757;" onclick="if(confirm('هل تريد حذف حسابك نهائياً؟')){alert('تم طلب حذف الحساب')}">
+      <div class="setting-item" style="cursor:pointer; color:#ff4757;" onclick="if(confirm('هل تريد حذف حسابك نهائياً؟ لا يمكن التراجع!'))doDeleteAccount()">
         <span>حذف الحساب</span>
-        <span>→</span>
+        <span>←</span>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Password Change Modal -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal-box">
+    <div class="modal-title">🔒 تغيير كلمة المرور</div>
+    <div class="alert-msg" id="pwdAlert"></div>
+    <div class="form-group">
+      <label>كلمة المرور الحالية</label>
+      <input type="password" id="oldPwd" placeholder="ادخل كلمة المرور الحالية">
+    </div>
+    <div class="form-group">
+      <label>كلمة المرور الجديدة</label>
+      <input type="password" id="newPwd" placeholder="ادخل كلمة المرور الجديدة (6 أحرف على الأقل)">
+    </div>
+    <div class="form-group">
+      <label>تأكيد كلمة المرور الجديدة</label>
+      <input type="password" id="confirmPwd" placeholder="أعد كتابة كلمة المرور الجديدة">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="doChangePwd()">💾 حفظ</button>
+      <button class="btn-cancel" onclick="closePwdModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
 <script>
+// ─── Theme ───────────────────────────────────────────────
 function toggleTheme(){
   const h=document.documentElement;
   const dark=h.getAttribute('data-theme')==='dark';
   h.setAttribute('data-theme',dark?'light':'dark');
   localStorage.setItem('profile-theme',dark?'light':'dark');
 }
-const t=localStorage.getItem('profile-theme');
-if(t) document.documentElement.setAttribute('data-theme',t);
+const savedTheme=localStorage.getItem('profile-theme');
+if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
 
+// ─── Tabs ─────────────────────────────────────────────────
 function switchTab(idx){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
@@ -315,13 +263,140 @@ function switchTab(idx){
   document.querySelectorAll('.tab-btn')[idx].classList.add('active');
 }
 
-function toggleSwitch(el){
-  el.classList.toggle('active');
+function toggleSwitch(el){ el.classList.toggle('active'); }
+
+// ─── Load current user ────────────────────────────────────
+const currentUser = JSON.parse(localStorage.getItem('alamin_current') || 'null');
+if(!currentUser){ window.location.href='login.html'; }
+
+const fullName = (currentUser.name) || ((currentUser.firstName||'') + ' ' + (currentUser.lastName||'')).trim() || 'طالب';
+const gradeMap = {
+  'prep1':'الصف الأول الإعدادي','prep2':'الصف الثاني الإعدادي','prep3':'الصف الثالث الإعدادي',
+  'sec1':'الصف الأول الثانوي',
+  'sec2_science_bio':'الصف الثاني الثانوي - علمي علوم',
+  'sec2_science_math':'الصف الثاني الثانوي - علمي رياضة',
+  'sec2_arts':'الصف الثاني الثانوي - أدبي',
+  'sec3_science_bio':'الصف الثالث الثانوي - علمي علوم',
+  'sec3_science_math':'الصف الثالث الثانوي - علمي رياضة',
+  'sec3_arts':'الصف الثالث الثانوي - أدبي',
+};
+const gradeLabel = gradeMap[currentUser.grade] || currentUser.grade || 'غير محدد';
+
+// Fill hero
+document.getElementById('heroName').textContent = fullName;
+document.getElementById('heroPhone').textContent = currentUser.phone || '---';
+document.getElementById('heroBadgeGrade').textContent = '📚 ' + gradeLabel;
+
+// Fill tab 1
+document.getElementById('dispFirstName').textContent = currentUser.firstName || currentUser.name || '---';
+document.getElementById('dispLastName').textContent = currentUser.lastName || '---';
+document.getElementById('dispPhone').textContent = currentUser.phone || '---';
+document.getElementById('dispGrade').textContent = gradeLabel;
+
+// ─── Statistics from localStorage ─────────────────────────
+function loadStats(){
+  const uid = currentUser.id || currentUser.phone;
+  const userStats = JSON.parse(localStorage.getItem('stats_'+uid)||'{"hours":0,"courses":0,"done":0,"avg":null}');
+  document.getElementById('statHours').textContent = userStats.hours || 0;
+  document.getElementById('statCourses').textContent = userStats.courses || 0;
+  document.getElementById('statDone').textContent = userStats.done || 0;
+  document.getElementById('statAvg').textContent = userStats.avg ? userStats.avg+'%' : '--';
+
+  // Weekly activity
+  const days = ['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+  const weekData = JSON.parse(localStorage.getItem('week_'+uid)||'[0,0,0,0,0,0,0]');
+  const container = document.getElementById('weeklyActivity');
+  container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">' +
+    days.map((d,i)=>`
+      <div style="text-align:center;padding:12px;background:var(--bg);border-radius:10px;">
+        <div style="font-size:22px;margin-bottom:6px;">${weekData[i]>0?'📚':'⬜'}</div>
+        <div style="font-size:11px;color:var(--text2);">${d}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--primary);">${weekData[i]>0?weekData[i]+' د':'--'}</div>
+      </div>`).join('')
+    + '</div>';
+}
+loadStats();
+
+// ─── Activity from localStorage ───────────────────────────
+function loadActivity(){
+  const uid = currentUser.id || currentUser.phone;
+  const acts = JSON.parse(localStorage.getItem('activity_'+uid)||'[]');
+  const list = document.getElementById('activityList');
+  if(!acts.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><div>لا يوجد نشاط مسجّل بعد</div></div>';
+    return;
+  }
+  list.innerHTML = acts.map(a=>`
+    <div class="activity-item">
+      <div class="activity-icon">${a.icon||'📌'}</div>
+      <div class="activity-text">
+        <div style="font-weight:700;">${a.title}</div>
+        <div class="activity-desc">${a.desc||''}</div>
+        <div class="activity-time">${a.time||''}</div>
+      </div>
+    </div>`).join('');
+}
+loadActivity();
+
+// ─── Password Change ──────────────────────────────────────
+function openChangePwd(){
+  document.getElementById('oldPwd').value='';
+  document.getElementById('newPwd').value='';
+  document.getElementById('confirmPwd').value='';
+  const al=document.getElementById('pwdAlert');
+  al.className='alert-msg'; al.textContent='';
+  document.getElementById('pwdModal').classList.add('open');
+}
+function closePwdModal(){
+  document.getElementById('pwdModal').classList.remove('open');
+}
+function showPwdAlert(msg,type){
+  const al=document.getElementById('pwdAlert');
+  al.textContent=msg;
+  al.className='alert-msg '+(type==='ok'?'ok':'err');
+}
+async function doChangePwd(){
+  const oldP=document.getElementById('oldPwd').value.trim();
+  const newP=document.getElementById('newPwd').value.trim();
+  const confP=document.getElementById('confirmPwd').value.trim();
+  if(!oldP||!newP||!confP){ showPwdAlert('❌ يرجى ملء جميع الحقول','err'); return; }
+  if(newP.length<6){ showPwdAlert('❌ كلمة المرور الجديدة 6 أحرف على الأقل','err'); return; }
+  if(newP!==confP){ showPwdAlert('❌ كلمة المرور الجديدة وتأكيدها غير متطابقتين','err'); return; }
+
+  // Verify old password
+  const users = JSON.parse(localStorage.getItem('alamin_users')||'[]');
+  const idx = users.findIndex(u=>u.phone===currentUser.phone);
+  if(idx===-1||users[idx].password!==oldP){
+    showPwdAlert('❌ كلمة المرور الحالية غير صحيحة','err'); return;
+  }
+  users[idx].password = newP;
+  localStorage.setItem('alamin_users',JSON.stringify(users));
+  // Update current session
+  const upd = {...currentUser, password:newP};
+  localStorage.setItem('alamin_current',JSON.stringify(upd));
+  showPwdAlert('✅ تم تغيير كلمة المرور بنجاح!','ok');
+  setTimeout(()=>closePwdModal(),1500);
 }
 
-function saveProfile(){
-  alert('✅ تم حفظ البيانات بنجاح');
+// ─── Logout / Delete ──────────────────────────────────────
+function doLogout(){
+  localStorage.removeItem('alamin_current');
+  window.location.href='login.html';
 }
+function doDeleteAccount(){
+  const phone=currentUser.phone;
+  let users=JSON.parse(localStorage.getItem('alamin_users')||'[]');
+  users=users.filter(u=>u.phone!==phone);
+  localStorage.setItem('alamin_users',JSON.stringify(users));
+  localStorage.removeItem('alamin_current');
+  alert('تم حذف الحساب. نأسف لرحيلك!');
+  window.location.href='index.html';
+}
+
+// Close modal on outside click
+document.getElementById('pwdModal').addEventListener('click',function(e){
+  if(e.target===this) closePwdModal();
+});
 </script>
 </body>
 </html>

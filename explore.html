@@ -13,7 +13,8 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 
 .topbar{ background:var(--card); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,.08); }
 .logo{ display:flex; align-items:center; gap:12px; text-decoration:none; }
-.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; }
+.logo-icon{ width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; font-weight:900; overflow:hidden; }
+.logo-icon img { width:100%; height:100%; object-fit:cover; display:block; }
 .logo-text{ font-size:18px; font-weight:900; color:var(--primary); font-family:'Tajawal',sans-serif; }
 .topbar-right{ display:flex; align-items:center; gap:14px; }
 .topbar-right a{ text-decoration:none; color:var(--text2); font-weight:600; padding:8px 14px; border-radius:10px; transition:all .2s; }
@@ -59,15 +60,15 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
 .cta-desc{ font-size:16px; margin-bottom:24px; opacity:.95; }
 .cta-btn{ display:inline-block; background:white; color:var(--primary); padding:14px 32px; border-radius:12px; font-weight:900; text-decoration:none; transition:all .2s; }
 .cta-btn:hover{ transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,0,0,.2); }
-
-@media(max-width:768px){ .courses-grid{ grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); } .features-grid{ grid-template-columns:repeat(2,1fr); } }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <a href="index.html" class="logo">
-    <div class="logo-icon">أ</div>
+    <div class="logo-icon">
+      <img src="ايقونة الواجهه.jpeg" alt="الأمين">
+    </div>
     <div class="logo-text">الأمين</div>
   </a>
   <div class="topbar-right">

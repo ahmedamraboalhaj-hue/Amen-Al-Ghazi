@@ -44,7 +44,9 @@ nav::after {
 }
 .nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
 .nav-logo-box { width:46px; height:46px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; color:white; font-weight:900; position:relative; overflow:hidden; box-shadow:0 4px 14px rgba(139,105,20,0.3); }
-.nav-logo-box::before { content:''; position:absolute; top:-50%; left:-90%; width:50%; height:200%; background:linear-gradient(120deg,transparent,rgba(255,255,255,0.55),transparent); transform:rotate(20deg); animation:logoSheen 4.5s ease-in-out infinite; }
+.nav-logo-box::before { content:''; position:absolute; top:-50%; left:-90%; width:50%; height:200%; background:linear-gradient(120deg,transparent,rgba(255,255,255,0.55),transparent); transform:rotate(20deg); animation:logoSheen 4.5s ease-in-out infinite; z-index: 2; }
+.nav-logo-box, .welcome-logo { overflow: hidden; }
+.nav-logo-box img, .welcome-logo img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
 @keyframes logoSheen { 0%,60%{left:-90%} 100%{left:160%} }
 .nav-brand { font-family:'Tajawal',sans-serif; font-size:19px; font-weight:900; color:var(--primary); }
 .nav-sub { font-size:10px; color:var(--text2); display:block; margin-top:-3px; }
@@ -143,6 +145,52 @@ nav::after {
 [data-theme="dark"] .alert.ok { background:#0e2318; border-color:#1a6640; color:#4ddb8a; }
 
 @media(max-width:900px) { .page-wrap{grid-template-columns:1fr;} .left-panel{display:none;} .right-panel{padding:32px 24px;} }
+
+/* ─── Welcome Overlay ─── */
+.welcome-overlay {
+  position:fixed; inset:0; z-index:999;
+  background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  animation:fadeInOv .4s ease;
+}
+@keyframes fadeInOv { from{opacity:0} to{opacity:1} }
+.welcome-card {
+  background:var(--card);
+  border:2px solid var(--border);
+  border-radius:28px;
+  padding:48px 40px;
+  max-width:480px; width:100%;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(139,105,20,.15);
+  animation:slideUpCard .45s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUpCard { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+.welcome-logo { width:80px; height:80px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:22px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:36px; color:white; font-weight:900; box-shadow:0 8px 28px rgba(139,105,20,.35); }
+.welcome-title { font-family:'Tajawal',sans-serif; font-size:26px; font-weight:900; margin-bottom:8px; color:var(--text); }
+.welcome-sub { font-size:15px; color:var(--text2); margin-bottom:36px; line-height:1.7; }
+.welcome-btns { display:flex; flex-direction:column; gap:14px; }
+.wbtn {
+  padding:18px 24px; border-radius:16px; border:2px solid var(--border);
+  cursor:pointer; font-family:'Cairo',sans-serif; font-size:16px; font-weight:800;
+  display:flex; align-items:center; gap:14px;
+  transition:all .2s; background:var(--bg); color:var(--text);
+  text-align:right;
+}
+.wbtn:hover { border-color:var(--primary); background:rgba(200,169,110,.08); transform:translateY(-2px); box-shadow:0 6px 20px rgba(139,105,20,.12); }
+.wbtn .wbtn-icon { font-size:32px; flex-shrink:0; }
+.wbtn .wbtn-text { flex:1; }
+.wbtn .wbtn-text strong { display:block; font-size:16px; margin-bottom:3px; }
+.wbtn .wbtn-text span { font-size:12px; color:var(--text2); font-weight:600; }
+.wbtn.primary-btn { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border-color:transparent; box-shadow:0 8px 0 #5C4008, 0 12px 24px rgba(139,105,20,.35); }
+.wbtn.primary-btn:hover { transform:translateY(-4px); box-shadow:0 12px 0 #4a3306, 0 18px 32px rgba(139,105,20,.4); }
+.wbtn.primary-btn .wbtn-text span { color:rgba(255,255,255,.75); }
+
+/* sub-choice for center students */
+.center-sub { display:none; flex-direction:column; gap:12px; margin-top:4px; }
+.center-sub.visible { display:flex; animation:slideUpCard .3s cubic-bezier(0.34,1.56,0.64,1); }
+.back-choice { background:none; border:none; color:var(--text2); font-size:13px; font-weight:700; cursor:pointer; margin-top:8px; font-family:'Cairo',sans-serif; }
+.back-choice:hover { color:var(--primary); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -151,11 +199,59 @@ nav::after {
 <body>
 <nav>
   <a href="index.html" class="nav-logo">
-    <div class="nav-logo-box">أ</div>
+    <div class="nav-logo-box">
+      <img src="ايقونة الواجهه.jpeg" alt="الأمين">
+    </div>
     <div><span class="nav-brand">الأمين</span><span class="nav-sub">في اللغة العربية</span></div>
   </a>
   <button class="theme-btn" onclick="toggleTheme()">🌙</button>
 </nav>
+
+<!-- ═══════════ WELCOME OVERLAY ═══════════ -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-card">
+    <div class="welcome-logo">
+      <img src="ايقونة الواجهه.jpeg" alt="الأمين">
+    </div>
+    <div class="welcome-title">أهلاً بيك في الأمين! 👋</div>
+    <div class="welcome-sub">قبل ما تسجّل دخولك، عايزين نعرف أنت طالب إيه؟</div>
+
+    <div class="welcome-btns" id="mainChoices">
+      <button class="wbtn primary-btn" onclick="showCenterSub()">
+        <span class="wbtn-icon">🏫</span>
+        <span class="wbtn-text">
+          <strong>طالب من السنتر</strong>
+          <span>بتحضر مع الأستاذ الأمين في السنتر</span>
+        </span>
+      </button>
+      <button class="wbtn" onclick="dismissOverlay()">
+        <span class="wbtn-icon">🌐</span>
+        <span class="wbtn-text">
+          <strong>طالب خارج السنتر</strong>
+          <span>بتتعلم أونلاين من غير ما تيجي السنتر</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="center-sub" id="centerSub">
+      <button class="wbtn primary-btn" onclick="goCodeLogin()">
+        <span class="wbtn-icon">🔑</span>
+        <span class="wbtn-text">
+          <strong>عندي كود السنتر</strong>
+          <span>هدخل بالكود الخاص بيا</span>
+        </span>
+      </button>
+      <button class="wbtn" onclick="dismissOverlay()">
+        <span class="wbtn-icon">📝</span>
+        <span class="wbtn-text">
+          <strong>ما معيش كود / ضاع مني</strong>
+          <span>هسجّل دخول بالرقم وكلمة المرور عادي</span>
+        </span>
+      </button>
+      <button class="back-choice" onclick="showMainChoices()">← رجوع</button>
+    </div>
+  </div>
+</div>
 
 <div class="page-wrap">
   <!-- LEFT -->
@@ -214,14 +310,42 @@ nav::after {
       <div class="register-row" id="toggleLoginMode" style="cursor:pointer; color:var(--primary); font-weight:800; text-align:center; margin-bottom:10px;" onclick="toggleLoginMode()">لدي كود من السنتر؟ اضغط هنا</div>
       <div class="register-row">مش عندك حساب؟ <a href="register.html">اعمل حساب جديد!</a></div>
 
-      <div class="admin-hint">
-        للدخول كـ أدمن: <strong>01000000000</strong> / <strong>admin123</strong>
-      </div>
+
     </div>
   </div>
 </div>
 
 <script>
+// ─── Welcome Overlay ───────────────────────────────────────
+function showCenterSub(){
+  document.getElementById('mainChoices').style.display='none';
+  const sub=document.getElementById('centerSub');
+  sub.classList.add('visible');
+}
+function showMainChoices(){
+  document.getElementById('centerSub').classList.remove('visible');
+  document.getElementById('mainChoices').style.display='flex';
+}
+function dismissOverlay(){
+  const ov=document.getElementById('welcomeOverlay');
+  ov.style.animation='fadeOutOv .3s ease forwards';
+  setTimeout(()=>ov.style.display='none',280);
+}
+function goCodeLogin(){
+  // activate code mode then dismiss
+  loginMode='code';
+  document.getElementById('phoneGroup').style.display='none';
+  document.getElementById('passGroup').style.display='none';
+  document.getElementById('codeGroup').style.display='block';
+  document.getElementById('toggleLoginMode').textContent='العودة لتسجيل الدخول برقم الموبايل';
+  dismissOverlay();
+}
+// Add fadeOut keyframe via JS
+const styleEl=document.createElement('style');
+styleEl.textContent='@keyframes fadeOutOv{from{opacity:1}to{opacity:0}}';
+document.head.appendChild(styleEl);
+// ────────────────────────────────────────────────────────────
+
 function toggleTheme(){
   const h=document.documentElement;
   const dark=h.getAttribute('data-theme')==='dark';
@@ -300,7 +424,7 @@ async function doLogin(){
 
     setLoading(true);
     // Admin login
-    if(phone==='01000000000'&&pass==='admin123'){
+    if(phone==='2026'&&pass==='2027'){
       localStorage.setItem('alamin_current',JSON.stringify({id:0,name:'الأستاذ الأمين',phone:'01000000000',role:'admin'}));
       showAlert('✅ أهلاً بك يا أدمن! جاري التوجيه...','success');
       setTimeout(()=>window.location.href='dashboard.html',1000);
