@@ -395,23 +395,58 @@ function toggleLoginMode() {
 
 async function doLogin(){
   if (loginMode === 'code') {
-    const code = document.getElementById('codeInp').value.trim();
+    const code = document.getElementById('codeInp').value.trim().toUpperCase();
     if(!code){showAlert('❌ من فضلك ادخل الكود الخاص بك','error');return;}
     setLoading(true);
     try {
-      const docRef = db.collection('students').doc(code);
+      // ── أولاً: البحث في centerStudents بالكود (الطريقة الجديدة) ──
+      const centerSnap = await db.collection('centerStudents')
+        .where('centerCode', '==', code).limit(1).get();
+
+      if (!centerSnap.empty) {
+        const doc = centerSnap.docs[0];
+        const user = doc.data();
+        user.id        = doc.id;
+        user.role      = 'student';
+        user.type      = 'center';
+        user.centerCode = code;
+        localStorage.setItem('alamin_current', JSON.stringify(user));
+        showAlert('✅ أهلاً بيك يا ' + (user.name || user.fullName || 'طالب') + '! جاري التوجيه...', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+        return;
+      }
+
+      // ── ثانياً: البحث في students بالـ doc ID (الطريقة القديمة) ──
+      const docRef  = db.collection('students').doc(code);
       const docSnap = await docRef.get();
       if(docSnap.exists) {
         const user = docSnap.data();
-        user.id = code;
+        user.id   = code;
         user.role = 'student';
-        localStorage.setItem('alamin_current',JSON.stringify(user));
+        localStorage.setItem('alamin_current', JSON.stringify(user));
         showAlert('✅ أهلاً بيك يا '+ (user.name || 'طالب') +'! جاري التوجيه...','success');
-        setTimeout(()=>window.location.href='index.html',1000);
-      } else {
-        showAlert('❌ الكود غير صحيح أو غير مسجل!','error');
-        setLoading(false);
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+        return;
       }
+
+      // ── ثالثاً: البحث في students بحقل qrCode أو offlineCode ──
+      const qrSnap = await db.collection('students')
+        .where('qrCode', '==', code).limit(1).get();
+      if (!qrSnap.empty) {
+        const doc  = qrSnap.docs[0];
+        const user = doc.data();
+        user.id   = doc.id;
+        user.role = 'student';
+        localStorage.setItem('alamin_current', JSON.stringify(user));
+        showAlert('✅ أهلاً بيك يا ' + (user.name || 'طالب') + '! جاري التوجيه...', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+        return;
+      }
+
+      // لا يوجد نتيجة
+      showAlert('❌ الكود غير صحيح أو غير مسجل — تأكد من الكود وحاول تاني', 'error');
+      setLoading(false);
+
     } catch(err) {
        console.error(err);
        showAlert('❌ حدث خطأ في الاتصال بقاعدة البيانات','error');

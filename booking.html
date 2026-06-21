@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>احجز مكانك — الأمين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --primary:#C8A96E;--primary-dark:#8B6914;--accent:#f5a623;
+  --success:#2ed573;--danger:#ff4757;--warning:#ffa502;
+  --bg:#FDF8F0;--card:#fff;--text:#0f172a;--text2:#475569;--border:#E8D5A3;
+}
+[data-theme="dark"]{--bg:#1a1209;--card:#2a1f0f;--text:#e2eaf4;--text2:#b89a6a;--border:#3d2e10;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Cairo",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+
+/* NAV */
+nav{padding:0 28px;height:66px;background:var(--card);display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(139,105,20,.08);position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none;}
+.nav-logo-box{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;font-weight:900;box-shadow:0 4px 12px rgba(139,105,20,.3);overflow:hidden;}
+.nav-logo-box img{width:100%;height:100%;object-fit:cover;display:block;}
+.nav-brand{font-family:"Tajawal",sans-serif;font-size:17px;font-weight:900;color:var(--primary);display:block;}
+.nav-sub{font-size:11px;color:var(--text2);display:block;}
+.nav-btn{padding:8px 16px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:13px;font-family:"Cairo",sans-serif;color:var(--text2);font-weight:700;text-decoration:none;transition:all .2s;}
+.nav-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#1a1209 0%,#2d1f08 45%,#3d2a0a 100%);padding:48px 20px 56px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(200,169,110,.18) 0%,transparent 65%);}
+.hero-eyebrow{display:inline-block;background:rgba(200,169,110,.15);border:1px solid rgba(200,169,110,.35);color:#C8A96E;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px;position:relative;}
+.hero h1{font-family:"Tajawal",sans-serif;font-size:clamp(24px,5vw,42px);font-weight:900;color:#fff;margin-bottom:10px;line-height:1.3;position:relative;}
+.hero h1 em{color:#C8A96E;font-style:normal;}
+.hero p{color:rgba(255,255,255,.7);font-size:15px;max-width:480px;margin:0 auto;line-height:1.8;position:relative;}
+
+/* WRAP */
+.wrap{max-width:740px;margin:0 auto;padding:36px 16px 60px;}
+
+/* CARD */
+.card{background:var(--card);border:2px solid var(--border);border-radius:22px;padding:32px 28px;box-shadow:0 8px 40px rgba(139,105,20,.09);margin-bottom:20px;}
+.card-title{font-family:"Tajawal",sans-serif;font-size:21px;font-weight:900;margin-bottom:4px;display:flex;align-items:center;gap:9px;}
+.card-sub{color:var(--text2);font-size:13px;margin-bottom:26px;}
+
+/* GRADE PICK */
+.grade-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px;}
+.grade-btn{border:2px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;text-align:center;background:var(--bg);transition:all .25s;font-family:"Cairo",sans-serif;}
+.grade-btn:hover{border-color:var(--primary);}
+.grade-btn.sel{border-color:var(--primary);background:var(--card);box-shadow:0 4px 18px rgba(200,169,110,.2);}
+.grade-btn .gb-icon{font-size:32px;margin-bottom:6px;}
+.grade-btn .gb-label{font-size:15px;font-weight:900;color:var(--text);}
+.grade-btn .gb-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+
+/* GROUPS */
+.groups-wrap{display:none;animation:fadeUp .3s ease;}
+.groups-wrap.show{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.groups-title{font-size:13px;font-weight:800;color:var(--text2);margin-bottom:10px;}
+.groups-list{display:flex;flex-direction:column;gap:9px;margin-bottom:24px;}
+.group-opt{border:2px solid var(--border);border-radius:13px;padding:0;cursor:pointer;transition:all .22s;background:var(--bg);overflow:hidden;}
+.group-opt:hover{border-color:var(--primary);background:var(--card);}
+.group-opt.sel{border-color:var(--primary);background:var(--card);box-shadow:0 3px 16px rgba(200,169,110,.18);}
+.group-inner{display:flex;align-items:center;gap:0;padding:13px 16px;}
+.g-dot{width:19px;height:19px;border-radius:50%;border:2px solid var(--border);margin-left:13px;flex-shrink:0;transition:all .2s;display:grid;place-items:center;}
+.group-opt.sel .g-dot{border-color:var(--primary);background:var(--primary);}
+.group-opt.sel .g-dot::after{content:"";width:7px;height:7px;border-radius:50%;background:#fff;display:block;}
+.g-info{flex:1;}
+.g-name{font-size:14px;font-weight:900;color:var(--text);margin-bottom:3px;}
+.g-meta{display:flex;gap:12px;flex-wrap:wrap;}
+.g-meta span{font-size:11px;color:var(--text2);}
+.g-price{font-family:"Tajawal",sans-serif;font-size:17px;font-weight:900;color:var(--primary);white-space:nowrap;}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:24px 0;position:relative;}
+.div span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);padding:0 12px;font-size:12px;font-weight:700;color:var(--text2);}
+
+/* FIELDS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.f{margin-bottom:0;}
+.f.full{grid-column:1/-1;}
+.f label{display:block;font-size:13px;font-weight:800;margin-bottom:6px;color:var(--text2);}
+.f label em{color:var(--danger);font-style:normal;}
+.f input,.f select{width:100%;padding:12px 15px;border:2px solid var(--border);border-radius:12px;font-family:"Cairo",sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:all .22s;}
+.f input:focus,.f select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(200,169,110,.1);background:var(--card);}
+.f input.err{border-color:var(--danger);}
+.f-hint{font-size:11px;color:var(--text2);margin-top:4px;}
+.f-err{font-size:11px;color:var(--danger);margin-top:3px;display:none;}
+.f-err.show{display:block;}
+
+/* PHONE + COPY */
+.phone-wrap{position:relative;}
+.phone-wrap input{padding-left:70px;}
+.copy-btn{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:var(--primary);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:"Cairo",sans-serif;transition:all .2s;}
+.copy-btn:hover{background:var(--primary-dark);}
+.copy-btn.copied{background:var(--success);}
+
+/* PAYMENT BOX */
+.pay-box{background:linear-gradient(135deg,#fffbeb,#fef9ec);border:2px solid #f59e0b;border-radius:15px;padding:22px;margin:24px 0;}
+.pay-title{font-size:16px;font-weight:900;color:#92400e;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.pay-steps{list-style:none;}
+.pay-steps li{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid rgba(245,158,11,.2);font-size:13px;line-height:1.7;color:#78350f;}
+.pay-steps li:last-child{border:none;}
+.sn{min-width:24px;height:24px;border-radius:50%;background:#f59e0b;color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;flex-shrink:0;margin-top:3px;}
+.voda{display:inline-block;background:#e00;color:#fff;padding:7px 16px;border-radius:9px;font-size:17px;font-weight:900;letter-spacing:2px;font-family:monospace;cursor:pointer;margin:4px 0;transition:opacity .2s;}
+.voda:hover{opacity:.85;}
+.copy-hint{font-size:11px;color:#92400e;margin-top:2px;}
+.amt{display:inline-block;background:#10b981;color:#fff;padding:4px 13px;border-radius:7px;font-size:14px;font-weight:900;}
+
+/* SUBMIT */
+.sub-btn{width:100%;padding:16px;margin-top:26px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;border-radius:13px;font-family:"Cairo",sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all .3s;box-shadow:0 8px 0 #5C4008,0 12px 24px rgba(139,105,20,.3);display:flex;align-items:center;justify-content:center;gap:10px;}
+.sub-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 11px 0 #4a3306,0 16px 30px rgba(139,105,20,.4);}
+.sub-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:0 4px 0 #5C4008;}
+.spin{width:19px;height:19px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* SUCCESS */
+.suc{display:none;text-align:center;padding:36px 16px;animation:fadeUp .5s ease;}
+.suc.show{display:block;}
+.suc-icon{font-size:68px;margin-bottom:14px;}
+.suc-title{font-family:"Tajawal",sans-serif;font-size:26px;font-weight:900;color:var(--success);margin-bottom:10px;}
+.suc-sub{font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:24px;}
+.suc-num{font-family:"Tajawal",sans-serif;font-size:36px;font-weight:900;color:var(--primary);letter-spacing:4px;margin:10px 0;}
+.suc-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:18px;max-width:440px;margin:0 auto 20px;text-align:right;}
+.suc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.suc-row:last-child{border:none;}
+.sk{color:var(--text2);}
+.sv{font-weight:800;}
+.suc-note{background:rgba(200,169,110,.1);border:1.5px solid var(--border);border-radius:12px;padding:16px;max-width:440px;margin:0 auto 20px;font-size:13px;line-height:1.9;color:var(--text2);text-align:right;}
+.suc-note strong{color:var(--primary-dark);}
+.back-btn{display:inline-block;padding:13px 28px;background:var(--bg);border:2px solid var(--border);border-radius:12px;font-family:"Cairo",sans-serif;font-size:14px;font-weight:800;color:var(--text2);text-decoration:none;cursor:pointer;transition:all .2s;}
+.back-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* INQUIRY */
+.inq-card{background:var(--card);border:2px solid var(--border);border-radius:22px;padding:28px;box-shadow:0 4px 20px rgba(139,105,20,.07);}
+.inq-title{font-family:"Tajawal",sans-serif;font-size:18px;font-weight:900;margin-bottom:4px;}
+.inq-sub{color:var(--text2);font-size:13px;margin-bottom:20px;}
+.inq-row{display:flex;gap:10px;}
+.inq-input{flex:1;padding:12px 15px;border:2px solid var(--border);border-radius:12px;font-family:"Cairo",sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:all .22s;}
+.inq-input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(200,169,110,.1);background:var(--card);}
+.inq-btn{padding:12px 20px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;border-radius:12px;font-family:"Cairo",sans-serif;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;}
+.inq-result{display:none;margin-top:14px;border-radius:12px;padding:14px 16px;font-size:13px;}
+.inq-result.show{display:block;}
+.inq-result.ok{background:#d1fae5;border:1.5px solid #34d399;color:#064e3b;}
+.inq-result.wait{background:#fef3c7;border:1.5px solid #fbbf24;color:#78350f;}
+.inq-result.no{background:#fee2e2;border:1.5px solid #f87171;color:#7f1d1d;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(100px);background:#1a1a2e;color:#fff;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:700;transition:transform .3s;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{background:#059669;}
+.toast.bad{background:#dc2626;}
+
+@media(max-width:580px){
+  .fg{grid-template-columns:1fr;}
+  .card{padding:22px 15px;}
+  .grade-pick{grid-template-columns:1fr 1fr;}
+  nav{padding:0 14px;}
+  .inq-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-box">
+      <img src="ايقونة الواجهه.jpeg" alt="الأمين" onerror="this.style.display='none';this.parentNode.innerHTML='أ'">
+    </div>
+    <div>
+      <span class="nav-brand">الأمين</span>
+      <span class="nav-sub">منصة تعليمية</span>
+    </div>
+  </a>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="login.html" class="nav-btn">🔑 تسجيل الدخول</a>
+    <button class="nav-btn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">📅 التسجيل مفتوح الآن</div>
+  <h1>احجز مكانك في<br><em>مجموعات الأستاذ الأمين</em></h1>
+  <p>أماكن محدودة — سارع بالحجز قبل الامتلاء</p>
+</div>
+
+<div class="wrap">
+
+  <!-- فورم الحجز -->
+  <div id="bookingSection">
+    <div class="card">
+      <div class="card-title">📋 بيانات الحجز</div>
+      <div class="card-sub">اختر سنتك الدراسية أولاً ثم أكمل بياناتك</div>
+
+      <!-- STEP 1: اختيار السنة -->
+      <div class="groups-title">١. اختر سنتك الدراسية <em style="color:var(--danger)">*</em></div>
+      <div class="grade-pick">
+        <button class="grade-btn" id="gb2" onclick="pickGrade('2')">
+          <div class="gb-icon">📘</div>
+          <div class="gb-label">ثاني ثانوي</div>
+          <div class="gb-sub">الصف الثاني الثانوي</div>
+        </button>
+        <button class="grade-btn" id="gb3" onclick="pickGrade('3')">
+          <div class="gb-icon">📗</div>
+          <div class="gb-label">ثالث ثانوي</div>
+          <div class="gb-sub">الصف الثالث الثانوي</div>
+        </button>
+      </div>
+
+      <!-- STEP 2: المجموعات (تظهر بعد اختيار السنة) -->
+      <div class="groups-wrap" id="groupsWrap">
+        <div class="groups-title">٢. اختر المجموعة <em style="color:var(--danger)">*</em></div>
+        <div class="groups-list" id="groupsList"></div>
+        <div id="g-err" style="font-size:12px;color:var(--danger);display:none;margin-bottom:8px;">اختر مجموعة أولاً</div>
+      </div>
+
+      <!-- STEP 3: بيانات الطالب -->
+      <div class="groups-wrap" id="fieldsWrap">
+        <div class="div"><span>بيانات الطالب</span></div>
+        <div class="fg">
+
+          <div class="f full">
+            <label>اسم الطالب الثلاثي <em>*</em></label>
+            <input type="text" id="fullName" placeholder="مثال: أحمد محمد علي" autocomplete="name">
+            <div class="f-err" id="e-fullName">الرجاء إدخال الاسم الثلاثي (3 كلمات على الأقل)</div>
+          </div>
+
+          <div class="f">
+            <label>رقم هاتف الطالب <em>*</em></label>
+            <div class="phone-wrap">
+              <input type="tel" id="studentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
+              <button class="copy-btn" onclick="copyField('studentPhone',this)" type="button">نسخ</button>
+            </div>
+            <div class="f-err" id="e-studentPhone">11 رقم مطلوب</div>
+          </div>
+
+          <div class="f">
+            <label>رقم هاتف ولي الأمر <em>*</em></label>
+            <div class="phone-wrap">
+              <input type="tel" id="parentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
+              <button class="copy-btn" onclick="copyField('parentPhone',this)" type="button">نسخ</button>
+            </div>
+            <div class="f-err" id="e-parentPhone">11 رقم مطلوب</div>
+          </div>
+
+          <div class="f full">
+            <label>العنوان <em>*</em></label>
+            <input type="text" id="address" placeholder="مثال: كفر الشيخ — شارع الجمهورية">
+            <div class="f-err" id="e-address">الرجاء إدخال العنوان</div>
+          </div>
+
+        </div>
+
+        <div class="div"><span>السداد — فودافون كاش فقط</span></div>
+
+        <div class="pay-box">
+          <div class="pay-title">💰 خطوات السداد</div>
+          <ul class="pay-steps">
+            <li>
+              <div class="sn">١</div>
+              <div>حوّل المبلغ: <span class="amt" id="payAmt">—</span> عبر فودافون كاش أو اتصل بـ <strong>*9#</strong></div>
+            </li>
+            <li>
+              <div class="sn">٢</div>
+              <div>
+                على رقم الأستاذ:
+                <div class="voda" onclick="copyVoda()">01012345678</div>
+                <div class="copy-hint">👆 اضغط لنسخ الرقم</div>
+              </div>
+            </li>
+            <li><div class="sn">٣</div><div>احفظ <strong>كود العملية</strong> من رسالة التأكيد</div></li>
+            <li><div class="sn">٤</div><div>أدخل الكود والرقم أدناه وأرسل الطلب ✅</div></li>
+          </ul>
+          <div class="fg" style="margin-top:14px">
+            <div class="f">
+              <label>كود العملية <em>*</em></label>
+              <input type="text" id="txCode" placeholder="مثال: 1234567890" dir="ltr" maxlength="20" inputmode="numeric">
+              <div class="f-err" id="e-txCode">أدخل كود العملية</div>
+            </div>
+            <div class="f">
+              <label>الرقم المحوّل منه <em>*</em></label>
+              <div class="phone-wrap">
+                <input type="tel" id="senderPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
+                <button class="copy-btn" onclick="copyField('senderPhone',this)" type="button">نسخ</button>
+              </div>
+              <div class="f-err" id="e-senderPhone">11 رقم مطلوب</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="sub-btn" id="subBtn" onclick="submitBooking()">
+          <div class="spin" id="spin"></div>
+          <span id="subTxt">🚀 إرسال طلب الحجز</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- استفسار عن طلب -->
+    <div class="inq-card">
+      <div class="inq-title">🔍 استفسار عن طلب</div>
+      <div class="inq-sub">عندك رقم طلب؟ تقدر تعرف حالته هنا</div>
+      <div class="inq-row">
+        <input class="inq-input" id="inqNum" type="text" placeholder="أدخل رقم الطلب (5 أرقام)" maxlength="5" inputmode="numeric" dir="ltr">
+        <button class="inq-btn" onclick="checkInquiry()">🔍 استعلم</button>
+      </div>
+      <div class="inq-result" id="inqResult"></div>
+    </div>
+  </div>
+
+  <!-- شاشة النجاح -->
+  <div class="suc" id="sucWrap">
+    <div class="suc-icon">✅</div>
+    <div class="suc-title">تم استلام طلبك!</div>
+    <div class="suc-num" id="sucNum"></div>
+    <div class="suc-note">
+      <strong>📌 احفظ رقم الطلب جيداً</strong><br>
+      سيتم مراجعة بيانات التحويل وتفعيل حجزك خلال <strong>24 ساعة</strong>.<br><br>
+      بعد التفعيل، عُد لصفحة <strong>احجز الآن</strong> واضغط <strong>"استفسار"</strong>
+      وأدخل رقم طلبك لاستلام <strong>كود السنتر</strong> الخاص بيك.<br><br>
+      بكود السنتر تقدر تسجّل دخولك على المنصة مباشرةً 🎓
+    </div>
+    <div class="suc-box" id="sucBox"></div>
+    <button class="back-btn" onclick="location.reload()">🔄 طلب حجز جديد</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="firebase-config.js"></script>
+<script>
+/* ══ بيانات المجموعات ══ */
+const GROUPS = {
+  "2": [
+    {id:"g2a",name:"مجموعة A",days:"السبت والثلاثاء",time:"٤:٠٠ م — ٦:٠٠ م",location:"السنتر — القاعة الكبرى",price:350},
+    {id:"g2b",name:"مجموعة B",days:"الأحد والأربعاء",time:"٥:٠٠ م — ٧:٠٠ م",location:"السنتر — القاعة الكبرى",price:350},
+    {id:"g2c",name:"مجموعة C",days:"الاثنين والخميس",time:"٦:٠٠ م — ٨:٠٠ م",location:"السنتر — القاعة الكبرى",price:350},
+  ],
+  "3": [
+    {id:"g3a",name:"مجموعة A",days:"السبت والثلاثاء",time:"٢:٠٠ م — ٤:٠٠ م",location:"السنتر — قاعة الامتحانات",price:400},
+    {id:"g3b",name:"مجموعة B",days:"الأحد والأربعاء",time:"٣:٠٠ م — ٥:٠٠ م",location:"السنتر — قاعة الامتحانات",price:400},
+    {id:"g3c",name:"مجموعة C",days:"الاثنين والخميس",time:"٧:٠٠ م — ٩:٠٠ م",location:"السنتر — قاعة الامتحانات",price:400},
+  ]
+};
+const GRADE_LABELS = {"2":"ثاني ثانوي","3":"ثالث ثانوي"};
+const VODA = "01012345678";
+
+let selGrade = null, selGroup = null;
+
+/* ══ اختيار السنة ══ */
+function pickGrade(g) {
+  selGrade = g; selGroup = null;
+  document.querySelectorAll(".grade-btn").forEach(b => b.classList.remove("sel"));
+  document.getElementById("gb" + g).classList.add("sel");
+  renderGroups(g);
+  document.getElementById("groupsWrap").classList.add("show");
+  document.getElementById("fieldsWrap").classList.remove("show");
+  setTimeout(() => document.getElementById("groupsWrap").scrollIntoView({behavior:"smooth",block:"nearest"}), 150);
+}
+
+/* ══ رسم المجموعات ══ */
+function renderGroups(g) {
+  const grps = GROUPS[g] || [];
+  document.getElementById("groupsList").innerHTML = grps.map(gr => `
+    <div class="group-opt" id="go_${gr.id}" onclick="pickGroup('${gr.id}','${g}')">
+      <div class="group-inner">
+        <div class="g-dot" id="dot_${gr.id}"></div>
+        <div class="g-info">
+          <div class="g-name">${gr.name} — ${GRADE_LABELS[g]}</div>
+          <div class="g-meta">
+            <span>📅 ${gr.days}</span>
+            <span>🕓 ${gr.time}</span>
+            <span>📍 ${gr.location}</span>
+          </div>
+        </div>
+        <div class="g-price">${gr.price} ج.م</div>
+      </div>
+    </div>`).join("");
+}
+
+/* ══ اختيار مجموعة ══ */
+function pickGroup(id, g) {
+  const grps = GROUPS[g] || [];
+  selGroup = grps.find(gr => gr.id === id);
+  document.querySelectorAll(".group-opt").forEach(el => el.classList.remove("sel"));
+  document.getElementById("go_" + id).classList.add("sel");
+  document.getElementById("g-err").style.display = "none";
+  document.getElementById("payAmt").textContent = selGroup.price + " ج.م";
+  document.getElementById("fieldsWrap").classList.add("show");
+  setTimeout(() => document.getElementById("fieldsWrap").scrollIntoView({behavior:"smooth",block:"nearest"}), 150);
+}
+
+/* ══ نسخ حقل ══ */
+function copyField(id, btn) {
+  const val = document.getElementById(id).value.trim();
+  if (!val) { toast("الحقل فاضي!", "bad"); return; }
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = "✓";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "نسخ"; btn.classList.remove("copied"); }, 1500);
+  }).catch(() => toast(val, ""));
+}
+
+function copyVoda() {
+  navigator.clipboard.writeText(VODA).then(() => toast("✅ تم نسخ الرقم: " + VODA, "ok")).catch(() => toast(VODA, ""));
+}
+
+/* ══ Validation ══ */
+function vE(id, bad) {
+  document.getElementById("e-" + id)?.classList.toggle("show", bad);
+  document.getElementById(id)?.classList.toggle("err", bad);
+  return bad;
+}
+function validate() {
+  let ok = true;
+  if (!selGroup) {
+    document.getElementById("g-err").style.display = "block";
+    document.getElementById("groupsWrap").scrollIntoView({behavior:"smooth",block:"center"});
+    ok = false;
+  }
+  const nm = document.getElementById("fullName").value.trim();
+  if (vE("fullName", nm.split(/\s+/).filter(Boolean).length < 3)) ok = false;
+  const sp = document.getElementById("studentPhone").value.trim();
+  if (vE("studentPhone", sp.length !== 11 || !/^0\d{10}$/.test(sp))) ok = false;
+  const pp = document.getElementById("parentPhone").value.trim();
+  if (vE("parentPhone", pp.length !== 11 || !/^0\d{10}$/.test(pp))) ok = false;
+  if (vE("address", !document.getElementById("address").value.trim())) ok = false;
+  if (vE("txCode", document.getElementById("txCode").value.trim().length < 4)) ok = false;
+  const snp = document.getElementById("senderPhone").value.trim();
+  if (vE("senderPhone", snp.length !== 11 || !/^0\d{10}$/.test(snp))) ok = false;
+  return ok;
+}
+
+/* ══ رقم طلب عشوائي 5 أرقام ══ */
+function genOrderNum() {
+  return String(Math.floor(10000 + Math.random() * 90000));
+}
+
+/* ══ Submit ══ */
+async function submitBooking() {
+  if (!validate()) return;
+  setBusy(true);
+  const orderNum = genOrderNum();
+  const data = {
+    orderNum,
+    fullName:        document.getElementById("fullName").value.trim(),
+    studentPhone:    document.getElementById("studentPhone").value.trim(),
+    parentPhone:     document.getElementById("parentPhone").value.trim(),
+    address:         document.getElementById("address").value.trim(),
+    groupId:         selGroup.id,
+    groupName:       selGroup.name + " — " + GRADE_LABELS[selGrade],
+    groupGrade:      selGrade,
+    groupGradeLabel: GRADE_LABELS[selGrade],
+    groupDays:       selGroup.days,
+    groupTime:       selGroup.time,
+    phone:           document.getElementById("senderPhone").value.trim(),
+    transactionCode: document.getElementById("txCode").value.trim(),
+    amountNumber:    selGroup.price,
+    amount:          String(selGroup.price),
+    status:          "pending",
+    source:          "booking_form",
+    createdAt:       window.firebase?.firestore
+                       ? firebase.firestore.FieldValue.serverTimestamp()
+                       : new Date().toISOString(),
+  };
+  try {
+    const ref = await window.db.collection("bookingRequests").add(data);
+    await window.db.collection("paymentRequests").add({
+      ...data, bookingRequestId: ref.id, courseId: selGroup.id,
+    });
+    showSuccess(data);
+  } catch(e) {
+    const local = JSON.parse(localStorage.getItem("pending_bookings") || "[]");
+    local.push({...data, localId: Date.now()});
+    localStorage.setItem("pending_bookings", JSON.stringify(local));
+    showSuccess(data);
+    toast("تم الحفظ محلياً — سيُرسل عند عودة الإنترنت", "ok");
+  }
+  setBusy(false);
+}
+
+/* ══ Success ══ */
+function showSuccess(data) {
+  document.getElementById("bookingSection").style.display = "none";
+  document.getElementById("sucNum").textContent = "# " + data.orderNum;
+  const rows = [
+    ["الاسم", data.fullName],
+    ["المجموعة", data.groupName],
+    ["المواعيد", data.groupDays + " / " + data.groupTime],
+    ["المبلغ", data.amountNumber + " ج.م"],
+    ["كود العملية", data.transactionCode],
+  ];
+  document.getElementById("sucBox").innerHTML = rows.map(([k,v]) =>
+    `<div class="suc-row"><span class="sk">${k}</span><span class="sv">${v}</span></div>`
+  ).join("");
+  document.getElementById("sucWrap").classList.add("show");
+  document.getElementById("sucWrap").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* ══ استفسار عن طلب ══ */
+async function checkInquiry() {
+  const num = document.getElementById("inqNum").value.trim();
+  const res = document.getElementById("inqResult");
+  if (!num || num.length !== 5) {
+    res.className = "inq-result show no";
+    res.innerHTML = "❌ أدخل رقم الطلب المكوّن من 5 أرقام";
+    return;
+  }
+  res.className = "inq-result show wait";
+  res.innerHTML = "⏳ جاري البحث...";
+  try {
+    const snap = await window.db.collection("bookingRequests")
+      .where("orderNum", "==", num).limit(1).get();
+    if (snap.empty) {
+      res.className = "inq-result show no";
+      res.innerHTML = "❌ رقم الطلب غير موجود — تأكد من الرقم";
+      return;
+    }
+    const d = snap.docs[0].data();
+    if (d.status === "approved" && d.centerCode) {
+      res.className = "inq-result show ok";
+      res.innerHTML = `
+        ✅ <strong>تم تفعيل حجزك!</strong><br>
+        كود السنتر الخاص بيك: <strong style="font-size:18px;color:#065f46;letter-spacing:2px">${d.centerCode}</strong><br>
+        <small>سجّل دخولك على المنصة بهذا الكود 🎓</small>`;
+    } else if (d.status === "rejected") {
+      res.className = "inq-result show no";
+      res.innerHTML = "❌ تم رفض طلبك — تواصل مع الأستاذ للاستفسار";
+    } else {
+      res.className = "inq-result show wait";
+      res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>
+        المجموعة: ${d.groupName}<br>
+        سيتم التفعيل خلال 24 ساعة — عُد للاستعلام لاستلام كود السنتر`;
+    }
+  } catch(e) {
+    res.className = "inq-result show no";
+    res.innerHTML = "❌ خطأ في الاتصال — حاول مرة تانية";
+  }
+}
+
+/* ══ Helpers ══ */
+function setBusy(on) {
+  document.getElementById("spin").style.display = on ? "block" : "none";
+  document.getElementById("subTxt").textContent = on ? "جاري إرسال الطلب..." : "🚀 إرسال طلب الحجز";
+  document.getElementById("subBtn").disabled = on;
+}
+let _t;
+function toast(msg, cls="") {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.className = "toast show " + cls;
+  clearTimeout(_t); _t = setTimeout(() => el.className = "toast", 3500);
+}
+function toggleTheme() {
+  const d = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", d ? "light" : "dark");
+  localStorage.setItem("alamin-theme", d ? "light" : "dark");
+}
+const _th = localStorage.getItem("alamin-theme");
+if (_th) document.documentElement.setAttribute("data-theme", _th);
+</script>
+</body>
+</html>
