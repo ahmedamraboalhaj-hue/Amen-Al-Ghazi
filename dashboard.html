@@ -2344,6 +2344,15 @@ function deleteStudent(id){
 // ---- COURSES ----
 function renderCoursesAdmin(){
   const grid=document.getElementById('coursesAdminGrid');
+  if(!courses || courses.length === 0){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text2)">
+      <div style="font-size:56px;margin-bottom:14px">📚</div>
+      <div style="font-size:18px;font-weight:900;margin-bottom:8px">لا توجد كورسات بعد</div>
+      <div style="font-size:13px;margin-bottom:20px">اضغط «إضافة كورس» لإنشاء أول كورس</div>
+      <button class="btn-add" onclick="openAddCourseModal()" style="margin:0 auto">➕ إضافة كورس</button>
+    </div>`;
+    return;
+  }
   grid.innerHTML=courses.map(c=>{
     const thumbHTML = c.thumbnail
       ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;display:block">`

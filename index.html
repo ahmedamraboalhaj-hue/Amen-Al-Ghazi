@@ -2131,14 +2131,17 @@
       pointer-events: none;
     }
 
-    /* ══ زرار احجز الآن الثابت ══ */
-    .book-now-fab {
+    /* ══ أزرار الـ FAB الثابتة ══ */
+    .fab-group {
       position: fixed; bottom: 28px; left: 28px; z-index: 999;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+    }
+    .book-now-fab {
       display: flex; align-items: center; gap: 10px;
       background: linear-gradient(135deg, #C8A96E, #8B6914);
       color: #fff; padding: 14px 22px; border-radius: 50px;
       font-family: "Cairo", sans-serif; font-size: 15px; font-weight: 900;
-      text-decoration: none;
+      text-decoration: none; position: relative;
       box-shadow: 0 8px 0 #5C4008, 0 12px 28px rgba(139,105,20,.45);
       animation: fabBounce 1.8s cubic-bezier(0.36,0.07,0.19,0.97) infinite;
       transition: transform .2s, box-shadow .2s;
@@ -2148,6 +2151,25 @@
       box-shadow: 0 12px 0 #4a3306, 0 18px 36px rgba(139,105,20,.55);
       animation: none;
     }
+    .inq-fab {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff; border: 2px solid #C8A96E;
+      color: #8B6914; padding: 11px 18px; border-radius: 50px;
+      font-family: "Cairo", sans-serif; font-size: 13px; font-weight: 900;
+      text-decoration: none; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(139,105,20,.2);
+      transition: all .2s;
+    }
+    .inq-fab:hover { background: #C8A96E; color: #fff; transform: translateY(-2px); }
+    .wa-fab {
+      display: flex; align-items: center; justify-content: center;
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #25D366; color: #fff;
+      box-shadow: 0 4px 16px rgba(37,211,102,.4);
+      text-decoration: none; font-size: 24px;
+      transition: all .2s;
+    }
+    .wa-fab:hover { transform: translateY(-3px) scale(1.1); box-shadow: 0 8px 24px rgba(37,211,102,.5); }
     .fab-arrow {
       width: 30px; height: 30px; background: rgba(255,255,255,.2);
       border-radius: 50%; display: flex; align-items: center;
@@ -2158,6 +2180,44 @@
       position: absolute; inset: 0; border-radius: 50px;
       animation: fabGlow 1.8s ease-out infinite;
     }
+    /* مودال الاستفسار */
+    .inq-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1100;
+      background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: flex-start;
+      padding: 0 0 130px 28px;
+    }
+    .inq-modal-overlay.open { display: flex; }
+    .inq-modal {
+      background: #fff; border-radius: 20px; padding: 24px;
+      width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: slideUp .3s ease;
+    }
+    [data-theme="dark"] .inq-modal { background: #2a1f0f; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+    .inq-modal h3 { font-family:"Cairo",sans-serif; font-size:16px; font-weight:900; margin-bottom:4px; color:#0f172a; }
+    [data-theme="dark"] .inq-modal h3 { color:#e2eaf4; }
+    .inq-modal p { font-size:12px; color:#64748b; margin-bottom:16px; }
+    .inq-modal input {
+      width:100%; padding:11px 14px; border:2px solid #E8D5A3; border-radius:12px;
+      font-family:"Cairo",sans-serif; font-size:14px; outline:none;
+      background:#FDF8F0; color:#0f172a; margin-bottom:10px;
+      transition: border-color .2s;
+    }
+    .inq-modal input:focus { border-color:#C8A96E; }
+    [data-theme="dark"] .inq-modal input { background:#1a1209; color:#e2eaf4; border-color:#3d2e10; }
+    .inq-modal-btn {
+      width:100%; padding:12px; background:linear-gradient(135deg,#C8A96E,#8B6914);
+      color:#fff; border:none; border-radius:12px; font-family:"Cairo",sans-serif;
+      font-size:14px; font-weight:900; cursor:pointer; transition:all .2s;
+    }
+    .inq-modal-btn:hover { opacity:.9; }
+    .inq-modal-result { margin-top:12px; border-radius:10px; padding:12px; font-size:13px; display:none; line-height:1.7; }
+    .inq-modal-result.show { display:block; }
+    .inq-modal-result.ok { background:#d1fae5; color:#064e3b; border:1.5px solid #34d399; }
+    .inq-modal-result.wait { background:#fef3c7; color:#78350f; border:1.5px solid #fbbf24; }
+    .inq-modal-result.no { background:#fee2e2; color:#7f1d1d; border:1.5px solid #f87171; }
+    .inq-modal-close { float:left; background:none; border:none; font-size:18px; cursor:pointer; color:#94a3b8; padding:0; line-height:1; }
     @keyframes fabBounce {
       0%,100% { transform: translateY(0); }
       30%      { transform: translateY(-8px); }
@@ -2174,8 +2234,9 @@
       100% { box-shadow: 0 0 0 0 rgba(200,169,110,.0); }
     }
     @media(max-width: 500px) {
-      .book-now-fab { bottom: 18px; left: 50%; transform: translateX(-50%); }
-      .book-now-fab:hover { transform: translateX(-50%) translateY(-4px); animation: none; }
+      .fab-group { bottom: 18px; left: 50%; transform: translateX(-50%); align-items: center; }
+      .inq-modal-overlay { padding: 0 0 160px 50%; transform: none; }
+      .inq-modal { width: 290px; margin-right: -145px; }
     }
   </style>
   <script src="pwa-install.js" defer></script>
@@ -2285,6 +2346,11 @@
           &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642;</span>
       </button>
       <button class="nav-search-btn" onclick="openSearch()" aria-label="بحث">🔍</button>
+      <a href="https://wa.me/201553399342" target="_blank" title="تواصل معنا على واتساب"
+         style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:#25D366;border-radius:50%;color:#fff;font-size:20px;text-decoration:none;flex-shrink:0;transition:transform .2s;"
+         onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" fill="white"><path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.668 4.61 1.832 6.5L4 29l7.734-1.812A11.94 11.94 0 0016 28c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10a9.94 9.94 0 01-4.906-1.289l-.352-.207-4.594 1.078 1.094-4.469-.227-.363A9.94 9.94 0 016 15c0-5.523 4.477-10 10-10zm-3.094 5.5c-.23 0-.602.086-.918.43-.316.344-1.207 1.18-1.207 2.875s1.234 3.332 1.406 3.563c.172.23 2.399 3.843 5.922 5.25 2.953 1.164 3.524.93 4.156.871.633-.059 2.04-.836 2.328-1.641.289-.805.289-1.496.203-1.641-.086-.145-.316-.23-.66-.402-.344-.172-2.04-1.008-2.356-1.121-.317-.113-.547-.172-.777.172-.23.344-.887 1.121-1.09 1.352-.2.23-.403.258-.747.086-.344-.172-1.453-.535-2.766-1.703-1.023-.91-1.715-2.035-1.914-2.379-.2-.344-.021-.53.148-.703.154-.153.344-.402.516-.602.17-.2.23-.344.344-.574.113-.23.058-.43-.028-.602-.086-.172-.762-1.875-1.059-2.563-.277-.664-.562-.578-.777-.59a14.3 14.3 0 00-.668-.008z"/></svg>
+      </a>
       <div class="theme-switch" onclick="toggleTheme()" title="تغيير المظهر">
         <div class="theme-switch-bg-icons">
           <span>☀️</span>
@@ -3257,12 +3323,80 @@
 
   </script>
 
-  <!-- ══ زرار احجز الآن ══ -->
-  <a href="booking.html" class="book-now-fab">
-    <div class="fab-glow"></div>
-    <span>📅 احجز الآن</span>
-    <div class="fab-arrow">🚀</div>
-  </a>
+  <!-- ══ أزرار الـ FAB ══ -->
+  <div class="fab-group">
+    <a href="https://wa.me/201553399342" target="_blank" class="wa-fab" title="تواصل معنا على واتساب">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="26" height="26" fill="white"><path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.668 4.61 1.832 6.5L4 29l7.734-1.812A11.94 11.94 0 0016 28c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10a9.94 9.94 0 01-4.906-1.289l-.352-.207-4.594 1.078 1.094-4.469-.227-.363A9.94 9.94 0 016 15c0-5.523 4.477-10 10-10zm-3.094 5.5c-.23 0-.602.086-.918.43-.316.344-1.207 1.18-1.207 2.875s1.234 3.332 1.406 3.563c.172.23 2.399 3.843 5.922 5.25 2.953 1.164 3.524.93 4.156.871.633-.059 2.04-.836 2.328-1.641.289-.805.289-1.496.203-1.641-.086-.145-.316-.23-.66-.402-.344-.172-2.04-1.008-2.356-1.121-.317-.113-.547-.172-.777.172-.23.344-.887 1.121-1.09 1.352-.2.23-.403.258-.747.086-.344-.172-1.453-.535-2.766-1.703-1.023-.91-1.715-2.035-1.914-2.379-.2-.344-.021-.53.148-.703.154-.153.344-.402.516-.602.17-.2.23-.344.344-.574.113-.23.058-.43-.028-.602-.086-.172-.762-1.875-1.059-2.563-.277-.664-.562-.578-.777-.59a14.3 14.3 0 00-.668-.008z"/></svg>
+    </a>
+    <button class="inq-fab" onclick="openInqModal()">
+      🔍 استفسار عن طلب
+    </button>
+    <a href="booking.html" class="book-now-fab">
+      <div class="fab-glow"></div>
+      <span>📅 احجز الآن</span>
+      <div class="fab-arrow">🚀</div>
+    </a>
+  </div>
+
+  <!-- ══ مودال الاستفسار ══ -->
+  <div class="inq-modal-overlay" id="inqModalOverlay" onclick="closeInqModal(event)">
+    <div class="inq-modal">
+      <button class="inq-modal-close" onclick="closeInqModalDirect()">✕</button>
+      <h3>🔍 استفسار عن طلب حجز</h3>
+      <p>أدخل رقم الطلب الخاص بيك (5 أرقام)</p>
+      <input type="text" id="inqModalInput" placeholder="مثال: 48271" maxlength="5" inputmode="numeric" dir="ltr" onkeydown="if(event.key==='Enter') checkInqModal()">
+      <button class="inq-modal-btn" onclick="checkInqModal()">🔍 استعلم الآن</button>
+      <div class="inq-modal-result" id="inqModalResult"></div>
+    </div>
+  </div>
+
+  <script>
+  function openInqModal() {
+    document.getElementById('inqModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inqModalInput').focus(), 200);
+  }
+  function closeInqModal(e) {
+    if (e.target === document.getElementById('inqModalOverlay')) closeInqModalDirect();
+  }
+  function closeInqModalDirect() {
+    document.getElementById('inqModalOverlay').classList.remove('open');
+    document.getElementById('inqModalResult').className = 'inq-modal-result';
+    document.getElementById('inqModalInput').value = '';
+  }
+  async function checkInqModal() {
+    const num = document.getElementById('inqModalInput').value.trim();
+    const res = document.getElementById('inqModalResult');
+    if (!num || num.length !== 5) {
+      res.className = 'inq-modal-result show no';
+      res.innerHTML = '❌ أدخل رقم الطلب المكوّن من 5 أرقام';
+      return;
+    }
+    res.className = 'inq-modal-result show wait';
+    res.innerHTML = '⏳ جاري البحث...';
+    try {
+      const snap = await window.db.collection('bookingRequests').where('orderNum','==',num).limit(1).get();
+      if (snap.empty) {
+        res.className = 'inq-modal-result show no';
+        res.innerHTML = '❌ رقم الطلب غير موجود — تأكد من الرقم';
+        return;
+      }
+      const d = snap.docs[0].data();
+      if (d.status === 'approved' && d.centerCode) {
+        res.className = 'inq-modal-result show ok';
+        res.innerHTML = `✅ <strong>تم تفعيل حجزك!</strong><br>كود الحضور الخاص بيك:<br><strong style="font-size:20px;letter-spacing:2px;color:#065f46">${d.centerCode}</strong><br><small>سجّل دخولك على المنصة بهذا الكود 🎓</small>`;
+      } else if (d.status === 'rejected') {
+        res.className = 'inq-modal-result show no';
+        res.innerHTML = '❌ تم رفض طلبك — <a href="https://wa.me/201553399342" target="_blank" style="color:#7f1d1d">تواصل معنا على واتساب</a>';
+      } else {
+        res.className = 'inq-modal-result show wait';
+        res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>${d.groupName}<br><small>انتظر 6 ساعات للتفعيل ثم استعلم مجدداً</small>`;
+      }
+    } catch(e) {
+      res.className = 'inq-modal-result show no';
+      res.innerHTML = '❌ خطأ في الاتصال — حاول مرة تانية';
+    }
+  }
+  </script>
 
 </body>
 
