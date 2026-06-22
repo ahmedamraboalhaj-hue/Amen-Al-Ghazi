@@ -2136,31 +2136,42 @@
       position: fixed; bottom: 28px; left: 28px; z-index: 999;
       display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
     }
+    .fab-container {
+      position: fixed; bottom: 40px; left: 20px; right: 20px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 20px; z-index: 40; pointer-events: none;
+    }
+    .fab-container button, .fab-container a {
+      pointer-events: auto;
+    }
     .book-now-fab {
       display: flex; align-items: center; gap: 10px;
       background: linear-gradient(135deg, #C8A96E, #8B6914);
-      color: #fff; padding: 14px 22px; border-radius: 50px;
-      font-family: "Cairo", sans-serif; font-size: 15px; font-weight: 900;
-      text-decoration: none; position: relative;
+      color: #fff; padding: 16px 26px; border-radius: 50px;
+      font-family: "Cairo", sans-serif; font-size: 16px; font-weight: 900;
+      text-decoration: none; position: relative; border: none; cursor: pointer;
       box-shadow: 0 8px 0 #5C4008, 0 12px 28px rgba(139,105,20,.45);
       animation: fabBounce 1.8s cubic-bezier(0.36,0.07,0.19,0.97) infinite;
       transition: transform .2s, box-shadow .2s;
     }
     .book-now-fab:hover {
-      transform: translateY(-4px) scale(1.04);
+      transform: translateY(-6px) scale(1.06);
       box-shadow: 0 12px 0 #4a3306, 0 18px 36px rgba(139,105,20,.55);
       animation: none;
     }
     .inq-fab {
       display: flex; align-items: center; gap: 8px;
       background: #fff; border: 2px solid #C8A96E;
-      color: #8B6914; padding: 11px 18px; border-radius: 50px;
-      font-family: "Cairo", sans-serif; font-size: 13px; font-weight: 900;
+      color: #8B6914; padding: 13px 20px; border-radius: 50px;
+      font-family: "Cairo", sans-serif; font-size: 14px; font-weight: 900;
       text-decoration: none; cursor: pointer;
       box-shadow: 0 4px 16px rgba(139,105,20,.2);
       transition: all .2s;
     }
-    .inq-fab:hover { background: #C8A96E; color: #fff; transform: translateY(-2px); }
+    .inq-fab:hover { 
+      background: #C8A96E; color: #fff; transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 6px 20px rgba(139,105,20,.35);
+    }
     .wa-fab {
       display: flex; align-items: center; justify-content: center;
       width: 50px; height: 50px; border-radius: 50%;
@@ -2175,10 +2186,6 @@
       border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-size: 16px;
       animation: arrowPulse 1.4s ease-in-out infinite;
-    }
-    .fab-glow {
-      position: absolute; inset: 0; border-radius: 50px;
-      animation: fabGlow 1.8s ease-out infinite;
     }
     /* مودال الاستفسار */
     .inq-modal-overlay {
@@ -2670,7 +2677,6 @@
     </div>
   </footer>
 
-  <a href="#" class="wa-btn" title="تواصل على واتساب">💬</a>
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆</button>
 
   <!-- VODAFONE CASH MODAL -->
@@ -2946,9 +2952,13 @@
         return;
       }
       grid.innerHTML = courses.map(c => {
+        const isFree = c.type === 'free';
         const isEnrolled = enrolledIds.includes(String(c.id));
+        // الكورسات المجانية تفتح مباشرة بدون enrollment
+        const actionHandler = (isFree || isEnrolled)
+          ? `window.location.href='lessons.html?course=${c.id}'`
+          : `enrollCourse(${c.id})`;
         const actionLabel = isEnrolled ? 'عرض المحتوى' : 'الدخول للكورس';
-        const actionHandler = isEnrolled ? `window.location.href='lessons.html?course=${c.id}'` : `enrollCourse(${c.id})`;
         return `
     <div class="course-card fade-up">
       <div class="teacher-chip">الأستاذ الأمين</div>
@@ -2963,7 +2973,7 @@
         <div class="course-desc">${c.desc}</div>
         <div class="course-actions">
           <button class="btn-enter" onclick="${actionHandler}">${actionLabel}</button>
-          ${c.type === 'free' ? `<button class="btn-free-enroll shine-btn" onclick="${actionHandler}">كورس مجاني !</button>` : ''}
+          ${isFree ? `<button class="btn-free-enroll shine-btn" onclick="${actionHandler}">🎁 كورس مجاني!</button>` : ''}
         </div>
       </div>
     </div>
@@ -3323,19 +3333,15 @@
 
   </script>
 
-  <!-- ══ أزرار الـ FAB ══ -->
-  <div class="fab-group">
-    <a href="https://wa.me/201553399342" target="_blank" class="wa-fab" title="تواصل معنا على واتساب">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="26" height="26" fill="white"><path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.668 4.61 1.832 6.5L4 29l7.734-1.812A11.94 11.94 0 0016 28c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10a9.94 9.94 0 01-4.906-1.289l-.352-.207-4.594 1.078 1.094-4.469-.227-.363A9.94 9.94 0 016 15c0-5.523 4.477-10 10-10zm-3.094 5.5c-.23 0-.602.086-.918.43-.316.344-1.207 1.18-1.207 2.875s1.234 3.332 1.406 3.563c.172.23 2.399 3.843 5.922 5.25 2.953 1.164 3.524.93 4.156.871.633-.059 2.04-.836 2.328-1.641.289-.805.289-1.496.203-1.641-.086-.145-.316-.23-.66-.402-.344-.172-2.04-1.008-2.356-1.121-.317-.113-.547-.172-.777.172-.23.344-.887 1.121-1.09 1.352-.2.23-.403.258-.747.086-.344-.172-1.453-.535-2.766-1.703-1.023-.91-1.715-2.035-1.914-2.379-.2-.344-.021-.53.148-.703.154-.153.344-.402.516-.602.17-.2.23-.344.344-.574.113-.23.058-.43-.028-.602-.086-.172-.762-1.875-1.059-2.563-.277-.664-.562-.578-.777-.59a14.3 14.3 0 00-.668-.008z"/></svg>
-    </a>
+  <!-- ══ أزرار الإجراءات السريعة ══ -->
+  <div class="fab-container">
+    <button onclick="openBookingGuide()" class="book-now-fab" style="border:none;">
+      <span>📅 احجز الآن</span>
+      <div class="fab-arrow">🚀</div>
+    </button>
     <button class="inq-fab" onclick="openInqModal()">
       🔍 استفسار عن طلب
     </button>
-    <a href="booking.html" class="book-now-fab">
-      <div class="fab-glow"></div>
-      <span>📅 احجز الآن</span>
-      <div class="fab-arrow">🚀</div>
-    </a>
   </div>
 
   <!-- ══ مودال الاستفسار ══ -->
@@ -3343,17 +3349,71 @@
     <div class="inq-modal">
       <button class="inq-modal-close" onclick="closeInqModalDirect()">✕</button>
       <h3>🔍 استفسار عن طلب حجز</h3>
-      <p>أدخل رقم الطلب الخاص بيك (5 أرقام)</p>
-      <input type="text" id="inqModalInput" placeholder="مثال: 48271" maxlength="5" inputmode="numeric" dir="ltr" onkeydown="if(event.key==='Enter') checkInqModal()">
+      <p>أدخل رقم هاتف الطالب لمعرفة حالة الحجز</p>
+      <input type="tel" id="inqModalInput" placeholder="01xxxxxxxxx" maxlength="11" inputmode="numeric" dir="ltr" onkeydown="if(event.key==='Enter') checkInqModal()">
       <button class="inq-modal-btn" onclick="checkInqModal()">🔍 استعلم الآن</button>
       <div class="inq-modal-result" id="inqModalResult"></div>
     </div>
   </div>
 
+
+  <!-- ══ مودال تعليمات الحجز ══ -->
+  <div class="inq-modal-overlay" id="bookingGuideOverlay" onclick="closeBookingGuide(event)" style="z-index:200;">
+    <div class="inq-modal" style="max-width:480px;width:92%;max-height:88vh;overflow-y:auto;padding:28px 24px;">
+      <button class="inq-modal-close" onclick="document.getElementById('bookingGuideOverlay').classList.remove('open')">✕</button>
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="font-size:48px;margin-bottom:8px;">📋</div>
+        <h3 style="font-size:19px;font-weight:900;font-family:'Tajawal',sans-serif;color:var(--primary-dark);margin-bottom:4px;">تعليمات هامة قبل الحجز</h3>
+        <p style="font-size:12px;color:#64748b;">اقرأ التعليمات بعناية قبل ملء الفورم</p>
+      </div>
+      <ol style="list-style:none;padding:0;display:flex;flex-direction:column;gap:14px;margin-bottom:22px;">
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#fefce8;border:1.5px solid #fbbf24;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#f59e0b;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">١</span>
+          <div style="font-size:13px;color:#78350f;line-height:1.8;"><strong>الاسم الثلاثي:</strong> تأكد إنك هتدخل اسمك <u>ثلاثي كامل</u> (ثلاث كلمات على الأقل)</div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#fefce8;border:1.5px solid #fbbf24;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#f59e0b;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٢</span>
+          <div style="font-size:13px;color:#78350f;line-height:1.8;"><strong>أرقام الهاتف:</strong> هتدخل رقم هاتف الطالب ورقم هاتف ولي الأمر — <span dir="ltr" style="font-family:monospace;">باللغة الإنجليزية (أرقام فقط)</span></div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#fefce8;border:1.5px solid #fbbf24;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#f59e0b;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٣</span>
+          <div style="font-size:13px;color:#78350f;line-height:1.8;"><strong>الصف والمجموعة:</strong> اختر صفك الدراسي ومجموعتك <u>بعناية شديدة</u> — تأكد من الاختيار الصح</div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#fff7ed;border:1.5px solid #f97316;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#ea580c;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٤</span>
+          <div style="font-size:13px;color:#7c2d12;line-height:1.8;"><strong>💰 السداد:</strong><br>حوّل مبلغ الاشتراك على الرقم الظاهر <span style="background:#e00;color:#fff;padding:2px 8px;border-radius:6px;font-weight:900;">بالأحمر</span> في صفحة الحجز<br><small>بعد ما تحوّل — ارجع للفورم واحجز</small></div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#fff7ed;border:1.5px solid #f97316;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#ea580c;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٥</span>
+          <div style="font-size:13px;color:#7c2d12;line-height:1.8;"><strong>📨 رسالة التحويل:</strong> احفظها معاك — هتحتاج منها:<br>✅ <strong>كود العملية</strong><br>✅ <strong>الرقم المحوّل منه</strong><br>هتدخلهم في الفورم</div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#f0fdf4;border:1.5px solid #34d399;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#059669;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٦</span>
+          <div style="font-size:13px;color:#064e3b;line-height:1.8;"><strong>⏳ بعد الإرسال:</strong> انتظر <strong>6 ساعات</strong> حتى يتم تفعيل حسابك على المنصة وتأكيد حجزك</div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;background:#eff6ff;border:1.5px solid #60a5fa;border-radius:12px;padding:13px 14px;">
+          <span style="min-width:26px;height:26px;background:#2563eb;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">٧</span>
+          <div style="font-size:13px;color:#1e3a5f;line-height:1.8;"><strong>🔍 الاستفسار عن الحجز:</strong><br>بعد 6 ساعات — ادخل على المنصة واضغط <em>"استفسار عن طلب حجز"</em><br>أدخل رقم هاتف الطالب ← هيظهر لك <strong>كود السنتر</strong> (كود الحضور والغياب)<br>اضغط <strong>"تسجيل الدخول للمنصة"</strong> وسجّل دخولك بالكود مباشرةً 🎓</div>
+        </li>
+      </ol>
+      <a href="booking.html" style="display:block;width:100%;padding:15px;background:linear-gradient(135deg,#C8A96E,#8B6914);color:#fff;border:none;border-radius:13px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:900;text-align:center;text-decoration:none;box-shadow:0 8px 0 #5C4008,0 12px 24px rgba(139,105,20,.3);">
+        ✅ فهمت — خليني أحجز الآن
+      </a>
+    </div>
+  </div>
+
+  <script>
+  function openBookingGuide() { document.getElementById('bookingGuideOverlay').classList.add('open'); }
+  function closeBookingGuide(e) { if (e.target === document.getElementById('bookingGuideOverlay')) document.getElementById('bookingGuideOverlay').classList.remove('open'); }
+  </script>
+
   <script>
   function openInqModal() {
     document.getElementById('inqModalOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('inqModalInput').focus(), 200);
+    setTimeout(() => {
+      const inp = document.getElementById('inqModalInput');
+      if (inp) inp.focus();
+    }, 200);
   }
   function closeInqModal(e) {
     if (e.target === document.getElementById('inqModalOverlay')) closeInqModalDirect();
@@ -3364,39 +3424,64 @@
     document.getElementById('inqModalInput').value = '';
   }
   async function checkInqModal() {
-    const num = document.getElementById('inqModalInput').value.trim();
-    const res = document.getElementById('inqModalResult');
-    if (!num || num.length !== 5) {
+    const phone = document.getElementById('inqModalInput').value.trim();
+    const res   = document.getElementById('inqModalResult');
+    if (!phone || phone.length !== 11 || !/^0\d{10}$/.test(phone)) {
       res.className = 'inq-modal-result show no';
-      res.innerHTML = '❌ أدخل رقم الطلب المكوّن من 5 أرقام';
+      res.innerHTML = '❌ أدخل رقم هاتف الطالب الصحيح (11 رقم يبدأ بـ 0)';
       return;
     }
     res.className = 'inq-modal-result show wait';
     res.innerHTML = '⏳ جاري البحث...';
+    if (!window.db) {
+      res.className = 'inq-modal-result show no';
+      res.innerHTML = '❌ خطأ في الاتصال — أعد تحميل الصفحة وحاول مرة تانية';
+      return;
+    }
     try {
-      const snap = await window.db.collection('bookingRequests').where('orderNum','==',num).limit(1).get();
+      let snap;
+      try {
+        snap = await window.db.collection('bookingRequests')
+          .where('studentPhone','==',phone)
+          .orderBy('createdAt','desc').limit(5).get();
+      } catch(_) {
+        snap = await window.db.collection('bookingRequests')
+          .where('studentPhone','==',phone).limit(5).get();
+      }
       if (snap.empty) {
         res.className = 'inq-modal-result show no';
-        res.innerHTML = '❌ رقم الطلب غير موجود — تأكد من الرقم';
+        res.innerHTML = '❌ لا يوجد طلب حجز بهذا الرقم — تأكد من الرقم';
         return;
       }
-      const d = snap.docs[0].data();
-      if (d.status === 'approved' && d.centerCode) {
+      const docs = snap.docs.map(d => d.data());
+      const approved = docs.find(d => d.status === 'approved' && d.centerCode);
+      if (approved) {
         res.className = 'inq-modal-result show ok';
-        res.innerHTML = `✅ <strong>تم تفعيل حجزك!</strong><br>كود الحضور الخاص بيك:<br><strong style="font-size:20px;letter-spacing:2px;color:#065f46">${d.centerCode}</strong><br><small>سجّل دخولك على المنصة بهذا الكود 🎓</small>`;
-      } else if (d.status === 'rejected') {
-        res.className = 'inq-modal-result show no';
-        res.innerHTML = '❌ تم رفض طلبك — <a href="https://wa.me/201553399342" target="_blank" style="color:#7f1d1d">تواصل معنا على واتساب</a>';
-      } else {
-        res.className = 'inq-modal-result show wait';
-        res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>${d.groupName}<br><small>انتظر 6 ساعات للتفعيل ثم استعلم مجدداً</small>`;
+        res.innerHTML = `
+          ✅ <strong>تم تفعيل حجزك!</strong><br>
+          <span style="color:#374151">المجموعة: ${approved.groupName || '—'}</span><br>
+          كود السنتر الخاص بيك:<br>
+          <div style="display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap;">
+            <strong style="font-size:24px;color:#065f46;letter-spacing:4px;font-family:monospace;">${approved.centerCode}</strong>
+            <a href="login.html?code=${encodeURIComponent(approved.centerCode)}" style="display:inline-block;padding:9px 16px;background:linear-gradient(135deg,#C8A96E,#8B6914);color:#fff;border-radius:10px;font-size:13px;font-weight:900;text-decoration:none;white-space:nowrap;">🔑 تسجيل الدخول</a>
+          </div>
+          <small style="color:#065f46">انسخ الكود وادخل على المنصة بيه 🎓</small>`;
+        return;
       }
+      const rejected = docs.every(d => d.status === 'rejected');
+      if (rejected) {
+        res.className = 'inq-modal-result show no';
+        res.innerHTML = '❌ تم رفض طلبك — تواصل مع الأستاذ للاستفسار';
+        return;
+      }
+      const d = docs.find(d => d.status === 'pending' || d.status === 'manual_review') || docs[0];
+      res.className = 'inq-modal-result show wait';
+      res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>المجموعة: ${d.groupName || '—'}<br><small>انتظر 6 ساعات للتفعيل ثم استعلم مجدداً</small>`;
     } catch(e) {
       res.className = 'inq-modal-result show no';
       res.innerHTML = '❌ خطأ في الاتصال — حاول مرة تانية';
     }
   }
-  </script>
 
 </body>
 

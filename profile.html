@@ -116,7 +116,15 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
         <div class="profile-email" id="heroPhone">---</div>
         <div class="profile-badges">
           <div class="badge" id="heroBadgeGrade">📚 ---</div>
-          <div class="badge">🌟 طالب مسجّل</div>
+          <div class="badge" id="heroBadgeType">🌟 طالب مسجّل</div>
+        </div>
+        <!-- كود السنتر -->
+        <div id="centerCodeBox" style="display:none;margin-top:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.35);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(6px);">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:4px;">🔑 كود السنتر الخاص بك</div>
+            <div id="heroCenterCode" style="font-family:monospace;font-size:26px;font-weight:900;letter-spacing:4px;color:#fff;"></div>
+          </div>
+          <button onclick="copyCenterCode()" id="copyCodeBtn" style="background:rgba(255,255,255,.25);color:white;border:2px solid rgba(255,255,255,.5);border-radius:10px;padding:8px 16px;font-family:'Cairo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.4)'" onmouseout="this.style.background='rgba(255,255,255,.25)'">📋 نسخ الكود</button>
         </div>
       </div>
     </div>
@@ -145,6 +153,11 @@ body{ font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); }
         <label>رقم الهاتف</label>
         <div class="readonly-field" id="dispPhone">---</div>
         <div class="field-note">لا يمكن تعديل رقم الهاتف.</div>
+      </div>
+      <div class="form-group">
+        <label>🔑 كود السنتر</label>
+        <div class="readonly-field" id="dispCenterCode" style="font-family:monospace;font-size:18px;letter-spacing:3px;font-weight:900;color:var(--primary);">---</div>
+        <div class="field-note" id="dispCenterCodeNote">يظهر هنا كودك عند تفعيل الاشتراك في السنتر.</div>
       </div>
       <div class="form-group">
         <label>الصف الدراسي</label>
@@ -287,11 +300,44 @@ document.getElementById('heroName').textContent = fullName;
 document.getElementById('heroPhone').textContent = currentUser.phone || '---';
 document.getElementById('heroBadgeGrade').textContent = '📚 ' + gradeLabel;
 
+// badge type
+const isCenterStudent = currentUser.studentType === 'center' || currentUser.centerCode || currentUser.code;
+document.getElementById('heroBadgeType').textContent = isCenterStudent ? '🏫 طالب السنتر' : '🌐 طالب أونلاين';
+
+// center code box
+const centerCode = currentUser.centerCode || currentUser.code || null;
+if(centerCode){
+  const box = document.getElementById('centerCodeBox');
+  box.style.display = 'flex';
+  document.getElementById('heroCenterCode').textContent = centerCode;
+}
+
 // Fill tab 1
 document.getElementById('dispFirstName').textContent = currentUser.firstName || currentUser.name || '---';
 document.getElementById('dispLastName').textContent = currentUser.lastName || '---';
 document.getElementById('dispPhone').textContent = currentUser.phone || '---';
 document.getElementById('dispGrade').textContent = gradeLabel;
+
+// center code in tab
+if(centerCode){
+  document.getElementById('dispCenterCode').textContent = centerCode;
+  document.getElementById('dispCenterCodeNote').textContent = 'هذا هو كود السنتر الخاص بك — احتفظ بيه.';
+} else {
+  document.getElementById('dispCenterCode').textContent = 'لا يوجد كود مفعّل بعد';
+  document.getElementById('dispCenterCode').style.color = 'var(--text2)';
+  document.getElementById('dispCenterCode').style.fontSize = '14px';
+  document.getElementById('dispCenterCode').style.letterSpacing = 'normal';
+}
+
+// copy code function
+function copyCenterCode(){
+  if(!centerCode) return;
+  navigator.clipboard.writeText(centerCode).then(()=>{
+    const btn = document.getElementById('copyCodeBtn');
+    btn.textContent = '✅ تم النسخ!';
+    setTimeout(()=>{ btn.textContent = '📋 نسخ الكود'; }, 2000);
+  });
+}
 
 // ─── Statistics from localStorage ─────────────────────────
 function loadStats(){

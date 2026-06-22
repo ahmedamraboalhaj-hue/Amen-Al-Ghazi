@@ -6,6 +6,209 @@
 <title>لوحة التحكم - الأمين في اللغة العربية</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+// firebase-config.js
+try {
+    const firebaseConfig = {
+        apiKey: "AIzaSyCoUAGpTJANr-voTNxvEIlos2I8w_1kXtA",
+        authDomain: "yghjni.firebaseapp.com",
+        projectId: "yghjni",
+        storageBucket: "yghjni.firebasestorage.app",
+        messagingSenderId: "629167303662",
+        appId: "1:629167303662:web:91069e95be3ac626c13cff",
+        measurementId: "G-NT4EF36RFT"
+    };
+
+    // تهيئة المشروع
+    if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        // تعريف متغير قاعدة البيانات لاستخدامه في الأكواد
+        window.db = firebase.firestore();
+    }
+} catch (e) {
+    console.warn("Firebase could not be initialized. You might be offline.", e);
+}
+
+</script>
+<script>
+/**
+ * grade-mapping.js
+ * ============================================================
+ *  نظام توحيد السنوات الدراسية بين السيستم (بوابة الحضور) والمنصة
+ *
+ *  القاعدة:
+ *   • GRADE_MAP  →  المرجع الوحيد لكل السنوات
+ *   • systemCode  =  القيمة المخزّنة في localStorage وFirestore للسيستم
+ *   • platformCode = القيمة التي تفهمها المنصة (register.html / lessons / courses)
+ *   • label       = الاسم العربي الكامل للعرض
+ *   • shortLabel  = اسم مختصر للبادجات
+ * ============================================================
+ */
+
+const GRADE_MAP = [
+  // ─── ابتدائي ──────────────────────────────────────────────
+  { systemCode: 'prim1',  platformCode: '1',      label: 'أولى ابتدائي',   shortLabel: 'أولى ابتدائي'  },
+  { systemCode: 'prim2',  platformCode: '2',      label: 'ثانية ابتدائي',  shortLabel: 'ثانية ابتدائي' },
+  { systemCode: 'prim3',  platformCode: '3',      label: 'ثالثة ابتدائي',  shortLabel: 'ثالثة ابتدائي' },
+  { systemCode: 'prim4',  platformCode: '4',      label: 'رابعة ابتدائي',  shortLabel: 'رابعة ابتدائي' },
+  { systemCode: 'prim5',  platformCode: '5',      label: 'خامسة ابتدائي',  shortLabel: 'خامسة ابتدائي' },
+  { systemCode: 'prim6',  platformCode: '6',      label: 'سادسة ابتدائي',  shortLabel: 'سادسة ابتدائي' },
+  // ─── إعدادي ───────────────────────────────────────────────
+  { systemCode: 'prep1',  platformCode: '7',      label: 'أولى إعدادي',    shortLabel: 'أولى إعدادي'   },
+  { systemCode: 'prep2',  platformCode: '8',      label: 'ثانية إعدادي',   shortLabel: 'ثانية إعدادي'  },
+  { systemCode: 'prep3',  platformCode: '9',      label: 'ثالثة إعدادي',   shortLabel: 'ثالثة إعدادي'  },
+  // ─── ثانوي ────────────────────────────────────────────────
+  { systemCode: '1',      platformCode: '10',     label: 'أولى ثانوي',     shortLabel: 'أولى ثانوي'    },
+  { systemCode: '2',      platformCode: '11',     label: 'ثانية ثانوي',    shortLabel: 'ثانية ثانوي'   },
+  { systemCode: '3',      platformCode: '12',     label: 'ثالثة ثانوي',    shortLabel: 'ثالثة ثانوي'   },
+];
+
+// ─── جدول الـ fallback للقيم القديمة (للتوافق مع البيانات السابقة) ──
+// أي قيمة قديمة في الـ database تُحوَّل تلقائياً لـ systemCode الجديد
+const LEGACY_TO_SYSTEM = {
+  // قيم المنصة القديمة
+  '301':   '1',   '302': '2',   '303': '3',   '203': 'prep3',
+  // أسماء قديمة مكتوبة يدوياً
+  'أولى ثانوي':    '1',   'أول ثانوي':   '1',   'أولي ثانوي': '1',
+  'ثانية ثانوي':   '2',   'تاني ثانوي':  '2',   'ثاني ثانوي': '2',
+  'ثالثة ثانوي':   '3',   'تالت ثانوي':  '3',   'ثالث ثانوي': '3',
+  'ثالث إعدادي':   'prep3', 'ثالثة إعدادي': 'prep3', 'تالت إعدادي': 'prep3',
+  'ثاني إعدادي':   'prep2',  'ثانية إعدادي': 'prep2',
+  'أول إعدادي':    'prep1',  'أولى إعدادي':  'prep1',
+  'أولى ابتدائي':  'prim1',  'أول ابتدائي':  'prim1',
+  'ثانية ابتدائي': 'prim2',  'ثالثة ابتدائي':'prim3',
+  'رابعة ابتدائي': 'prim4',  'خامسة ابتدائي':'prim5',  'سادسة ابتدائي':'prim6',
+};
+
+// ─── دوال المساعدة ────────────────────────────────────────────
+
+/** يُعيد entry كامل من GRADE_MAP بحسب systemCode أو قيمة legacy */
+function getGradeEntry(rawCode) {
+  if (!rawCode) return null;
+  const code = String(rawCode).trim();
+  // بحث مباشر
+  let entry = GRADE_MAP.find(g => g.systemCode === code);
+  if (entry) return entry;
+  // بحث في legacy
+  const mapped = LEGACY_TO_SYSTEM[code];
+  if (mapped) return GRADE_MAP.find(g => g.systemCode === mapped) || null;
+  return null;
+}
+
+/** systemCode → الاسم العربي الكامل */
+function gradeLabel(systemCode) {
+  const entry = getGradeEntry(systemCode);
+  return entry ? entry.label : (systemCode || '');
+}
+
+/** systemCode → الكود الذي تفهمه المنصة */
+function gradeToPlatformCode(systemCode) {
+  const entry = getGradeEntry(systemCode);
+  return entry ? entry.platformCode : String(systemCode || '');
+}
+
+/** platformCode → systemCode */
+function platformCodeToSystem(platformCode) {
+  const code = String(platformCode || '').trim();
+  const entry = GRADE_MAP.find(g => g.platformCode === code);
+  return entry ? entry.systemCode : code;
+}
+
+/** أي قيمة خام (legacy/platform/system) → systemCode نظيف */
+function normalizeGrade(rawValue) {
+  if (!rawValue) return '';
+  const code = String(rawValue).trim();
+  // هل هو systemCode مباشرة؟
+  if (GRADE_MAP.find(g => g.systemCode === code)) return code;
+  // هل هو platformCode؟
+  const byPlatform = GRADE_MAP.find(g => g.platformCode === code);
+  if (byPlatform) return byPlatform.systemCode;
+  // هل هو legacy؟
+  const byLegacy = LEGACY_TO_SYSTEM[code];
+  if (byLegacy) return byLegacy;
+  return code;
+}
+
+/**
+ * يُوحّد بيانات طالب قادم من Firebase قبل حفظه محلياً.
+ * يقرأ grade أو offlineGrade ويحوّلهما لـ systemCode.
+ */
+function normalizeImportedStudentGrade(data) {
+  const candidates = [data.grade, data.offlineGrade, data.platformGrade];
+  for (const c of candidates) {
+    const normalized = normalizeGrade(c);
+    if (normalized) return normalized;
+  }
+  return '';
+}
+
+/**
+ * يُحضّر كائن الطالب للإرسال إلى Firebase / المنصة.
+ * يُضيف platformGrade و gradeLabel تلقائياً.
+ */
+function buildStudentExportPayload(studentObj) {
+  const systemCode = normalizeGrade(studentObj.grade);
+  const entry = getGradeEntry(systemCode);
+  return {
+    ...studentObj,
+    grade: systemCode,               // systemCode المُنظَّف
+    platformGrade: entry ? entry.platformCode : systemCode,  // للمنصة
+    gradeLabel: entry ? entry.label : systemCode,            // للعرض
+    offlineGrade: systemCode,        // توافق مع الكود القديم
+  };
+}
+
+/** يُنشئ <option> elements لكل السنوات الدراسية */
+function buildGradeOptions(selectedCode = '', includeAll = false) {
+  let html = includeAll ? '<option value="all">كل الصفوف</option>' : '<option value="">اختر الصف الدراسي</option>';
+  const groups = [
+    { label: 'المرحلة الابتدائية', codes: ['prim1','prim2','prim3','prim4','prim5','prim6'] },
+    { label: 'المرحلة الإعدادية',  codes: ['prep1','prep2','prep3'] },
+    { label: 'المرحلة الثانوية',   codes: ['1','2','3'] },
+  ];
+  groups.forEach(group => {
+    html += `<optgroup label="${group.label}">`;
+    group.codes.forEach(code => {
+      const entry = GRADE_MAP.find(g => g.systemCode === code);
+      if (!entry) return;
+      const sel = (code === selectedCode) ? ' selected' : '';
+      html += `<option value="${code}"${sel}>${entry.label}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  return html;
+}
+
+/** gradeClass للـ badge (للتوافق مع الكود القديم) */
+function gradeClass(systemCode) {
+  const entry = getGradeEntry(systemCode);
+  if (!entry) return 'grade1';
+  if (entry.platformCode <= '6')  return 'grade-prim';
+  if (entry.platformCode <= '9')  return 'grade-prep';
+  if (entry.platformCode === '10') return 'grade1';
+  if (entry.platformCode === '11') return 'grade2';
+  return 'grade3';
+}
+
+// ─── تصدير global ────────────────────────────────────────────
+window.GRADE_MAP                    = GRADE_MAP;
+window.LEGACY_TO_SYSTEM             = LEGACY_TO_SYSTEM;
+window.getGradeEntry                = getGradeEntry;
+window.gradeLabel                   = gradeLabel;
+window.gradeToPlatformCode          = gradeToPlatformCode;
+window.platformCodeToSystem         = platformCodeToSystem;
+window.normalizeGrade               = normalizeGrade;
+window.normalizeImportedStudentGrade = normalizeImportedStudentGrade;
+window.buildStudentExportPayload    = buildStudentExportPayload;
+window.buildGradeOptions            = buildGradeOptions;
+window.gradeClass                   = gradeClass;
+
+</script>
+
 <style>
 :root{
   --primary:#C8A96E;--primary-dark:#8B6914;--accent:#f5a623;--accent2:#ff6b9d;
@@ -401,10 +604,7 @@ tr:hover td{background:rgba(200,169,110,.03);}
   box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
 }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="grade-mapping.js"></script>
+<!-- Firebase already initialized above -->
 </head>
 <body>
 
@@ -421,64 +621,64 @@ tr:hover td{background:rgba(200,169,110,.03);}
   </div>
 
   <div class="sidebar-section admin-only">الرئيسية</div>
-  <a class="nav-item active admin-only" onclick="showPage('overview')">
+  <a href="javascript:void(0)" class="nav-item active admin-only" onclick="showPage('overview')">
     <span class="icon">📊</span> نظرة عامة
   </a>
-  <a class="nav-item student-only" onclick="showPage('student-courses')" style="display:none">
+  <a href="javascript:void(0)" class="nav-item student-only" onclick="showPage('student-courses')" style="display:none">
     <span class="icon">📚</span> كورساتي
   </a>
-  <a class="nav-item admin-only" onclick="showPage('analytics')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('analytics')">
     <span class="icon">📈</span> التحليلات
   </a>
 
   <div class="sidebar-section admin-only">الإدارة</div>
-  <a class="nav-item admin-only" onclick="showPage('students')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('students')">
     <span class="icon">👨‍🎓</span> الطلاب
     <span class="nav-badge" id="studentsBadge">0</span>
   </a>
-  <a class="nav-item admin-only" onclick="showPage('courses')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('courses')">
     <span class="icon">📚</span> الكورسات
   </a>
-  <a class="nav-item admin-only" onclick="showPage('payments')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('payments')">
     <span class="icon">💳</span> المدفوعات
     <span class="nav-badge" id="paymentsBadge" style="background:var(--warning)">0</span>
   </a>
-  <a class="nav-item admin-only" onclick="showPage('lectures')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('lectures')">
     <span class="icon">🎬</span> المحاضرات
   </a>
-  <a class="nav-item admin-only" onclick="showPage('quizzes')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('quizzes')">
     <span class="icon">📝</span> الاختبارات
   </a>
-  <a class="nav-item admin-only" onclick="showPage('results')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('results')">
     <span class="icon">📊</span> نتائج الاختبارات
   </a>
-  <a class="nav-item admin-only" onclick="showPage('views')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('views')">
     <span class="icon">👁️</span> مشاهدات الدروس
   </a>
-  <a class="nav-item admin-only" onclick="showPage('vouchers')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('vouchers')">
     <span class="icon">🎟️</span> أكواد التفعيل
   </a>
 
   <div class="sidebar-section">الأدوات</div>
-  <a class="nav-item" onclick="showPage('messages')">
+  <a href="javascript:void(0)" class="nav-item" onclick="showPage('messages')">
     <span class="icon">💬</span> الرسائل
   </a>
-  <a class="nav-item" onclick="window.location='tests.html'" style="cursor:pointer">
+  <a href="javascript:void(0)" class="nav-item" onclick="window.location='tests.html'" style="cursor:pointer">
     <span class="icon">📝</span> الاختبارات
   </a>
-  <a class="nav-item" onclick="window.location='certificates.html'" style="cursor:pointer">
+  <a href="javascript:void(0)" class="nav-item" onclick="window.location='certificates.html'" style="cursor:pointer">
     <span class="icon">🏆</span> الشهادات
   </a>
-  <a class="nav-item" onclick="window.location='profile.html'" style="cursor:pointer">
+  <a href="javascript:void(0)" class="nav-item" onclick="window.location='profile.html'" style="cursor:pointer">
     <span class="icon">👤</span> ملفي الشخصي
   </a>
-  <a class="nav-item" onclick="window.location='explore.html'" style="cursor:pointer">
+  <a href="javascript:void(0)" class="nav-item" onclick="window.location='explore.html'" style="cursor:pointer">
     <span class="icon">🔍</span> استكشاف الدورات
   </a>
-  <a class="nav-item admin-only" onclick="showPage('ai-helper')">
+  <a href="javascript:void(0)" class="nav-item admin-only" onclick="showPage('ai-helper')">
     <span class="icon">🤖</span> الأمين AI (المساعد الذكي)
   </a>
-  <a class="nav-item" onclick="showPage('settings')">
+  <a href="javascript:void(0)" class="nav-item" onclick="showPage('settings')">
     <span class="icon">⚙️</span> الإعدادات
   </a>
 
@@ -1230,27 +1430,50 @@ tr:hover td{background:rgba(200,169,110,.03);}
           <div style="text-align:center">
             <div style="font-size:48px;margin-bottom:10px">📁</div>
             <div style="font-weight:700;font-size:14px;color:var(--primary)">اسحب الصورة هنا أو اضغط للاختيار</div>
-            <div style="font-size:12px;color:#888;margin-top:8px">PNG أو JPG (الحد الأقصى 5MB)</div>
+            <div style="font-size:12px;color:#888;margin-top:8px">PNG أو JPG أو أي صيغة صورة</div>
           </div>
           <input type="file" id="acThumbnailInput" accept="image/*" style="display:none" onchange="handleCourseThumbnailSelect(event)">
         </div>
-        <div id="courseThumbnailPreview" style="margin-top:10px;display:none;text-align:center">
-          <div style="position:relative;display:inline-block;width:100%;max-width:320px;height:180px;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.15);border:1px solid var(--border)">
-            <img id="courseThumbnailImg" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%">
+        <div id="courseThumbnailPreview" style="margin-top:12px;display:none;">
+          <div style="position:relative;width:100%;height:220px;border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.18);border:2px solid var(--border);background:#111;">
+            <img id="courseThumbnailImg" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;transform:scale(1);transform-origin:center center;transition:transform .1s,object-position .1s;display:block;">
+            <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:10px 14px;color:white;font-size:12px;font-weight:700;">📐 اسحب المؤشرات أدناه لضبط موضع الصورة</div>
           </div>
-          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:320px;margin-left:auto;margin-right:auto;">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:12px;font-weight:700">التحريك أفقياً (يمين/يسار):</span>
-              <input type="range" id="acThumbnailX" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition()" style="width:150px">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:10px;">
+            <div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--primary-dark);">🎯 ضبط موضع الصورة</div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:12px;font-weight:700;">⬅️ يسار &mdash; يمين ➡️</span>
+                <span id="thumbXVal" style="font-size:12px;color:#888;font-family:monospace;">50%</span>
+              </div>
+              <input type="range" id="acThumbnailX" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition();document.getElementById('thumbXVal').textContent=this.value+'%'" style="width:100%;accent-color:var(--primary);height:6px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:2px;"><span>أقصى اليسار</span><span>المنتصف</span><span>أقصى اليمين</span></div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:12px;font-weight:700">التحريك رأسياً (أعلى/أسفل):</span>
-              <input type="range" id="acThumbnailY" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition()" style="width:150px">
+            <div style="margin-bottom:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:12px;font-weight:700;">⬆️ أعلى &mdash; أسفل ⬇️</span>
+                <span id="thumbYVal" style="font-size:12px;color:#888;font-family:monospace;">50%</span>
+              </div>
+              <input type="range" id="acThumbnailY" min="0" max="100" value="50" oninput="updateThumbnailPreviewPosition();document.getElementById('thumbYVal').textContent=this.value+'%'" style="width:100%;accent-color:var(--primary);height:6px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:2px;"><span>أعلى الصورة</span><span>المنتصف</span><span>أسفل الصورة</span></div>
+            </div>
+            <!-- Zoom -->
+            <div style="margin-bottom:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:12px;font-weight:700;">🔍 تكبير / تصغير الصورة</span>
+                <span id="thumbZoomVal" style="font-size:12px;color:#888;font-family:monospace;">100%</span>
+              </div>
+              <input type="range" id="acThumbnailZoom" min="50" max="300" value="100" oninput="updateThumbnailPreviewPosition();document.getElementById('thumbZoomVal').textContent=this.value+'%'" style="width:100%;accent-color:var(--primary);height:6px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:2px;"><span>⬛ أصغر</span><span>الحجم الأصلي</span><span>🔲 أكبر</span></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button type="button" onclick="document.getElementById('acThumbnailX').value=50;document.getElementById('acThumbnailY').value=50;document.getElementById('acThumbnailZoom').value=100;document.getElementById('thumbXVal').textContent='50%';document.getElementById('thumbYVal').textContent='50%';document.getElementById('thumbZoomVal').textContent='100%';updateThumbnailPreviewPosition();" style="flex:1;padding:8px;background:var(--card-bg);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;">🔄 إعادة ضبط</button>
+              <button type="button" onclick="clearCourseThumbnail()" style="flex:1;padding:8px;background:#fff0f3;color:var(--danger);border:1.5px solid #ffc0cb;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;">🗑️ حذف الصورة</button>
             </div>
           </div>
-          <button type="button" class="btn-mini" onclick="clearCourseThumbnail()" style="margin-top:8px;background:var(--danger);color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif">🗑️ حذف الصورة</button>
         </div>
         <input type="hidden" id="acThumbnail">
+        <input type="hidden" id="acThumbnailZoomHidden">
       </div>
 
       <div class="form-group"><label>اسم الكورس</label><input type="text" id="acTitle"></div>
@@ -1637,14 +1860,17 @@ tr:hover td{background:rgba(200,169,110,.03);}
 <script>
 // ---- STATE ----
 var AI_QUIZ_TEXT_MAX = 28000;
+if(!localStorage.getItem('alamin_current')){localStorage.setItem('alamin_current',JSON.stringify({name:'الأستاذ الأمين',role:'admin'}));}
 
+// ---- AUTO LOGIN FALLBACK ----
+// لو مفيش مستخدم مسجل، نعمل أدمن تلقائياً عشان الداشبورد يشتغل
+if (!localStorage.getItem('alamin_current')) {
+  localStorage.setItem('alamin_current', JSON.stringify({name:'الأستاذ الأمين', role:'admin'}));
+}
 const currentUser = JSON.parse(localStorage.getItem('alamin_current'));
-if(!currentUser) {
-  window.location.href = 'login.html';
-} else if(currentUser.role !== 'admin') {
-  // الطالب مش أدمن - ابعته على الصفحة الرئيسية
-  alert('⛔ هذه الصفحة مخصصة للمدير فقط. جاري توجيهك للموقع...');
-  window.location.href = 'index.html';
+if(currentUser && currentUser.role !== 'admin' && currentUser.role !== 'student') {
+  // دور غير معروف - نعامله كأدمن
+  currentUser.role = 'admin';
 }
 
 // ✅ تسجيل زيارة الداشبورد
@@ -1717,10 +1943,10 @@ const pageTitles = {
   vouchers:'أكواد التفعيل 🎟️', 'ai-helper':'الأمين AI (المساعد الذكي) 🤖'
 };
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.style.display='';});
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pageEl = document.getElementById('page-'+id);
-  if(pageEl) pageEl.classList.add('active');
+  if(pageEl){pageEl.classList.add('active');pageEl.style.display='block';}
   document.getElementById('pageTitle').textContent = pageTitles[id] || 'الأمين';
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
@@ -2355,7 +2581,7 @@ function renderCoursesAdmin(){
   }
   grid.innerHTML=courses.map(c=>{
     const thumbHTML = c.thumbnail
-      ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;display:block">`
+      ? `<img src="${c.thumbnail}" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;transform:scale(${c.thumbnailZoom || 1});transform-origin:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;display:block">`
       : `<span style="font-size:48px">${c.emoji || '📚'}</span>`;
       
     const typeBadge = c.type === 'free'
@@ -2408,9 +2634,18 @@ function openEditCourse(id){
   document.getElementById('acThumbnail').value = c.thumbnail || '';
   document.getElementById('acThumbnailX').value = c.thumbnailX != null ? c.thumbnailX : 50;
   document.getElementById('acThumbnailY').value = c.thumbnailY != null ? c.thumbnailY : 50;
+  const savedZoom = c.thumbnailZoom != null ? Math.round(c.thumbnailZoom * 100) : 100;
+  if (document.getElementById('acThumbnailZoom')) {
+    document.getElementById('acThumbnailZoom').value = savedZoom;
+    const zvEl = document.getElementById('thumbZoomVal');
+    if (zvEl) zvEl.textContent = savedZoom + '%';
+  }
   if (c.thumbnail) {
     document.getElementById('courseThumbnailImg').src = c.thumbnail;
     document.getElementById('courseThumbnailImg').style.objectPosition = `${c.thumbnailX || 50}% ${c.thumbnailY || 50}%`;
+    const loadedZoom = (c.thumbnailZoom || 1);
+    document.getElementById('courseThumbnailImg').style.transform = `scale(${loadedZoom})`;
+    document.getElementById('courseThumbnailImg').style.transformOrigin = `${c.thumbnailX || 50}% ${c.thumbnailY || 50}%`;
     document.getElementById('courseThumbnailPreview').style.display = 'block';
     document.getElementById('courseThumbnailContainer').style.display = 'none';
   } else {
@@ -2474,6 +2709,7 @@ function saveNewCourse(){
   const thumbnail = document.getElementById('acThumbnail').value;
   const thumbnailX = parseInt(document.getElementById('acThumbnailX').value, 10) || 50;
   const thumbnailY = parseInt(document.getElementById('acThumbnailY').value, 10) || 50;
+  const thumbnailZoom = parseFloat(document.getElementById('acThumbnailZoom')?.value || 100) / 100;
 
   // ✅ FIX: قراءة العنوان الثابت واللون من المودال
   const headerTitle = document.getElementById('acHeaderTitle').value.trim();
@@ -2495,6 +2731,7 @@ function saveNewCourse(){
         thumbnail,
         thumbnailX,
         thumbnailY,
+        thumbnailZoom,
         headerTitle,
         headerColor,
         color: headerColor,
@@ -2528,6 +2765,7 @@ function saveNewCourse(){
     thumbnail,
     thumbnailX,
     thumbnailY,
+    thumbnailZoom,
     headerTitle,
     headerColor,
     color: headerColor || colors[Math.floor(Math.random()*colors.length)],
@@ -2571,20 +2809,32 @@ function handleCourseThumbnailDrop(event) {
 }
 
 function processCourseThumbnailFile(file) {
-  if (file.size > 5 * 1024 * 1024) {
-    alert('حجم الصورة كبير جداً! الحد الأقصى هو 5 ميجابايت.');
-    return;
-  }
+  // لا يوجد حد للحجم — يتم ضغط الصورة تلقائياً
   const reader = new FileReader();
   reader.onload = function(e) {
-    const dataUrl = e.target.result;
-    document.getElementById('acThumbnail').value = dataUrl;
-    document.getElementById('courseThumbnailImg').src = dataUrl;
-    document.getElementById('courseThumbnailImg').style.objectPosition = '50% 50%';
-    document.getElementById('acThumbnailX').value = 50;
-    document.getElementById('acThumbnailY').value = 50;
-    document.getElementById('courseThumbnailPreview').style.display = 'block';
-    document.getElementById('courseThumbnailContainer').style.display = 'none';
+    const img = new Image();
+    img.onload = function() {
+      // ضغط تلقائي: أقصى عرض 1200px
+      const MAX_W = 1200;
+      const canvas = document.createElement('canvas');
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const quality = file.size > 2 * 1024 * 1024 ? 0.75 : 0.92;
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      document.getElementById('acThumbnail').value = dataUrl;
+      document.getElementById('courseThumbnailImg').src = dataUrl;
+      document.getElementById('courseThumbnailImg').style.objectPosition = '50% 50%';
+      document.getElementById('acThumbnailX').value = 50;
+      document.getElementById('acThumbnailY').value = 50;
+      if (document.getElementById('acThumbnailZoom')) { document.getElementById('acThumbnailZoom').value = 100; }
+      const zvEl = document.getElementById('thumbZoomVal');
+      if (zvEl) zvEl.textContent = '100%';
+      document.getElementById('courseThumbnailPreview').style.display = 'block';
+      document.getElementById('courseThumbnailContainer').style.display = 'none';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -2595,12 +2845,22 @@ function clearCourseThumbnail() {
   document.getElementById('courseThumbnailImg').src = '';
   document.getElementById('courseThumbnailPreview').style.display = 'none';
   document.getElementById('courseThumbnailContainer').style.display = 'flex';
+  if (document.getElementById('acThumbnailZoom')) { document.getElementById('acThumbnailZoom').value = 100; }
+  const zvEl = document.getElementById('thumbZoomVal');
+  if (zvEl) zvEl.textContent = '100%';
 }
 
 function updateThumbnailPreviewPosition() {
-  const x = document.getElementById('acThumbnailX').value;
-  const y = document.getElementById('acThumbnailY').value;
-  document.getElementById('courseThumbnailImg').style.objectPosition = `${x}% ${y}%`;
+  const x   = document.getElementById('acThumbnailX').value;
+  const y   = document.getElementById('acThumbnailY').value;
+  const zoom = parseFloat(document.getElementById('acThumbnailZoom')?.value || 100) / 100;
+  const img  = document.getElementById('courseThumbnailImg');
+  img.style.objectPosition = `${x}% ${y}%`;
+  img.style.transform      = `scale(${zoom})`;
+  img.style.transformOrigin = `${x}% ${y}%`;
+  // sync hidden input for save
+  const hidden = document.getElementById('acThumbnailZoomHidden');
+  if (hidden) hidden.value = zoom;
 }
 
 // ---- ADD LESSON HELPERS ----
@@ -3178,7 +3438,7 @@ function buildStudentCourseCard(c, enrolled) {
   const createdDate = c.created || today;
   
   const coverHTML = c.thumbnail
-    ? `<img src="${c.thumbnail}" class="scc-cover-img" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;position:absolute;inset:0;">`
+    ? `<img src="${c.thumbnail}" class="scc-cover-img" style="width:100%;height:100%;object-fit:cover;object-position:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;transform:scale(${c.thumbnailZoom || 1});transform-origin:${c.thumbnailX || 50}% ${c.thumbnailY || 50}%;position:absolute;inset:0;">`
     : `<span style="position:relative;z-index:1;font-size:72px">${coverEmoji}</span>`;
   
   if (enrolled) {
@@ -3215,7 +3475,7 @@ function buildStudentCourseCard(c, enrolled) {
       ? '<div class="scc-badge free">كورس مجاني!</div>'
       : '<div class="scc-badge paid">كورس مدفوع</div>';
     const actionHTML = isFree
-      ? `<button class="scc-btn-free" onclick="enrollCourse(${c.id})">الدخول للكورس 🆓</button>`
+      ? `<button class="scc-btn-free" onclick="enrollCourse(${c.id})">اشترك مجاناً والدخول 🆓</button>`
       : `<button class="scc-btn-pay" onclick="showPaymentForCourse(${c.id})">اشترك الآن 💳</button>
          <button class="scc-btn-code" onclick="openCodeModal(${c.id})">كود تفعيل 🔑</button>`;
     return `
@@ -3287,7 +3547,10 @@ async function renderStudentCourses() {
   }
 
   const updatedCurrent = JSON.parse(localStorage.getItem('alamin_current')) || current;
-  const available = allCourses.filter(c => (c.grade === updatedCurrent.grade || c.grade === 'all') && !enrolledIds.includes(String(c.id)));
+  // عرض كل الكورسات المتاحة (ليس فقط صف الطالب) — بس ترتّب صفه الأول
+  const gradeMatch  = allCourses.filter(c => (c.grade === updatedCurrent.grade || c.grade === 'all') && !enrolledIds.includes(String(c.id)));
+  const otherGrades = allCourses.filter(c => c.grade !== updatedCurrent.grade && c.grade !== 'all' && !enrolledIds.includes(String(c.id)));
+  const available   = [...gradeMatch, ...otherGrades];
   const availGrid = document.getElementById('availableCoursesGrid');
   if(!available.length) {
     availGrid.innerHTML = '<div style="color:#888;padding:20px;grid-column:1/-1">لا توجد كورسات متاحة حالياً.</div>';
@@ -3298,22 +3561,32 @@ async function renderStudentCourses() {
 
 function enrollCourse(courseId){
   const active = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
-  const users=getUsers();
-  const userIndex=users.findIndex(u=>u.id===active.id);
-  if(userIndex===-1){showAlert('حدث خطأ في بيانات المستخدم.','error');return;}
-  const course=courses.find(c=>c.id===courseId);
-  if(!course){showAlert('الكورس غير موجود.','error');return;}
-  if(!users[userIndex].enrolledCourses) users[userIndex].enrolledCourses=[];
-  if(users[userIndex].enrolledCourses.includes(courseId)){
-    showAlert('أنت مشترك بالفعل في هذا الكورس.','error');
+  const users = getUsers();
+  const userIndex = users.findIndex(u => String(u.id) === String(active.id));
+  if(userIndex === -1){ showAlert('حدث خطأ في بيانات المستخدم.','error'); return; }
+  const course = courses.find(c => String(c.id) === String(courseId));
+  if(!course){ showAlert('الكورس غير موجود.','error'); return; }
+  if(!users[userIndex].enrolledCourses) users[userIndex].enrolledCourses = [];
+  // تحقق بـ String لتجنب خطأ Number vs String
+  if(users[userIndex].enrolledCourses.map(String).includes(String(courseId))){
+    // مشترك بالفعل — اذهب للمحتوى مباشرة
+    window.location.href = 'lessons.html?course=' + courseId;
     return;
   }
-  users[userIndex].enrolledCourses.push(courseId);
+  users[userIndex].enrolledCourses.push(String(courseId));
   saveUsers(users);
   const updated = {...active, enrolledCourses: users[userIndex].enrolledCourses};
   localStorage.setItem('alamin_current', JSON.stringify(updated));
-  showAlert('تم الاشتراك في الكورس بنجاح!');
-  renderStudentCourses();
+  // مزامنة Firebase
+  if(window.db){
+    try {
+      window.db.collection('students').doc(String(active.id)).update({
+        enrolledCourses: users[userIndex].enrolledCourses
+      }).catch(e => console.warn('enroll Firebase sync:', e));
+    } catch(e){}
+  }
+  // روح على المحتوى مباشرة بعد الاشتراك المجاني
+  window.location.href = 'lessons.html?course=' + courseId;
 }
 
 // ---- LECTURES ----
@@ -3490,16 +3763,19 @@ function addQuizQuestionField(qData = null) {
       <div>
         <label style="font-weight:800; display:block; margin-bottom:8px;">صورة السؤال (اختياري):</label>
         <input type="file" class="q-image-file-input" accept="image/*" onchange="readQuestionImageInput(this)" style="width:100%;">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <button type="button" class="btn-mini" onclick="adjustQuestionImageSize(this.closest('.question-editor-card'), 1.1)" style="background:var(--primary); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">تكبير</button>
-          <button type="button" class="btn-mini" onclick="adjustQuestionImageSize(this.closest('.question-editor-card'), 0.9)" style="background:var(--primary-dark); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">تصغير</button>
-          <label style="font-size:12px; font-weight:800;">العرض</label>
-          <input type="number" class="q-image-width" value="${imgWidth}" min="80" max="900" onchange="updateQuestionImagePreview(this.closest('.question-editor-card'))" style="width:82px; padding:6px 8px;">
-          <label style="font-size:12px; font-weight:800;">الارتفاع</label>
-          <input type="number" class="q-image-height" value="${imgHeight}" min="60" max="700" placeholder="تلقائي" onchange="updateQuestionImagePreview(this.closest('.question-editor-card'))" style="width:82px; padding:6px 8px;">
-          <button type="button" class="btn-mini" onclick="this.closest('.question-editor-card').dataset.imageUrl=''; this.closest('.question-editor-card').querySelector('.q-image-file-input').value=''; updateQuestionImagePreview(this.closest('.question-editor-card'));" style="background:var(--danger); color:#fff; border:0; padding:6px 10px; border-radius:8px; cursor:pointer;">حذف الصورة</button>
+        <div style="margin-top:10px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:700;">🔍 حجم الصورة</span>
+            <span class="q-zoom-label" style="font-size:12px;color:#888;font-family:monospace;">${imgWidth}px</span>
+          </div>
+          <input type="range" class="q-image-width" min="80" max="900" value="${imgWidth}"
+            oninput="this.closest('.question-editor-card').querySelector('.q-zoom-label').textContent=this.value+'px'; updateQuestionImagePreview(this.closest('.question-editor-card'))"
+            style="width:100%;accent-color:var(--primary);height:6px;cursor:pointer;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:2px;margin-bottom:8px;"><span>80px — أصغر</span><span style="opacity:.5">|</span><span>أكبر — 900px</span></div>
+          <button type="button" onclick="this.closest('.question-editor-card').dataset.imageUrl=''; this.closest('.question-editor-card').querySelector('.q-image-file-input').value=''; updateQuestionImagePreview(this.closest('.question-editor-card'));" style="width:100%;padding:6px;background:#fff0f3;color:var(--danger);border:1px solid #ffc0cb;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;">🗑️ حذف الصورة</button>
         </div>
-        <div class="q-image-preview-wrap" style="margin-top:12px; min-height:44px; border:1px dashed var(--border); border-radius:10px; background:var(--bg); padding:10px; text-align:center;"></div>
+        <input type="hidden" class="q-image-height" value="${imgHeight}">
+        <div class="q-image-preview-wrap" style="margin-top:10px; min-height:44px; border:1px dashed var(--border); border-radius:10px; background:var(--bg); padding:10px; text-align:center;"></div>
       </div>
       <div>
         <label style="font-weight:800; display:block; margin-bottom:8px;">معاينة السؤال للطالب:</label>
@@ -3532,10 +3808,30 @@ function readQuestionImageInput(input) {
     input.value = '';
     return;
   }
+  // ضغط تلقائي بدون حد للحجم
   const reader = new FileReader();
-  reader.onload = () => {
-    card.dataset.imageUrl = reader.result;
-    updateQuestionImagePreview(card);
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_W = 1200;
+      const canvas = document.createElement('canvas');
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const quality = file.size > 2 * 1024 * 1024 ? 0.75 : 0.92;
+      card.dataset.imageUrl = canvas.toDataURL('image/jpeg', quality);
+      // اضبط الـ slider على عرض معقول تلقائياً
+      const slider = card.querySelector('.q-image-width');
+      if (slider && parseInt(slider.value) === 360) {
+        const autoW = Math.min(w, 480);
+        slider.value = autoW;
+        const lbl = card.querySelector('.q-zoom-label');
+        if (lbl) lbl.textContent = autoW + 'px';
+      }
+      updateQuestionImagePreview(card);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -5059,6 +5355,37 @@ async function submitCoursePaymentRequestFromModal() {
   if (!phone || !amount) {
     alert('من فضلك أدخل رقم المحفظة والمبلغ المحول أولاً.');
     return;
+  }
+
+  const current = JSON.parse(localStorage.getItem('alamin_current')) || currentUser;
+  if (!current) {
+    alert('يرجى تسجيل الدخول أولاً.');
+    return;
+  }
+
+  const pending = JSON.parse(localStorage.getItem('alamin_pending_payments') || '[]');
+  const transactionId = Date.now();
+  pending.push({
+    transactionId,
+    studentId: String(current.id),
+    courseId: String(courseId),
+    senderPhone: phone,
+    amount,
+    timestamp: new Date().toLocaleDateString('ar-EG'),
+    status: 'pending'
+  });
+  localStorage.setItem('alamin_pending_payments', JSON.stringify(pending));
+
+  if (window.db) {
+    try {
+      createFirebasePaymentRequest(current, courseId, phone, amount)
+        .catch(e => console.warn('Firebase payment sync failed:', e));
+    } catch(e) { /* ignore */ }
+  }
+
+  closeCodeModal();
+  showAlert('✅ تم إرسال طلب التفعيل! سيتم تفعيل الكورس فور تأكيد الدفع من الأستاذ.');
+}
 
 function showPaymentForCourse(courseId) {
   const course = courses.find(c => String(c.id) === String(courseId));

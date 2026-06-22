@@ -192,8 +192,45 @@ nav{padding:0 28px;height:66px;background:var(--card);display:flex;align-items:c
       <div class="card-title">📋 بيانات الحجز</div>
       <div class="card-sub">اختر سنتك الدراسية أولاً ثم أكمل بياناتك</div>
 
-      <!-- STEP 1: اختيار السنة -->
-      <div class="groups-title">١. اختر سنتك الدراسية <em style="color:var(--danger)">*</em></div>
+      <!-- STEP 1: بيانات الطالب -->
+      <div class="div"><span>١. بيانات الطالب</span></div>
+      <div class="fg">
+
+        <div class="f full">
+          <label>اسم الطالب الثلاثي <em>*</em></label>
+          <input type="text" id="fullName" placeholder="مثال: أحمد محمد علي" autocomplete="name">
+          <div class="f-err" id="e-fullName">الرجاء إدخال الاسم الثلاثي (3 كلمات على الأقل)</div>
+        </div>
+
+        <div class="f">
+          <label>رقم هاتف الطالب <em>*</em></label>
+          <div class="phone-wrap">
+            <input type="tel" id="studentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
+            <button class="copy-btn" onclick="copyField('studentPhone',this)" type="button">نسخ</button>
+          </div>
+          <div class="f-err" id="e-studentPhone">11 رقم مطلوب</div>
+        </div>
+
+        <div class="f">
+          <label>رقم هاتف ولي الأمر <em>*</em></label>
+          <div class="phone-wrap">
+            <input type="tel" id="parentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
+            <button class="copy-btn" onclick="copyField('parentPhone',this)" type="button">نسخ</button>
+          </div>
+          <div class="f-err" id="e-parentPhone">11 رقم مطلوب</div>
+        </div>
+
+        <div class="f full">
+          <label>العنوان <em>*</em></label>
+          <input type="text" id="address" placeholder="مثال: كفر الشيخ — شارع الجمهورية">
+          <div class="f-err" id="e-address">الرجاء إدخال العنوان</div>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: اختيار السنة -->
+      <div class="div"><span>٢. السنة الدراسية والمجموعة</span></div>
+      <div class="groups-title" style="margin-bottom:10px;">اختر سنتك الدراسية <em style="color:var(--danger)">*</em></div>
       <div class="grade-pick">
         <button class="grade-btn" id="gb2" onclick="pickGrade('2')">
           <div class="gb-icon">📘</div>
@@ -207,49 +244,15 @@ nav{padding:0 28px;height:66px;background:var(--card);display:flex;align-items:c
         </button>
       </div>
 
-      <!-- STEP 2: المجموعات (تظهر بعد اختيار السنة) -->
+      <!-- STEP 3: المجموعات (تظهر بعد اختيار السنة) -->
       <div class="groups-wrap" id="groupsWrap">
-        <div class="groups-title">٢. اختر المجموعة <em style="color:var(--danger)">*</em></div>
+        <div class="groups-title">اختر المجموعة <em style="color:var(--danger)">*</em></div>
         <div class="groups-list" id="groupsList"></div>
         <div id="g-err" style="font-size:12px;color:var(--danger);display:none;margin-bottom:8px;">اختر مجموعة أولاً</div>
       </div>
 
-      <!-- STEP 3: بيانات الطالب -->
+      <!-- STEP 4: السداد -->
       <div class="groups-wrap" id="fieldsWrap">
-        <div class="div"><span>بيانات الطالب</span></div>
-        <div class="fg">
-
-          <div class="f full">
-            <label>اسم الطالب الثلاثي <em>*</em></label>
-            <input type="text" id="fullName" placeholder="مثال: أحمد محمد علي" autocomplete="name">
-            <div class="f-err" id="e-fullName">الرجاء إدخال الاسم الثلاثي (3 كلمات على الأقل)</div>
-          </div>
-
-          <div class="f">
-            <label>رقم هاتف الطالب <em>*</em></label>
-            <div class="phone-wrap">
-              <input type="tel" id="studentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
-              <button class="copy-btn" onclick="copyField('studentPhone',this)" type="button">نسخ</button>
-            </div>
-            <div class="f-err" id="e-studentPhone">11 رقم مطلوب</div>
-          </div>
-
-          <div class="f">
-            <label>رقم هاتف ولي الأمر <em>*</em></label>
-            <div class="phone-wrap">
-              <input type="tel" id="parentPhone" placeholder="01xxxxxxxxx" maxlength="11" dir="ltr" inputmode="numeric">
-              <button class="copy-btn" onclick="copyField('parentPhone',this)" type="button">نسخ</button>
-            </div>
-            <div class="f-err" id="e-parentPhone">11 رقم مطلوب</div>
-          </div>
-
-          <div class="f full">
-            <label>العنوان <em>*</em></label>
-            <input type="text" id="address" placeholder="مثال: كفر الشيخ — شارع الجمهورية">
-            <div class="f-err" id="e-address">الرجاء إدخال العنوان</div>
-          </div>
-
-        </div>
 
         <div class="div"><span>السداد — فودافون كاش فقط</span></div>
 
@@ -264,11 +267,21 @@ nav{padding:0 28px;height:66px;background:var(--card);display:flex;align-items:c
               <div class="sn">٢</div>
               <div>
                 على رقم الأستاذ:
-                <div class="voda" onclick="copyVoda()">01012345678</div>
-                <div class="copy-hint">👆 اضغط لنسخ الرقم</div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0;">
+                  <div class="voda" id="vodaNum" onclick="copyVoda()">01012457129</div>
+                  <button onclick="copyVoda()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;">📋 نسخ</button>
+                </div>
+                <div style="font-size:12px;color:#92400e;font-weight:700;">متسجل باسم: <strong>أمين</strong></div>
+                <div class="copy-hint">👆 اضغط الرقم أو زرار نسخ لنسخه</div>
               </div>
             </li>
             <li><div class="sn">٣</div><div>احفظ <strong>كود العملية</strong> من رسالة التأكيد</div></li>
+            <li style="background:#fee2e2;border-radius:8px;padding:8px 10px;">
+              <div class="sn" style="background:#dc2626;">⚠</div>
+              <div style="color:#7f1d1d;font-size:12px;line-height:1.8;">
+                <strong>تنبيه هام:</strong> إذا حوّلت المبلغ ناقصاً ولو جنيه واحد، <strong>لن يتم تفعيل حسابك</strong> والفلوس لن تُرد — حوّل المبلغ كاملاً بالضبط
+              </div>
+            </li>
             <li><div class="sn">٤</div><div>أدخل الكود والرقم أدناه وأرسل الطلب ✅</div></li>
           </ul>
           <div class="fg" style="margin-top:14px">
@@ -296,31 +309,36 @@ nav{padding:0 28px;height:66px;background:var(--card);display:flex;align-items:c
     </div>
 
     <!-- استفسار عن طلب -->
-    <div class="inq-card">
-      <div class="inq-title">🔍 استفسار عن طلب</div>
-      <div class="inq-sub">عندك رقم طلب؟ تقدر تعرف حالته هنا</div>
-      <div class="inq-row">
-        <input class="inq-input" id="inqNum" type="text" placeholder="أدخل رقم الطلب (5 أرقام)" maxlength="5" inputmode="numeric" dir="ltr">
-        <button class="inq-btn" onclick="checkInquiry()">🔍 استعلم</button>
-      </div>
-      <div class="inq-result" id="inqResult"></div>
+  </div>
+
+  <!-- استفسار عن طلب — دايماً ظاهر -->
+  <div class="inq-card" style="margin-bottom:20px;">
+    <div class="inq-title">🔍 استفسار عن طلب</div>
+    <div class="inq-sub">أدخل رقم هاتف الطالب لمعرفة حالة الحجز واستلام كود السنتر</div>
+    <div class="inq-row">
+      <input class="inq-input" id="inqPhone" type="tel" placeholder="01xxxxxxxxx" maxlength="11" inputmode="numeric" dir="ltr">
+      <button class="inq-btn" onclick="checkInquiry()">🔍 استعلم</button>
     </div>
+    <div class="inq-result" id="inqResult"></div>
   </div>
 
   <!-- شاشة النجاح -->
   <div class="suc" id="sucWrap">
     <div class="suc-icon">✅</div>
     <div class="suc-title">تم استلام طلبك!</div>
-    <div class="suc-num" id="sucNum"></div>
+    <div class="suc-phone" id="sucPhone"></div>
+    <div class="suc-date" id="sucDate"></div>
     <div class="suc-note">
-      <strong>📌 احفظ رقم الطلب جيداً</strong><br>
-      سيتم مراجعة بيانات التحويل وتفعيل حجزك خلال <strong>24 ساعة</strong>.<br><br>
-      بعد التفعيل، عُد لصفحة <strong>احجز الآن</strong> واضغط <strong>"استفسار"</strong>
-      وأدخل رقم طلبك لاستلام <strong>كود السنتر</strong> الخاص بيك.<br><br>
+      <strong>📌 انتظر التفعيل</strong><br>
+      سيتم مراجعة بيانات التحويل وتفعيل حجزك خلال <strong>6 ساعات</strong>.<br><br>
+      بعد التفعيل ستتلقى <strong>كود السنتر</strong> الخاص بيك عبر صفحة الاستفسار باستخدام رقم هاتف الطالب.<br><br>
       بكود السنتر تقدر تسجّل دخولك على المنصة مباشرةً 🎓
     </div>
     <div class="suc-box" id="sucBox"></div>
-    <button class="back-btn" onclick="location.reload()">🔄 طلب حجز جديد</button>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+      <button class="back-btn" onclick="location.reload()">🔄 طلب حجز جديد</button>
+      <a href="index.html" style="display:inline-block;padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;color:#fff;text-decoration:none;cursor:pointer;transition:all .2s;box-shadow:0 6px 0 #5C4008;">🏠 العودة للمنصة</a>
+    </div>
   </div>
 
 </div>
@@ -343,7 +361,7 @@ const GROUPS = {
   ]
 };
 const GRADE_LABELS = {"2":"ثاني ثانوي","3":"ثالث ثانوي"};
-const VODA = "01012345678";
+const VODA = "01012457129";
 
 let selGrade = null, selGroup = null;
 
@@ -482,7 +500,23 @@ async function submitBooking() {
 /* ══ Success ══ */
 function showSuccess(data) {
   document.getElementById("bookingSection").style.display = "none";
-  document.getElementById("sucNum").textContent = "# " + data.orderNum;
+
+  // رقم هاتف الطالب
+  const phoneEl = document.getElementById("sucPhone");
+  if (phoneEl) {
+    phoneEl.textContent = "📞 " + (data.studentPhone || data.phone || '—');
+    phoneEl.style.cssText = "font-size:20px;font-weight:900;color:var(--primary);margin:6px 0;letter-spacing:1px;";
+  }
+
+  // تاريخ ووقت الإرسال
+  const dateEl = document.getElementById("sucDate");
+  if (dateEl) {
+    const now = new Date();
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' };
+    dateEl.textContent = "📅 " + now.toLocaleDateString('ar-EG', opts);
+    dateEl.style.cssText = "font-size:12px;color:var(--text2);margin-bottom:12px;";
+  }
+
   const rows = [
     ["الاسم", data.fullName],
     ["المجموعة", data.groupName],
@@ -497,44 +531,105 @@ function showSuccess(data) {
   document.getElementById("sucWrap").scrollIntoView({behavior:"smooth", block:"start"});
 }
 
-/* ══ استفسار عن طلب ══ */
+/* ══ استفسار عن طلب برقم هاتف الطالب ══ */
 async function checkInquiry() {
-  const num = document.getElementById("inqNum").value.trim();
-  const res = document.getElementById("inqResult");
-  if (!num || num.length !== 5) {
+  const phone = document.getElementById("inqPhone").value.trim();
+  const res   = document.getElementById("inqResult");
+
+  if (!phone || phone.length !== 11 || !/^0\d{10}$/.test(phone)) {
     res.className = "inq-result show no";
-    res.innerHTML = "❌ أدخل رقم الطلب المكوّن من 5 أرقام";
+    res.innerHTML = "❌ أدخل رقم هاتف الطالب الصحيح (11 رقم يبدأ بـ 0)";
     return;
   }
+
   res.className = "inq-result show wait";
   res.innerHTML = "⏳ جاري البحث...";
+
   try {
     const snap = await window.db.collection("bookingRequests")
-      .where("orderNum", "==", num).limit(1).get();
+      .where("studentPhone", "==", phone)
+      .orderBy("createdAt", "desc")
+      .limit(5)
+      .get();
+
     if (snap.empty) {
       res.className = "inq-result show no";
-      res.innerHTML = "❌ رقم الطلب غير موجود — تأكد من الرقم";
+      res.innerHTML = "❌ لا يوجد طلب حجز بهذا الرقم — تأكد من الرقم أو أرسل طلباً جديداً";
       return;
     }
-    const d = snap.docs[0].data();
-    if (d.status === "approved" && d.centerCode) {
+
+    // لو فيه أكتر من طلب، نعرضهم كلهم
+    const docs = snap.docs.map(d => d.data());
+
+    // لو فيه طلب مفعّل نبيّنه أول
+    const approved = docs.find(d => d.status === "approved" && d.centerCode);
+    if (approved) {
       res.className = "inq-result show ok";
       res.innerHTML = `
         ✅ <strong>تم تفعيل حجزك!</strong><br>
-        كود السنتر الخاص بيك: <strong style="font-size:18px;color:#065f46;letter-spacing:2px">${d.centerCode}</strong><br>
+        <span style="color:#374151">المجموعة: ${approved.groupName || '—'}</span><br>
+        كود السنتر الخاص بيك:<br>
+        <div style="display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap;">
+          <strong style="font-size:22px;color:#065f46;letter-spacing:3px;font-family:monospace;">${approved.centerCode}</strong>
+          <a href="login.html?code=${encodeURIComponent(approved.centerCode)}" style="display:inline-block;padding:8px 14px;background:linear-gradient(135deg,#C8A96E,#8B6914);color:#fff;border-radius:10px;font-size:13px;font-weight:900;text-decoration:none;white-space:nowrap;">🔑 تسجيل الدخول</a>
+        </div>
         <small>سجّل دخولك على المنصة بهذا الكود 🎓</small>`;
-    } else if (d.status === "rejected") {
+      return;
+    }
+
+    // لو فيه طلب مرفوض
+    const rejected = docs.find(d => d.status === "rejected");
+    if (rejected && docs.every(d => d.status === "rejected")) {
       res.className = "inq-result show no";
       res.innerHTML = "❌ تم رفض طلبك — تواصل مع الأستاذ للاستفسار";
-    } else {
-      res.className = "inq-result show wait";
-      res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>
-        المجموعة: ${d.groupName}<br>
-        سيتم التفعيل خلال 24 ساعة — عُد للاستعلام لاستلام كود السنتر`;
+      return;
     }
+
+    // الحالة الافتراضية: قيد المراجعة
+    const pending = docs.find(d => d.status === "pending" || d.status === "manual_review");
+    const d = pending || docs[0];
+    res.className = "inq-result show wait";
+    res.innerHTML = `⏳ <strong>طلبك قيد المراجعة</strong><br>
+      المجموعة: ${d.groupName || '—'}<br>
+      المبلغ: ${d.amountNumber || d.amount || '—'} ج.م<br>
+      سيتم التفعيل خلال 24 ساعة — عُد للاستعلام لاستلام كود السنتر`;
+
   } catch(e) {
-    res.className = "inq-result show no";
-    res.innerHTML = "❌ خطأ في الاتصال — حاول مرة تانية";
+    // لو Firestore مش عنده index على studentPhone+createdAt، نفّذ بدون orderBy
+    try {
+      const snap2 = await window.db.collection("bookingRequests")
+        .where("studentPhone", "==", phone)
+        .limit(5)
+        .get();
+      if (snap2.empty) {
+        res.className = "inq-result show no";
+        res.innerHTML = "❌ لا يوجد طلب حجز بهذا الرقم";
+        return;
+      }
+      const docs2 = snap2.docs.map(d => d.data());
+      const approved2 = docs2.find(d => d.status === "approved" && d.centerCode);
+      if (approved2) {
+        res.className = "inq-result show ok";
+        res.innerHTML = `
+          ✅ <strong>تم تفعيل حجزك!</strong><br>
+          <span style="color:#374151">المجموعة: ${approved2.groupName || '—'}</span><br>
+          كود السنتر الخاص بيك:<br>
+          <div style="display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap;">
+            <strong style="font-size:22px;color:#065f46;letter-spacing:3px;font-family:monospace;">${approved2.centerCode}</strong>
+            <a href="login.html?code=${encodeURIComponent(approved2.centerCode)}" style="display:inline-block;padding:8px 14px;background:linear-gradient(135deg,#C8A96E,#8B6914);color:#fff;border-radius:10px;font-size:13px;font-weight:900;text-decoration:none;white-space:nowrap;">🔑 تسجيل الدخول</a>
+          </div>
+          <small>سجّل دخولك على المنصة بهذا الكود 🎓</small>`;
+        return;
+      }
+      const d2 = docs2[0];
+      res.className = d2.status === "rejected" ? "inq-result show no" : "inq-result show wait";
+      res.innerHTML = d2.status === "rejected"
+        ? "❌ تم رفض طلبك — تواصل مع الأستاذ للاستفسار"
+        : `⏳ <strong>طلبك قيد المراجعة</strong><br>المجموعة: ${d2.groupName || '—'}<br>سيتم التفعيل خلال 24 ساعة`;
+    } catch(e2) {
+      res.className = "inq-result show no";
+      res.innerHTML = "❌ خطأ في الاتصال — حاول مرة تانية";
+    }
   }
 }
 

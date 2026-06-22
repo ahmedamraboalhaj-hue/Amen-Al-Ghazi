@@ -361,11 +361,8 @@ async function loadQuizzesAndAttempts() {
     } catch(e) { console.warn('Firebase quizzes/attempts load failed:', e); }
   }
   
-  // تصفية الاختبارات حسب الصف الدراسي للطالب
-  testsData = localQuizzes.filter(q => {    // فلترة الصف
-    if (!q.grade || q.grade === 'all') return true;
-    return String(q.grade) === String(user.grade);
-  });
+  // عرض كل الاختبارات بدون تقييد بالصف — الطالب يقدر يحل اختبار أي كورس
+  testsData = localQuizzes;
   
   renderTests();
   renderOverallStats();
@@ -375,10 +372,11 @@ async function loadQuizzesAndAttempts() {
   let targetQuizId = urlParams.get('quiz') || localStorage.getItem('alamin_selected_quiz');
   if (targetQuizId) {
     localStorage.removeItem('alamin_selected_quiz');
-    if (testsData.find(q => String(q.id) === String(targetQuizId))) {
+    const target = testsData.find(q => String(q.id) === String(targetQuizId));
+    if (target) {
       openQuizModal(targetQuizId);
     } else {
-      alert('⚠️ هذا الاختبار غير متاح لصفك الدراسي أو غير موجود.');
+      alert('⚠️ الاختبار غير موجود.');
     }
   }
 }
@@ -402,7 +400,7 @@ function renderOverallStats() {
 function renderTests() {
   const container = document.getElementById('testsContainer');
   if(!testsData.length) {
-    container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text2);">⚠️ لا توجد اختبارات متاحة لصفك الدراسي حالياً.</div>';
+    container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text2);">⚠️ لا توجد اختبارات متاحة حالياً.</div>';
     return;
   }
   
